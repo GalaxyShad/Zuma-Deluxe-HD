@@ -123,5 +123,6 @@ int Engine_LoadSettings();
 
 int randInt(const int, const int);
 float fsign(float x);
+float lerp(float start, float end, float val);
 
 #endif	

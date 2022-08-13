@@ -719,6 +719,11 @@ float fsign(float x) {
 	else return 0;
 }
 
+float lerp(float start, float end, float val) {
+
+    return start + val * (end - start);
+}
+
 // ==== Saved data ==== //
 int Engine_SaveSettings() {
     FILE* file;
@@ -810,3 +815,4 @@ int Engine_LoadSettings() {
 
     return 1;
 }
+
