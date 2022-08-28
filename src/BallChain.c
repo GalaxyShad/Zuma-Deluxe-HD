@@ -84,7 +84,7 @@ void BallChain_Init(BallChain* ballChain, Level* lvl, LevelSettings* settings) {
 	ballChain->isEndReached = 0;
 	ballChain->isGlowing = 0;
 	ballChain->chainBonus = 0;
-	// NEW
+	
 	ballChain->maxChainBonus = 0;
 	ballChain->totalCombos = 0;
 
@@ -124,19 +124,13 @@ void BallChain_UpdateColorInChain(BallChain* ballChain) {
 char BallChain_CollidesBack(BallChain* ballChain, int idx, int collideDist) {
 	if (idx == ballChain->len - 1) return 0;
 
-	if (ballChain->balls[idx].pos - ballChain->balls[idx + 1].pos < collideDist)
-		return 1;
-	else
-		return 0;
+	return (ballChain->balls[idx].pos - ballChain->balls[idx + 1].pos < collideDist)
 }
 
 char BallChain_CollidesFront(BallChain* ballChain, int idx, int collideDist) {
 	if (idx == 0) return 0;
 
-	if (ballChain->balls[idx - 1].pos - ballChain->balls[idx].pos < collideDist)
-		return 1;
-	else
-		return 0;
+	return (ballChain->balls[idx - 1].pos - ballChain->balls[idx].pos < collideDist)
 }
 
 void BallChain_Append(BallChain* ballChain, Level* lvl, LevelSettings* settings) {

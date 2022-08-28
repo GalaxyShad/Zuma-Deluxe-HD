@@ -489,8 +489,6 @@ int Engine_GetTextWidth(const char* str, int fontID) {
         i++;
     }
 
-    //dWidth -= font->widthList[0] * engine.scale_x;
-
     if (maxWidth < dWidth)
         maxWidth = dWidth;
 
