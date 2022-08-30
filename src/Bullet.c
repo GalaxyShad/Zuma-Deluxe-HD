@@ -29,11 +29,16 @@ void BulletsArr_UpdateOnScreenStatus(BulletsArr* bulletsArr, int* chainBonus) {
 	SDL_GetWindowSize(engine.win, &w, &h);
 
 	for (int i = 0; i < bulletsArr->len; i++)
-		if (bulletsArr->bullets[i].x > w + 50 || bulletsArr->bullets[i].x < -50) {
+		if (bulletsArr->bullets[i].x > w + 50 || 
+		    bulletsArr->bullets[i].x < -50
+		) {
 			bulletsArr->bullets[i].onScreen = 0;
 			*chainBonus = 0;
-		}
-		else if (bulletsArr->bullets[i].y > h + 50 || bulletsArr->bullets[i].y < -50) {
+		} 
+		
+		else if (bulletsArr->bullets[i].y > h + 50 || 
+				   bulletsArr->bullets[i].y < -50
+		) {
 			bulletsArr->bullets[i].onScreen = 0;
 			*chainBonus = 0;
 		}
@@ -111,7 +116,8 @@ int Bullet_IsCollidingWithChain(Bullet* bullet, BallChain* ballChain) {
 	for (int i = 0; i < ballChain->len; i++) {
 		if (!ballChain->balls[i].isExploding && 
 			!ballChain->balls[i].inTunnel &&
-			Bullet_IsColliding(bullet, &ballChain->balls[i])) 
+			Bullet_IsColliding(bullet, &ballChain->balls[i])
+		) 
 			return i;
 	}
 	return -1;
@@ -123,11 +129,17 @@ void BulletsArr_CollideWithChainUpdate(BulletsArr* bulletsArr, BallChain* ballCh
 
 		int collBall = Bullet_IsCollidingWithChain(&bulletsArr->bullets[i], ballChain);
 
-		if (collBall != -1){
+		if (collBall != -1) {
 			bulletsArr->bullets[i].onScreen = 0;
-			char isInsertBack = Bullet_isInsertInBack(&bulletsArr->bullets[i], &ballChain->balls[collBall], spiral);
+			
+			char isInsertBack = Bullet_isInsertInBack(
+				&bulletsArr->bullets[i], 
+				&ballChain->balls[collBall], spiral);
+
 			collBall = collBall + isInsertBack;
-		    BallChain_Insert(ballChain, collBall, bulletsArr->bullets[i].color, isInsertBack);
+
+		    BallChain_Insert(ballChain, collBall, 
+				bulletsArr->bullets[i].color, isInsertBack);
 		}
 	}
 }

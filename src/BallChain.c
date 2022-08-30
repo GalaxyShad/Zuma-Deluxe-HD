@@ -124,13 +124,13 @@ void BallChain_UpdateColorInChain(BallChain* ballChain) {
 char BallChain_CollidesBack(BallChain* ballChain, int idx, int collideDist) {
 	if (idx == ballChain->len - 1) return 0;
 
-	return (ballChain->balls[idx].pos - ballChain->balls[idx + 1].pos < collideDist)
+	return (ballChain->balls[idx].pos - ballChain->balls[idx + 1].pos < collideDist);
 }
 
 char BallChain_CollidesFront(BallChain* ballChain, int idx, int collideDist) {
 	if (idx == 0) return 0;
 
-	return (ballChain->balls[idx - 1].pos - ballChain->balls[idx].pos < collideDist)
+	return (ballChain->balls[idx - 1].pos - ballChain->balls[idx].pos < collideDist);
 }
 
 void BallChain_Append(BallChain* ballChain, Level* lvl, LevelSettings* settings) {

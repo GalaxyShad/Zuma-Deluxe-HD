@@ -27,10 +27,12 @@ void Button_Init(Button* btn) {
     btn->pos.y = 0;
 }
 
+
 void Button_SetText(Button* btn, const char* str) {
     strcpy(btn->text, str);
     btn->withText = true;
 }
+
 
 void Button_Update(Button* btn) {
     int mx, my;
@@ -48,10 +50,7 @@ void Button_Update(Button* btn) {
                     Engine_PlaySound(btn->soundClickID);
                 }
             } else {
-                if (btn->state == BTN_CLICKED)
-                    btn->clicked = true;
-                else 
-                    btn->clicked = false;
+                btn->clicked = (btn->state == BTN_CLICKED);
 
                 if (!btn->state == BTN_HOVER) {
                     if (btn->soundHoverSfxID != -1) {
@@ -69,9 +68,11 @@ void Button_Update(Button* btn) {
     }
 }
 
+
 int Button_IsClicked(Button* btn) {
     return btn->clicked;
 }
+
 
 void Button_Draw(Button* btn) {
     SDL_Texture* tex = Engine_GetTextureSDL(btn->textureID);
@@ -168,6 +169,7 @@ void CheckBox_Init(CheckBox* cb) {
     cb->pos.y = 0;
 }
 
+
 void CheckBox_Update(CheckBox* cb) {
     int mx, my;
     Engine_GetMousePos(&mx, &my);
@@ -188,13 +190,16 @@ void CheckBox_Update(CheckBox* cb) {
     } 
 }
 
+
 int CheckBox_IsClicked(CheckBox* cb) {
     return cb->clicked;
 }
 
+
 int CheckBox_IsChecked(CheckBox* cb) {
     return cb->checked;
 }
+
 
 void CheckBox_Draw(CheckBox* cb) {
     SDL_Texture* texture = Engine_GetTextureSDL(TEX_MENU);
@@ -236,6 +241,7 @@ void Slider_Init(Slider* s, float* val) {
     s->thumbPos = (SLIDER_THUMB_MAX * (*s->value)) / s->maxValue;
 }
 
+
 void Slider_Update(Slider* s) {
     int mx, my;
     Engine_GetMousePos(&mx, &my);
@@ -268,9 +274,11 @@ void Slider_Update(Slider* s) {
     }
 }
 
+
 int Slider_IsDragging(Slider* s) {
     return s->drag;
 }
+
 
 void Slider_Draw(Slider* s) {
     SDL_Texture* texture = Engine_GetTextureSDL(TEX_MENU);
@@ -318,6 +326,7 @@ void DialogueBoxText_Init(DialogueBoxText* dbt) {
     dbt->color.b = 0;
 }
 
+
 DialogueBox* DialogueBox_Create() {
     DialogueBox* db = malloc(sizeof(DialogueBox));
     if (!db)
@@ -353,6 +362,7 @@ DialogueBox* DialogueBox_Create() {
     return db;
 }
 
+
 void DialogueBox_AddButton(DialogueBox* db, Button* btn) {
     Button* ptr = realloc(
         db->buttons, 
@@ -368,6 +378,7 @@ void DialogueBox_AddButton(DialogueBox* db, Button* btn) {
     db->buttons[db->buttonsLen].pos.y = db->pos.y + btn->pos.y;
     db->buttonsLen++;
 }
+
 
 void DialogueBox_AddCheckBox(DialogueBox* db, CheckBox* cb) {
     CheckBox* ptr = realloc(
@@ -385,6 +396,7 @@ void DialogueBox_AddCheckBox(DialogueBox* db, CheckBox* cb) {
     db->chBoxesLen++;
 }
 
+
 void DialogueBox_AddSlider(DialogueBox* db, Slider* s) {
     Slider* ptr = realloc(
         db->sliders, 
@@ -400,6 +412,7 @@ void DialogueBox_AddSlider(DialogueBox* db, Slider* s) {
     db->sliders[db->slidersLen].pos.y = db->pos.y + s->pos.y;
     db->slidersLen++;
 }
+
 
 void DialogueBox_AddText(DialogueBox* db, DialogueBoxText* t) {
     DialogueBoxText* ptr = realloc(
@@ -419,12 +432,14 @@ void DialogueBox_AddText(DialogueBox* db, DialogueBoxText* t) {
     db->textsLen++;
 }
 
+
 void DialogueBox_SetTextStr(DialogueBox* db, int textID, const char* str) {
     if (textID < 0 || textID >= db->textsLen)
         return;
 
     strcpy(db->texts[textID].str, str);
 }
+
 
 void DialogueBox_Animate(DialogueBox* db) {
     db->animation = true;
@@ -442,11 +457,13 @@ void DialogueBox_Animate(DialogueBox* db) {
         db->texts[i].pos.y += dy;
 }
 
+
 int DialogueBox_GetBtn(DialogueBox* db) {
     int btn = db->pressedBtn;
     db->pressedBtn = 0;
     return btn;
 }
+
 
 void DialogueBox_Update(DialogueBox* db) {
 
@@ -466,6 +483,7 @@ void DialogueBox_Update(DialogueBox* db) {
     for (int i = 0; i < db->slidersLen; i++)
         Slider_Update(&db->sliders[i]);
 }
+
 
 void DialogueBox_Draw(DialogueBox* db) {
 
@@ -577,6 +595,7 @@ void DialogueBox_Draw(DialogueBox* db) {
     }
 }
 
+
 void DialogueBox_Destroy(DialogueBox* db) {
     db->buttonsLen = 0;
     free(db->buttons);
@@ -650,6 +669,7 @@ DialogueBox* DialogueBox_CreateOptions() {
     return db;
 }
 
+
 void DialogueBox_UpdateOptions(DialogueBox* db) {
     DialogueBox_Update(db);
 
@@ -670,6 +690,7 @@ void DialogueBox_UpdateOptions(DialogueBox* db) {
     }
 }
 
+
 DialogueBox* DialogueBox_CreateMenu() {
     DialogueBox* db = DialogueBox_CreateOptions();
     strcpy(db->caption, "mENU");
@@ -687,9 +708,11 @@ DialogueBox* DialogueBox_CreateMenu() {
     return db;
 }
 
+
 void DialogueBox_UpdateMenu(DialogueBox* db) {
     DialogueBox_UpdateOptions(db);
 }
+
 
 DialogueBox* DialogueBox_CreateResults() {
     DialogueBox* db = DialogueBox_Create();
@@ -749,6 +772,7 @@ DialogueBox* DialogueBox_CreateResults() {
 
     return db;
 }
+
 
 DialogueBox* DialogueBox_CreateGameOver() {
     DialogueBox* db = DialogueBox_Create();
@@ -823,6 +847,7 @@ Menu* Menu_Create() {
     return menu;
 }
 
+
 void Menu_AddButton(Menu* menu, Button* btn) {
     Button* ptr = realloc(
         menu->buttons, 
@@ -836,9 +861,11 @@ void Menu_AddButton(Menu* menu, Button* btn) {
     menu->buttonsLen++;
 }
 
+
 void Menu_SetBgRect(Menu* menu, SDL_Rect rect) {
     menu->trBg = rect;
 }
+
 
 void Menu_SetSkyRect(Menu* menu, SDL_Rect rect) {
     menu->haveSky = true;
@@ -846,11 +873,13 @@ void Menu_SetSkyRect(Menu* menu, SDL_Rect rect) {
     menu->trBgSky = rect;
 }
 
+
 int Menu_GetButton(Menu* menu) {
     int btn = menu->pressedBtn;
     menu->pressedBtn = 0;
     return btn;
 }
+
 
 void Menu_Update(Menu* menu) {
     for (int i = 0; i < menu->buttonsLen; i++) {
@@ -860,6 +889,7 @@ void Menu_Update(Menu* menu) {
             menu->pressedBtn = i+1;
     }
 }
+
 
 void Menu_Draw(Menu* menu) {
     SDL_Texture* tex = Engine_GetTextureSDL(TEX_MENU);
@@ -897,6 +927,7 @@ void Menu_Draw(Menu* menu) {
 
 }
 
+
 void Menu_Destroy(Menu* menu) {
     menu->buttonsLen = 0;
     free(menu->buttons);
@@ -914,6 +945,7 @@ void MenuMgr_Init(MenuMgr* m, int* curLvl, int* curDiff) {
     m->curLvl = curLvl;
     m->curDiff = curDiff;
 }
+
 
 void MenuMgr_Set(MenuMgr* m, int room) {
     if (m->room != NULL) {
@@ -1060,6 +1092,7 @@ void MenuMgr_Set(MenuMgr* m, int room) {
 
 }
 
+
 void MenuMgr_Update(MenuMgr* m) {
     if (!m)
         return;
@@ -1115,6 +1148,7 @@ void MenuMgr_Update(MenuMgr* m) {
         }
     }
 }
+
 
 void MenuMgr_Draw(MenuMgr* m) {
     if (m->roomID == MR_GAME) 

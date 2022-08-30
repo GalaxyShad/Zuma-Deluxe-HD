@@ -57,18 +57,10 @@ FetchContent_Declare(
 set(SDL2IMAGE_SAMPLES OFF)
 FetchContent_MakeAvailable(sdl2_image)
 
+FILE(GLOB MyCSources ${PROJECT_SOURCE_DIR}/src/*.c)
 add_executable(
     ZumaHD
-    ${PROJECT_SOURCE_DIR}/src/main.c
-    ${PROJECT_SOURCE_DIR}/src/Animation.c
-    ${PROJECT_SOURCE_DIR}/src/BallChain.c
-    ${PROJECT_SOURCE_DIR}/src/Bullet.c
-    ${PROJECT_SOURCE_DIR}/src/Engine.c
-    ${PROJECT_SOURCE_DIR}/src/Frog.c
-    ${PROJECT_SOURCE_DIR}/src/FX.c
-    ${PROJECT_SOURCE_DIR}/src/Game.c
-    ${PROJECT_SOURCE_DIR}/src/Level.c
-    ${PROJECT_SOURCE_DIR}/src/MenuMgr.c
+    ${MyCSources}
 )
 
 target_include_directories(

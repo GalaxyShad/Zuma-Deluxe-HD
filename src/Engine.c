@@ -57,14 +57,12 @@ int Engine_Init() {
     engine.volMus = 1.0f;
     engine.volSnd = 1.0f;
 
-    /* ������������� ���������� SDL */
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         Engine_PushError("SDL.dll graphics library initialization error:", 
                             SDL_GetError());
         return 0;
     }
 
-    /* ������������� ���������� SDL_Image */
     int flags = IMG_INIT_JPG | IMG_INIT_PNG;
     if (!(IMG_Init(flags) & flags)) {
         Engine_PushError("SDL_Image.dll initialization error:", 
@@ -72,7 +70,7 @@ int Engine_Init() {
         return 0;
     }
 
-    /* ������������� ���������� BASS */
+   
     if (!BASS_Init(-1, MUSIC_FREQUENCY, BASS_DEVICE_STEREO, 0, NULL)) {
         Engine_PushErrorCode("Bass.dll initialization error", 
                                 BASS_ErrorGetCode());
