@@ -1,9 +1,10 @@
 #ifndef MENU_MGR_H
 #define MENU_MGR_H
 
-#include "Engine.h"
-#include "Level.h"
-#include "Enums.h"
+#include "../global/Engine.h"
+#include "../global/Enums.h"
+
+#include "../gameplay/Level.h"
 
 #define SKY_SPD 1
 

@@ -5,8 +5,8 @@
 #include <string.h>
 #include <expat.h>
 
-#include "Engine.h"
-#include "Enums.h"
+#include "../global/Engine.h"
+#include "../global/Enums.h"
 
 #define PATH_LEVEL "levels"
 #define STAGE_COUNT 1

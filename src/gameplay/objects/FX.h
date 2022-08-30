@@ -1,10 +1,11 @@
 #ifndef MSG_H
 #define MSG_H
 
-#include <Engine.h>
-#include <Enums.h>
-#include <Animation.h>
 #include <time.h>
+
+#include "../../global/Engine.h"
+#include "../../global/Enums.h"
+#include "../../global/Animation.h"
 
 #define MSG_LIFETIME 1
 #define MSG_SPD 2

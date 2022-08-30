@@ -57,18 +57,19 @@ FetchContent_Declare(
 set(SDL2IMAGE_SAMPLES OFF)
 FetchContent_MakeAvailable(sdl2_image)
 
-FILE(GLOB MyCSources ${PROJECT_SOURCE_DIR}/src/*.c)
+FILE(GLOB_RECURSE SOURCES RELATIVE ${PROJECT_SOURCE_DIR} "src/*.c")
+
 add_executable(
     ZumaHD
-    ${MyCSources}
+    ${SOURCES}
 )
 
 target_include_directories(
     ZumaHD PUBLIC
     "${PROJECT_BINARY_DIR}"
+    "${PROJECT_SOURCE_DIR}/src"
     "${PROJECT_SOURCE_DIR}/lib/bass/c"
     "${PROJECT_SOURCE_DIR}/lib/bass-fx/C"
-    "${PROJECT_SOURCE_DIR}/include"
 
     "${expat_SOURCE_DIR}/expat/lib"
     "${sdl2_SOURCE_DIR}/include"

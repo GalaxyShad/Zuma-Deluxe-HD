@@ -1,15 +1,17 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include <Level.h>
-#include <Frog.h>
-#include <Bullet.h>
-#include <BallChain.h>
-#include <FX.h>
-#include <MenuMgr.h>
-
 #include <stdlib.h>
 #include <time.h>
+
+#include "../menu/MenuMgr.h"
+
+#include "objects/Frog.h"
+#include "objects/Bullet.h"
+#include "objects/BallChain.h"
+#include "objects/FX.h"
+
+#include "Level.h"
 
 #define TREASURE_COLLIDE_DIST 2900
 #define TREASURE_BLINK_TIME 3

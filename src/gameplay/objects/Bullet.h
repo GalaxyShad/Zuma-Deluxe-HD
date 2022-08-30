@@ -1,14 +1,16 @@
 #ifndef BULLET_H
 #define BULLET_H
 
-#include <Level.h>
-#include <Enums.h>
-#include <Animation.h>
-#include <BallChain.h>
-#include <Frog.h>
 #include <math.h>
-#include <Engine.h>
 
+#include "../../global/Enums.h"
+#include "../../global/Animation.h"
+#include "../../global/Engine.h"
+
+#include "../Level.h"
+
+#include "BallChain.h"
+#include "Frog.h"
 
 #define BULLETS_ARR_MAX_LEN 32
 #define BULLET_SPEED 15

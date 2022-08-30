@@ -1,11 +1,14 @@
 #ifndef FROG_H
 #define FROG_H
 
-#include <Engine.h>
-#include <Level.h>
-#include <Enums.h>
-#include <Animation.h>
 #include <math.h>
+
+#include "../../global/Engine.h"
+#include "../../global/Enums.h"
+#include "../../global/Animation.h"
+
+#include "../Level.h"
+
 
 #define FROG_CUR_BALL_PAD 35
 #define FROG_NEXT_BALL_PAD 40

@@ -1,13 +1,15 @@
 #ifndef BALL_H
 #define BALL_H
 
-#include <Level.h>
-#include <Enums.h>
-#include <Animation.h>
-#include <FX.h>
-
 #include <malloc.h>
 #include <math.h>
+
+#include "../../global/Enums.h"
+#include "../../global/Animation.h"
+
+#include "../Level.h"
+
+#include "FX.h"
 
 #define BALLS_CHAIN_PAD 			32.0f
 #define BALLS_CHAIN_PAD_ROUGH 		BALLS_CHAIN_PAD+2.0f

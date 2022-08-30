@@ -1,9 +1,11 @@
 #include "Application.h"
-#include "Consts.h"
-#include "Enums.h"
-#include "Engine.h"
-#include "Game.h"
-#include "MenuMgr.h"
+
+#include "global/Consts.h"
+#include "global/Enums.h"
+#include "global/Engine.h"
+
+#include "gameplay/Game.h"
+#include "menu/MenuMgr.h"
 
 #define MAX_FPS 60
 #define FRAME_DELAY 1000 / MAX_FPS
@@ -66,7 +68,7 @@ static void ApplicationZuma_HandleEvents(void) {
                 exit(0);
                 break;
             case SDL_MOUSEBUTTONDOWN:
-            
+
                 switch (e.button.button) {
                     case SDL_BUTTON_LEFT: 
                         app.mouseClicked = 1;
@@ -103,6 +105,7 @@ static void ApplicationZuma_Update(void) {
     }
     SDL_RenderPresent(engine.render);
 }
+
 
 int ApplicationZuma_Start(void) {
     if (!Engine_Init())
