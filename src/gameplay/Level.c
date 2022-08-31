@@ -1,169 +1,203 @@
 #include "Level.h"
 
+static void LevelParser_ParseGraphics(
+    void *data, const char *element, const char **attribute
+) {
+
+    LevelGraphics* ptr = realloc(
+        levelMgr.graphics,
+        sizeof(LevelGraphics) * (levelMgr.graphicsLen+1)
+    );
+
+    if (!ptr) {
+        Engine_PushErrorFile("levels.xml", "Out of Memory!");
+        return;
+    }
+
+    levelMgr.graphics = ptr;
+    levelMgr.graphicsLen++;
+
+    LevelGraphics* g = &levelMgr.graphics[levelMgr.graphicsLen-1];
+    strcpy(g->id, "none");
+    strcpy(g->spiralFile, "none");
+    strcpy(g->spiral2File, "none");
+    strcpy(g->textureFile, "none");
+    strcpy(g->textureTopLayerFile, "none");
+    strcpy(g->dispName, "none");
+    g->frogPos.x = 0;
+    g->frogPos.y = 0;
+    g->coinsLen = 0;
+    g->coinsPos = NULL;
+
+    for (int i = 0; attribute[i]; i += 2) {
+        if (strcmp(attribute[i], "id") == 0)
+            strcpy(g->id, attribute[i+1]);
+        else if (strcmp(attribute[i], "curve") == 0)
+            strcpy(g->spiralFile, attribute[i+1]);
+        else if (strcmp(attribute[i], "curve2") == 0)
+            strcpy(g->spiral2File, attribute[i+1]);
+        else if (strcmp(attribute[i], "image") == 0) 
+            strcpy(g->textureFile, attribute[i+1]);
+        else if (strcmp(attribute[i], "image-top") == 0)
+            strcpy(g->textureTopLayerFile, attribute[i+1]);
+        else if (strcmp(attribute[i], "dispname") == 0)
+            strcpy(g->dispName, attribute[i+1]);
+        else if (strcmp(attribute[i], "gx") == 0)
+            g->frogPos.x = atof(attribute[i+1]);
+        else if (strcmp(attribute[i], "gy") == 0)
+            g->frogPos.y = atof(attribute[i+1]);
+    }
+
+}
+
+
+static void LevelParser_ParseTreasurePoints(
+    void *data, const char *element, const char **attribute
+) {
+    LevelGraphics* g = &levelMgr.graphics[levelMgr.graphicsLen-1];
+        
+    SDL_FPoint* ptr = (SDL_FPoint*)realloc(
+        g->coinsPos,
+        sizeof(SDL_FPoint) * (g->coinsLen+1));
+    if (!ptr) {
+        Engine_PushErrorFile("levels.xml", "Out of Memory!");
+        return;
+    }
+
+    g->coinsPos = ptr;
+    g->coinsLen++;
+
+    for (int i = 0; attribute[i]; i += 2) {
+        if (strcmp(attribute[i], "x") == 0)
+            g->coinsPos[g->coinsLen-1].x = atof(attribute[i+1]);
+        else if (strcmp(attribute[i], "y") == 0)
+            g->coinsPos[g->coinsLen-1].y = atof(attribute[i+1]);
+    } 
+}
+
+
+static void LevelParser_ParseSettings(
+    void *data, const char *element, const char **attribute
+) {
+    LevelSettings* ptr = realloc(
+        levelMgr.settings,
+        sizeof(LevelSettings) * (levelMgr.settingsLen+1)
+    );
+
+    if (!ptr) {
+        Engine_PushErrorFile("levels.xml", "Out of Memory!");
+        return;
+    }
+
+    levelMgr.settings = ptr;
+    levelMgr.settingsLen++;
+
+    LevelSettings* s = &levelMgr.settings[levelMgr.settingsLen-1];
+
+    strcpy(s->id, "none");
+    s->ballSpd = 0.5;
+    s->ballStartCount = 35;
+    s->gaugeScore = 1000;
+    s->repeatChance = 40;
+    s->singleChance = 6;
+    s->ballColors = 4;
+    s->partTime = 30;
+    s->slowFactor = 4;
+
+    for (int i = 0; attribute[i]; i += 2) {
+        if (strcmp(attribute[i], "id") == 0)
+            strcpy(s->id, attribute[i+1]);
+        else if (strcmp(attribute[i], "speed") == 0)
+            s->ballSpd = atof(attribute[i+1]);
+        else if (strcmp(attribute[i], "start") == 0)
+            s->ballStartCount = atoi(attribute[i+1]);
+        else if (strcmp(attribute[i], "score") == 0)
+            s->gaugeScore = atoi(attribute[i+1]);
+        else if (strcmp(attribute[i], "repeat") == 0)
+            s->repeatChance = atoi(attribute[i+1]);
+        else if (strcmp(attribute[i], "colors") == 0)
+            s->ballColors = atoi(attribute[i+1]);
+        else if (strcmp(attribute[i], "single") == 0)
+            s->singleChance = atoi(attribute[i+1]);
+        else if (strcmp(attribute[i], "partime") == 0)
+            s->partTime = atoi(attribute[i+1]);
+        else if (strcmp(attribute[i], "slowfactor") == 0)
+            s->slowFactor = atof(attribute[i+1]);
+    }
+}
+
+
+static void LevelParser_ParseStageProgression(
+    void *data, const char *element, const char **attribute
+) {
+
+    for (int i = 0; i < STAGE_COUNT; i++)
+        levelMgr.stages[i].levelsLen = 0;
+
+    for (int i = 0; attribute[i]; i += 2) {
+        if (strncmp(attribute[i], "stage", 5) == 0) {
+            char* cid = strtok((char*)attribute[i], "stage");
+            int stageID = atoi(cid)-1;
+
+            char* gID = strtok((char*)attribute[i+1], ",");
+            while (gID) {
+                for (int i = 0; i < levelMgr.graphicsLen; i++) {
+                    if (strcmp(gID, levelMgr.graphics[i].id) == 0) {
+                        Level* ptr = realloc(
+                            levelMgr.stages[stageID].levels,
+                            sizeof(Level) * (levelMgr.stages[stageID].levelsLen+1));
+                        if (!ptr) {
+                            Engine_PushErrorFile("levels.xml", "Out of Memory!");
+                            return;
+                        }
+
+                        levelMgr.stages[stageID].levels = ptr;
+                        levelMgr.stages[stageID].levelsLen++;
+
+                        Level* lv = &levelMgr.stages[stageID].levels[levelMgr.stages[stageID].levelsLen-1];
+                        lv->settingsID = NULL;
+                        lv->graphicsID = i;
+                        break;
+                    }
+                }
+                gID = strtok(NULL, ",");
+            }
+        } else if (strncmp(attribute[i], "diffi", 5) == 0) {
+            char* cid = strtok((char*)attribute[i], "diffi");
+            int stageID = atoi(cid)-1;
+
+            char* sID = strtok((char*)attribute[i+1], ",");
+            int j = 0;
+            while (sID) {
+                for (int i = 0; i < levelMgr.settingsLen; i++) {
+                    if (strcmp(sID, levelMgr.settings[i].id) == 0) {
+                        Level* lv = &levelMgr.stages[stageID].levels[j];
+                        lv->settingsID  = malloc(sizeof(int));
+                        lv->settingsID[0] = i;
+                        break;
+                    }
+                }
+                sID = strtok(NULL, ",");
+                j++;
+            }
+        }
+    }
+}
+
+
 void XML_StartElement(void *data, const char *element, const char **attribute) {
     if (strcmp(element, "Graphics") == 0) {
-        LevelGraphics* ptr = realloc(
-            levelMgr.graphics,
-            sizeof(LevelGraphics) * (levelMgr.graphicsLen+1));
-        if (!ptr) {
-            Engine_PushErrorFile("levels.xml", "Out of Memory!");
-            return;
-        }
-
-        levelMgr.graphics = ptr;
-        levelMgr.graphicsLen++;
-
-        LevelGraphics* g = &levelMgr.graphics[levelMgr.graphicsLen-1];
-        strcpy(g->id, "none");
-        strcpy(g->spiralFile, "none");
-        strcpy(g->spiral2File, "none");
-        strcpy(g->textureFile, "none");
-        strcpy(g->textureTopLayerFile, "none");
-        strcpy(g->dispName, "none");
-        g->frogPos.x = 0;
-        g->frogPos.y = 0;
-        g->coinsLen = 0;
-        g->coinsPos = NULL;
-
-        for (int i = 0; attribute[i]; i += 2) {
-            if (strcmp(attribute[i], "id") == 0)
-                strcpy(g->id, attribute[i+1]);
-            else if (strcmp(attribute[i], "curve") == 0)
-                strcpy(g->spiralFile, attribute[i+1]);
-            else if (strcmp(attribute[i], "curve2") == 0)
-                strcpy(g->spiral2File, attribute[i+1]);
-            else if (strcmp(attribute[i], "image") == 0) 
-                strcpy(g->textureFile, attribute[i+1]);
-            else if (strcmp(attribute[i], "image-top") == 0)
-                strcpy(g->textureTopLayerFile, attribute[i+1]);
-            else if (strcmp(attribute[i], "dispname") == 0)
-                strcpy(g->dispName, attribute[i+1]);
-            else if (strcmp(attribute[i], "gx") == 0)
-                g->frogPos.x = atof(attribute[i+1]);
-            else if (strcmp(attribute[i], "gy") == 0)
-                g->frogPos.y = atof(attribute[i+1]);
-        }
-    } else if (xmlDepth == 2 && 
-               strcmp(element, "TreasurePoint") == 0) {
-        LevelGraphics* g = &levelMgr.graphics[levelMgr.graphicsLen-1];
-        
-        SDL_FPoint* ptr = (SDL_FPoint*)realloc(
-            g->coinsPos,
-            sizeof(SDL_FPoint) * (g->coinsLen+1));
-        if (!ptr) {
-            Engine_PushErrorFile("levels.xml", "Out of Memory!");
-            return;
-        }
-
-        g->coinsPos = ptr;
-        g->coinsLen++;
-
-        for (int i = 0; attribute[i]; i += 2) {
-            if (strcmp(attribute[i], "x") == 0)
-                g->coinsPos[g->coinsLen-1].x = atof(attribute[i+1]);
-            else if (strcmp(attribute[i], "y") == 0)
-                g->coinsPos[g->coinsLen-1].y = atof(attribute[i+1]);
-        }
+        LevelParser_ParseGraphics(data, element, attribute);
+    } else if (xmlDepth == 2 && strcmp(element, "TreasurePoint") == 0) {
+        LevelParser_ParseTreasurePoints(data, element, attribute);
     } else if (strcmp(element, "Settings") == 0) {
-        LevelSettings* ptr = realloc(
-            levelMgr.settings,
-            sizeof(LevelSettings) * (levelMgr.settingsLen+1));
-        if (!ptr) {
-            Engine_PushErrorFile("levels.xml", "Out of Memory!");
-            return;
-        }
-
-        levelMgr.settings = ptr;
-        levelMgr.settingsLen++;
-
-        LevelSettings* s = &levelMgr.settings[levelMgr.settingsLen-1];
-
-        strcpy(s->id, "none");
-        s->ballSpd = 0.5;
-        s->ballStartCount = 35;
-        s->gaugeScore = 1000;
-        s->repeatChance = 40;
-        s->singleChance = 6;
-        s->ballColors = 4;
-        s->partTime = 30;
-        s->slowFactor = 4;
-
-        for (int i = 0; attribute[i]; i += 2) {
-            if (strcmp(attribute[i], "id") == 0)
-                strcpy(s->id, attribute[i+1]);
-            else if (strcmp(attribute[i], "speed") == 0)
-                s->ballSpd = atof(attribute[i+1]);
-            else if (strcmp(attribute[i], "start") == 0)
-                s->ballStartCount = atoi(attribute[i+1]);
-            else if (strcmp(attribute[i], "score") == 0)
-                s->gaugeScore = atoi(attribute[i+1]);
-            else if (strcmp(attribute[i], "repeat") == 0)
-                s->repeatChance = atoi(attribute[i+1]);
-            else if (strcmp(attribute[i], "colors") == 0)
-                s->ballColors = atoi(attribute[i+1]);
-            else if (strcmp(attribute[i], "single") == 0)
-                s->singleChance = atoi(attribute[i+1]);
-            else if (strcmp(attribute[i], "partime") == 0)
-                s->partTime = atoi(attribute[i+1]);
-            else if (strcmp(attribute[i], "slowfactor") == 0)
-                s->slowFactor = atof(attribute[i+1]);
-        }
+        LevelParser_ParseSettings(data, element, attribute);
     } else if (strcmp(element, "LevelProgression") == 0) {
         // TODO
     } else if (strcmp(element, "Level") == 0) {
         // TODO
     } else if (strcmp(element, "StageProgression") == 0) {
-        for (int i = 0; i < STAGE_COUNT; i++)
-            levelMgr.stages[i].levelsLen = 0;
-
-        for (int i = 0; attribute[i]; i += 2) {
-            if (strncmp(attribute[i], "stage", 5) == 0) {
-                char* cid = strtok((char*)attribute[i], "stage");
-                int stageID = atoi(cid)-1;
-
-                char* gID = strtok((char*)attribute[i+1], ",");
-                while (gID) {
-                    for (int i = 0; i < levelMgr.graphicsLen; i++) {
-                        if (strcmp(gID, levelMgr.graphics[i].id) == 0) {
-                            Level* ptr = realloc(
-                                levelMgr.stages[stageID].levels,
-                                sizeof(Level) * (levelMgr.stages[stageID].levelsLen+1));
-                            if (!ptr) {
-                                Engine_PushErrorFile("levels.xml", "Out of Memory!");
-                                return;
-                            }
-
-                            levelMgr.stages[stageID].levels = ptr;
-                            levelMgr.stages[stageID].levelsLen++;
-
-                            Level* lv = &levelMgr.stages[stageID].levels[levelMgr.stages[stageID].levelsLen-1];
-                            lv->settingsID = NULL;
-                            lv->graphicsID = i;
-                            break;
-                        }
-                    }
-                    gID = strtok(NULL, ",");
-                }
-            } else if (strncmp(attribute[i], "diffi", 5) == 0) {
-                char* cid = strtok((char*)attribute[i], "diffi");
-                int stageID = atoi(cid)-1;
-
-                char* sID = strtok((char*)attribute[i+1], ",");
-                int j = 0;
-                while (sID) {
-                    for (int i = 0; i < levelMgr.settingsLen; i++) {
-                        if (strcmp(sID, levelMgr.settings[i].id) == 0) {
-                            Level* lv = &levelMgr.stages[stageID].levels[j];
-                            lv->settingsID  = malloc(sizeof(int));
-                            lv->settingsID[0] = i;
-                            break;
-                        }
-                    }
-                    sID = strtok(NULL, ",");
-                    j++;
-                }
-            }
-        }
+        LevelParser_ParseStageProgression(data, element, attribute);
     }
 
     xmlDepth++;
