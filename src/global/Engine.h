@@ -23,6 +23,8 @@
 #define WINDOW_WIDTH 1280.0
 #define WINDOW_HEIGHT 720.0
 
+
+
 typedef struct _Font {
 	SDL_Texture* texture;
 	int charsLen;
@@ -63,7 +65,9 @@ struct {
 	HSAMPLE* 		sounds;
 	unsigned int 	soundsSfxLen;
 	HSTREAM*		soundsSfx;
+
 } engine;
+
 
 void Engine_PushError(const char*, const char*);
 void Engine_PushErrorCode(const char*, int);
