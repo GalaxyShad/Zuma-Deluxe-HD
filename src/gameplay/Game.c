@@ -141,21 +141,13 @@ void Game_Init(Game* game, int lvlID, int difficulty) {
     game->dbGameOver = NULL;
 }
 
-void Game_Update(Game* game, int* inMenu, int mouseClicked) {
-    // Get mouse pos and rotate frog;
-    Engine_GetMousePos(&game->mx, &game->my);
-    Frog_Rotate(&game->frog, game->mx, game->my);
+static bool _Game_FrogControl(Game* game, int mouseClicked) {
+    bool isShooted = 0;
 
-    if (!game->isIntroEnded) {
-        Game_UpdateIntro(game);
-        return;
-    }
-
-    char isShooted = 0;
     switch (mouseClicked) {
         case 1:
             if (!isShooted && !game->chain.isEndReached && !game->isFirstTime)
-                isShooted = 1;
+                isShooted = true;
             break;
         case 2: {
             char t = game->frog.color;
@@ -166,63 +158,228 @@ void Game_Update(Game* game, int* inMenu, int mouseClicked) {
         }
     }
 
-    if (game->isLosed || game->isWon) {
-        if (game->isWon && !game->isOutroEnded) {
-            Game_UpdateOutro(game);
-            return;
+    return isShooted;
+}
+
+static bool _Game_isEnd(Game* game, int* inMenu) {
+    if (!game->isLosed && !game->isWon)
+        return false;
+
+    if (game->isWon && !game->isOutroEnded) {
+        Game_UpdateOutro(game);
+        return false;
+    }
+
+    if (game->dbStats) {
+        DialogueBox_Update(game->dbStats);
+        if (DialogueBox_GetBtn(game->dbStats) == 1) {
+            DialogueBox_Destroy(game->dbStats);
+            game->dbStats = NULL;
+
+            if (game->score > levelMgr.bestScore[game->lvlID][game->difficulty])
+                levelMgr.bestScore[game->lvlID][game->difficulty] = game->score;
+
+            if (game->time < levelMgr.bestTime[game->lvlID][game->difficulty] ||
+                levelMgr.bestTime[game->lvlID][game->difficulty] == 0)
+                    levelMgr.bestTime[game->lvlID][game->difficulty] = game->time;
+
+            LevelMgr_SaveProgress();
+
+            *inMenu = 1;
+            Level_Free(game->lvl);
+        }
+    }
+
+    if (game->dbGameOver) {
+        DialogueBox_Update(game->dbGameOver);
+        if (DialogueBox_GetBtn(game->dbGameOver) == 1) {
+            DialogueBox_Destroy(game->dbGameOver);
+            game->dbGameOver = NULL;
+            *inMenu = 1;
+            Level_Free(game->lvl);
+        }
+    }
+
+    return true;
+}
+
+static bool _Game_HandleMenu(Game* game, int* inMenu) {
+    if (!game->dbMenu)
+        return false;
+    
+    DialogueBox_UpdateMenu(game->dbMenu);
+
+    switch (DialogueBox_GetBtn(game->dbMenu)) {
+        case 1:
+            DialogueBox_Destroy(game->dbMenu);
+            game->dbMenu = NULL;
+            break;
+        case 2:
+            DialogueBox_Destroy(game->dbMenu);
+            game->dbMenu = NULL;
+            *inMenu = 1;
+            Level_Free(game->lvl);
+            break;
+    }
+
+    return true;
+}
+
+static void _Game_GenerateChain(Game* game) {
+    game->chain.speed = game->settings->ballSpd;
+
+    if (!game->chain.isGenerating)
+        return;
+
+    if (game->isFirstTime && game->chain.len < game->settings->ballStartCount) {
+        if (game->chain.balls[game->chain.len-1].pos >= 0.5) {
+            BallChain_Append(&game->chain, game->lvl, game->settings);
+            game->chain.balls[game->chain.len-1].spd = game->chain.balls[game->chain.len-2].spd;
+        }
+    } else {
+        if (game->chain.balls[game->chain.len-1].pos >= BALLS_CHAIN_PAD) {
+            BallChain_Append(&game->chain, game->lvl, game->settings);
+            game->chain.balls[game->chain.len-1].spd = game->chain.balls[game->chain.len-2].spd;
+            game->chain.balls[game->chain.len-1].startAnim = true;
+            Ball_InitAnim(&game->chain.balls[game->chain.len-1]);
+        } else if (game->chain.len == 0) {
+            BallChain_Append(&game->chain, game->lvl, game->settings);
         }
 
-        if (game->dbStats) {
-            DialogueBox_Update(game->dbStats);
-            if (DialogueBox_GetBtn(game->dbStats) == 1) {
-                DialogueBox_Destroy(game->dbStats);
-                game->dbStats = NULL;
-
-                if (game->score > levelMgr.bestScore[game->lvlID][game->difficulty])
-                    levelMgr.bestScore[game->lvlID][game->difficulty] = game->score;
-
-                if (game->time < levelMgr.bestTime[game->lvlID][game->difficulty] ||
-                    levelMgr.bestTime[game->lvlID][game->difficulty] == 0)
-                        levelMgr.bestTime[game->lvlID][game->difficulty] = game->time;
-
-                LevelMgr_SaveProgress();
-
-                *inMenu = 1;
-                Level_Free(game->lvl);
-            }
+        if (game->isFirstTime) {
+            Engine_StopSound(SND_ROLLING);
         }
-        if (game->dbGameOver) {
-            DialogueBox_Update(game->dbGameOver);
-            if (DialogueBox_GetBtn(game->dbGameOver) == 1) {
-                DialogueBox_Destroy(game->dbGameOver);
-                game->dbGameOver = NULL;
-                *inMenu = 1;
-                Level_Free(game->lvl);
-            }
-        }
+        game->isFirstTime = false;
+    }
+
+}
+
+static void _Game_HandleGameWon(Game* game) {
+    if (game->chain.isEndReached || 
+        game->chain.len != 0 || 
+        game->score <= game->settings->gaugeScore ||
+        game->isWon
+    ) {
         return;
     }
 
-    if (game->dbMenu) {
-        DialogueBox_UpdateMenu(game->dbMenu);
+    Engine_PlayMusic(MUS_WIN);
 
-        switch (DialogueBox_GetBtn(game->dbMenu)) {
-            case 1:
-                DialogueBox_Destroy(game->dbMenu);
-                game->dbMenu = NULL;
-                break;
-            case 2:
-                DialogueBox_Destroy(game->dbMenu);
-                game->dbMenu = NULL;
-                *inMenu = 1;
-                Level_Free(game->lvl);
-                break;
-        }
+    game->dbStats = DialogueBox_CreateResults();
+
+    char buff[8];
+    sprintf(buff, "%d", game->score);
+    DialogueBox_SetTextStr(game->dbStats, 
+        DB_RES_TEXT_POINTS, buff);
+    
+    sprintf(buff, "%d", game->totalCoins);
+    DialogueBox_SetTextStr(game->dbStats, 
+        DB_RES_TEXT_COINS, buff);
+
+    sprintf(buff, "%d", game->chain.totalCombos);
+    DialogueBox_SetTextStr(game->dbStats, 
+        DB_RES_TEXT_COMBOS, buff);
+
+    sprintf(buff, "%d", game->chain.maxChainBonus);
+    DialogueBox_SetTextStr(game->dbStats, 
+        DB_RES_TEXT_MAX_CHAIN, buff);
+
+    sprintf(buff, "%d", game->chain.maxCombo);
+    DialogueBox_SetTextStr(game->dbStats, 
+        DB_RES_TEXT_MAX_COMBO, buff);
+
+    game->time = ((float)clock())/CLOCKS_PER_SEC - game->time;
+    sprintf(buff, "%d:%02d", 
+        game->time / 60, 
+        game->time % 60);
+    DialogueBox_SetTextStr(game->dbStats, 
+        DB_RES_TEXT_YOUR_TIME, buff);
+
+    if (game->time <= game->settings->partTime) {
+        game->dbStats->texts[DB_RES_TEXT_YOUR_TIME].color.r = 0;
+        game->dbStats->texts[DB_RES_TEXT_YOUR_TIME].color.g = 255;
+        game->dbStats->texts[DB_RES_TEXT_YOUR_TIME].color.b = 0;
+    }
+
+
+    sprintf(buff, "%d:%02d", 
+        game->settings->partTime / 60, 
+        game->settings->partTime % 60);
+    DialogueBox_SetTextStr(game->dbStats, 
+        DB_RES_TEXT_ACE_TIME, buff);
+
+    game->isWon = true;
+
+}
+
+static bool _Game_IsGameLose(Game* game) {
+    if (!(game->chain.len == 0 && game->chain.isEndReached))
+        return false;
+
+
+    if (game->lives >= 1) {
+        int lives = game->lives - 1;
+        Engine_PlaySound(SND_CHANT14);
+        Game_Init(game, game->stageID, game->lvlID);
+        game->lives = lives;
+        return true;
+    } 
+
+    if (game->isLosed) 
+        return true;
+
+    Engine_PlaySound(SND_CHANT8);
+    Engine_PlayMusic(MUS_GAME_OVER);
+
+    game->dbGameOver = DialogueBox_CreateGameOver();
+
+    char buff[8];
+    
+    sprintf(buff, "%d", game->totalCoins);
+    DialogueBox_SetTextStr(game->dbGameOver, 
+        DB_GO_TEXT_COINS, buff);
+
+    sprintf(buff, "%d", game->chain.totalCombos);
+    DialogueBox_SetTextStr(game->dbGameOver, 
+        DB_GO_TEXT_COMBOS, buff);
+
+    sprintf(buff, "%d", game->chain.maxChainBonus);
+    DialogueBox_SetTextStr(game->dbGameOver, 
+        DB_GO_TEXT_MAX_CHAIN, buff);
+
+    sprintf(buff, "%d", game->chain.maxCombo);
+    DialogueBox_SetTextStr(game->dbGameOver, 
+        DB_GO_TEXT_MAX_COMBO, buff);
+
+    game->time = ((float)clock())/CLOCKS_PER_SEC - game->time;
+    sprintf(buff, "%d:%02d", game->time / 60, game->time % 60);
+    DialogueBox_SetTextStr(game->dbGameOver, 
+        DB_GO_TEXT_TOTAL_TIME, buff);
+
+    game->isLosed = true;
+    
+    return false;
+
+}
+
+void Game_Update(Game* game, int* inMenu, int mouseClicked) {
+    // Get mouse pos and rotate frog;
+    Engine_GetMousePos(&game->mx, &game->my);
+    Frog_Rotate(&game->frog, game->mx, game->my);
+
+    if (!game->isIntroEnded) {
+        Game_UpdateIntro(game);
         return;
     }
 
-    BallChain_Update(&game->chain, game->lvl->spiral, game->lvl->spiralLen, 
-        &game->score, &game->msgs);
+    bool isShooted = _Game_FrogControl(game, mouseClicked);
+
+    if (_Game_isEnd(game, inMenu)) return;
+    if (_Game_HandleMenu(game, inMenu)) return;
+
+    BallChain_Update(&game->chain, game->lvl->spiral, 
+        game->lvl->spiralLen, &game->score, &game->msgs);
+    
     if (game->chain.len > 0) {
         BulletsArr_UpdateOnScreenStatus(&game->bullets, &game->chain.chainBonus);
         BulletsArr_Update(&game->bullets);
@@ -235,131 +392,17 @@ void Game_Update(Game* game, int* inMenu, int mouseClicked) {
         Engine_PlaySound(SND_CHANT4);
     }
 
-    
-    game->chain.speed = game->settings->ballSpd;
-    if (game->chain.isGenerating) {
-        if (game->isFirstTime && game->chain.len < game->settings->ballStartCount) {
-            if (game->chain.balls[game->chain.len-1].pos >= 0.5) {
-                BallChain_Append(&game->chain, game->lvl, game->settings);
-                game->chain.balls[game->chain.len-1].spd = game->chain.balls[game->chain.len-2].spd;
-            }
-        } else {
-            if (game->chain.balls[game->chain.len-1].pos >= BALLS_CHAIN_PAD) {
-                BallChain_Append(&game->chain, game->lvl, game->settings);
-                game->chain.balls[game->chain.len-1].spd = game->chain.balls[game->chain.len-2].spd;
-                game->chain.balls[game->chain.len-1].startAnim = true;
-	            Ball_InitAnim(&game->chain.balls[game->chain.len-1]);
-            } else if (game->chain.len == 0) {
-                BallChain_Append(&game->chain, game->lvl, game->settings);
-            }
+    _Game_GenerateChain(game);
+    _Game_HandleGameWon(game);
+    if (_Game_IsGameLose(game)) return;
 
-            if (game->isFirstTime) {
-                Engine_StopSound(SND_ROLLING);
-            }
-            game->isFirstTime = false;
-        }
-    }
-
-    if (!game->chain.isEndReached && game->chain.len == 0 
-        && game->score > game->settings->gaugeScore) {
-        if (!game->isWon) {
-            Engine_PlayMusic(MUS_WIN);
-
-            game->dbStats = DialogueBox_CreateResults();
-
-            char buff[8];
-            sprintf(buff, "%d", game->score);
-            DialogueBox_SetTextStr(game->dbStats, 
-                DB_RES_TEXT_POINTS, buff);
-            
-            sprintf(buff, "%d", game->totalCoins);
-            DialogueBox_SetTextStr(game->dbStats, 
-                DB_RES_TEXT_COINS, buff);
-
-            sprintf(buff, "%d", game->chain.totalCombos);
-            DialogueBox_SetTextStr(game->dbStats, 
-                DB_RES_TEXT_COMBOS, buff);
-
-            sprintf(buff, "%d", game->chain.maxChainBonus);
-            DialogueBox_SetTextStr(game->dbStats, 
-                DB_RES_TEXT_MAX_CHAIN, buff);
-
-            sprintf(buff, "%d", game->chain.maxCombo);
-            DialogueBox_SetTextStr(game->dbStats, 
-                DB_RES_TEXT_MAX_COMBO, buff);
-
-            game->time = ((float)clock())/CLOCKS_PER_SEC - game->time;
-            sprintf(buff, "%d:%02d", 
-                game->time / 60, 
-                game->time % 60);
-            DialogueBox_SetTextStr(game->dbStats, 
-                DB_RES_TEXT_YOUR_TIME, buff);
-
-            if (game->time <= game->settings->partTime) {
-                game->dbStats->texts[DB_RES_TEXT_YOUR_TIME].color.r = 0;
-                game->dbStats->texts[DB_RES_TEXT_YOUR_TIME].color.g = 255;
-                game->dbStats->texts[DB_RES_TEXT_YOUR_TIME].color.b = 0;
-            }
-
-
-            sprintf(buff, "%d:%02d", 
-                game->settings->partTime / 60, 
-                game->settings->partTime % 60);
-            DialogueBox_SetTextStr(game->dbStats, 
-                DB_RES_TEXT_ACE_TIME, buff);
-
-            game->isWon = true;
-        }
-    }
-
-    if (game->chain.len == 0 && game->chain.isEndReached) {
-        if (game->lives >= 1) {
-            int lives = game->lives - 1;
-            Engine_PlaySound(SND_CHANT14);
-            Game_Init(game, game->stageID, game->lvlID);
-            game->lives = lives;
-            return;
-        } else {
-            if (!game->isLosed) {
-                Engine_PlaySound(SND_CHANT8);
-                Engine_PlayMusic(MUS_GAME_OVER);
-
-                game->dbGameOver = DialogueBox_CreateGameOver();
-
-                char buff[8];
-                
-                sprintf(buff, "%d", game->totalCoins);
-                DialogueBox_SetTextStr(game->dbGameOver, 
-                    DB_GO_TEXT_COINS, buff);
-
-                sprintf(buff, "%d", game->chain.totalCombos);
-                DialogueBox_SetTextStr(game->dbGameOver, 
-                    DB_GO_TEXT_COMBOS, buff);
-
-                sprintf(buff, "%d", game->chain.maxChainBonus);
-                DialogueBox_SetTextStr(game->dbGameOver, 
-                    DB_GO_TEXT_MAX_CHAIN, buff);
-
-                sprintf(buff, "%d", game->chain.maxCombo);
-                DialogueBox_SetTextStr(game->dbGameOver, 
-                    DB_GO_TEXT_MAX_COMBO, buff);
-
-                game->time = ((float)clock())/CLOCKS_PER_SEC - game->time;
-                sprintf(buff, "%d:%02d", game->time / 60, game->time % 60);
-                DialogueBox_SetTextStr(game->dbGameOver, 
-                    DB_GO_TEXT_TOTAL_TIME, buff);
-
-                game->isLosed = true;
-            }
-        }
-    }
-
+    // UI Update
     Button_Update(&game->btnMenu);
     if (Button_IsClicked(&game->btnMenu)) {
         game->dbMenu = DialogueBox_CreateMenu();
     }
 
-    if(isShooted && !(int)game->frog.shift && game->btnMenu.state != BTN_CLICKED) {
+    if (isShooted && !(int)game->frog.shift && game->btnMenu.state != BTN_CLICKED) {
         BulletsArr_AddBullet(&game->bullets, &game->frog);
         Engine_PlaySound(SND_FIREBALL1);
 
@@ -665,10 +708,9 @@ void Game_UpdateOutro(Game* game) {
         game->particles.prevPos = game->particles.pos;
     }
 
-    
-    game->particles.x += game->lvl->spiral[(int)game->particles.pos].dx * engine.scale_x * EXPLOSION_MOVE_SPEED;
-    game->particles.y += game->lvl->spiral[(int)game->particles.pos].dy * engine.scale_y * EXPLOSION_MOVE_SPEED;
-    game->particles.pos +=  EXPLOSION_MOVE_SPEED;
+    game->particles.x   += game->lvl->spiral[(int)game->particles.pos].dx * engine.scale_x * EXPLOSION_MOVE_SPEED;
+    game->particles.y   += game->lvl->spiral[(int)game->particles.pos].dy * engine.scale_y * EXPLOSION_MOVE_SPEED;
+    game->particles.pos += EXPLOSION_MOVE_SPEED;
 }
 
 void Game_DrawOutro(Game* game) {

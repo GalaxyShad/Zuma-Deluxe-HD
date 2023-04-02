@@ -10,7 +10,7 @@
 
 #define PATH_LEVEL "levels"
 #define STAGE_COUNT 1
-#define BUFF_SIZE 48
+#define BUFF_SIZE   48
 
 #define XML_BUFF_SIZE 32678
 
