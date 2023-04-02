@@ -24,6 +24,17 @@
 #define PIT_OPEN_POS 0.2
 
 
+typedef struct _Treasure {
+	int pos;
+	int totalCoins;
+
+	bool isActive;
+	bool isBlinking; 
+	bool isFading;
+
+	clock_t   time;
+	Animation anim;
+} Treasure;
 typedef struct _Game {
 	int mx, my, stageID, lvlID, score, lives, difficulty;
 	int ballsOnStart;
@@ -45,10 +56,8 @@ typedef struct _Game {
 	LevelSettings* settings;
 	LevelGraphics* graphics;
 
-	int treasurePos, totalCoins;
-	bool treasureActive, treasureBlinking, treasureFading;
-	clock_t treasureTime;
-	Animation treasureAnim;
+	int totalCoins;
+	Treasure treasure;
 
 	SDL_FPoint finishPos;
 	Animation finishAnim;
@@ -62,6 +71,8 @@ typedef struct _Game {
 	DialogueBox* dbGameOver;
 
 } Game;
+
+
 
 void Game_Init(Game*, int, int);
 

@@ -86,8 +86,10 @@ static void ApplicationZuma_HandleEvents(void) {
 
 static void ApplicationZuma_Update(void) {
     SDL_RenderClear(engine.render);
+
     if (app.inMenu) {
         MenuMgr_Update(&app.menuMgr);
+        
         if (app.menuMgr.roomID == MR_GAME && app.inMenu) {
             app.inMenu = 0;
             Game_Init(&app.game, app.curLvl, app.curDifficulty);
@@ -103,6 +105,7 @@ static void ApplicationZuma_Update(void) {
 
         Game_Draw(&app.game);
     }
+
     SDL_RenderPresent(engine.render);
 }
 

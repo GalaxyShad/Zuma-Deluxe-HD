@@ -7,6 +7,8 @@ void constrain(int* a, int min, int max) {
         *a = min;
 }
 
+
+
 void Game_Init(Game* game, int lvlID, int difficulty) {
     game->stageID = 0;
     game->score = 0;
@@ -82,16 +84,27 @@ void Game_Init(Game* game, int lvlID, int difficulty) {
     game->isFirstTime = true;
     game->chain.isGenerating = true;
 
-    game->treasureActive = false;
-    game->treasureBlinking = false;
-    game->treasureFading = false;
-    game->treasureTime = clock();
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
+
+    Treasure treasure;
+
+    treasure.isActive   = false;
+    treasure.isBlinking = false;
+    treasure.isFading   = false;
+    treasure.time       = clock();
+
+    SDL_Rect animTreasureRect = { 340, 0, 54, 54 };
+    Animation_Init(&treasure.anim, TEX_GAME_OBJECTS, animTreasureRect);
+    Animation_Set(&treasure.anim, 0, 30, 0.25);
+
+    game->treasure = treasure;
+
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
 
     game->lightTrailPitch = 0;
 
-    SDL_Rect animTreasureRect = {340, 0, 54, 54};
-    Animation_Init(&game->treasureAnim, TEX_GAME_OBJECTS, animTreasureRect);
-    Animation_Set(&game->treasureAnim, 0, 30, 0.25);
 
     SDL_Rect animFinishRect = {629, 132, 132, 132};
     Animation_Init(&game->finishAnim, TEX_GAME_OBJECTS, animFinishRect);
@@ -418,17 +431,17 @@ void Game_Draw(Game* game) {
     Messages_Draw(&game->msgs);
     Game_DrawHUD(game);
 
-    if (game->treasureActive) {
-        if (game->treasureBlinking) {
-            int delta = (int)(((float)(clock() - game->treasureTime))/(CLOCKS_PER_SEC / TREASURE_BLINK_SPEED));
+    if (game->treasure.isActive) {
+        if (game->treasure.isBlinking) {
+            int delta = (int)(((float)(clock() - game->treasure.time))/(CLOCKS_PER_SEC / TREASURE_BLINK_SPEED));
             if (delta % 2 == 0)
                 Game_DrawTreasure(game);
         } else
             Game_DrawTreasure(game);
     }
 
-    if (game->treasureFading) {
-        game->treasureAnim.scale += TREASURE_FADING_SPEED;
+    if (game->treasure.isFading) {
+        game->treasure.anim.scale += TREASURE_FADING_SPEED;
         Game_DrawTreasure(game);
     }
 
@@ -463,54 +476,54 @@ void Game_Draw(Game* game) {
 
 void Game_UpdateTreasure(Game* game) {
     clock_t t = clock();
-    float delta = ((float)(t - game->treasureTime)) / CLOCKS_PER_SEC;
+    float delta = ((float)(t - game->treasure.time)) / CLOCKS_PER_SEC;
 
-    if (game->treasureActive && game->treasureBlinking) {
+    if (game->treasure.isActive && game->treasure.isBlinking) {
         if (delta > TREASURE_BLINK_TIME) {
-            game->treasureActive = false;
-            game->treasureBlinking = false;
-            game->treasureTime = t;
+            game->treasure.isActive = false;
+            game->treasure.isBlinking = false;
+            game->treasure.time = t;
             Engine_PlaySound(SND_GEMVANISHES);
         }
-    } else if (game->treasureActive && !game->treasureBlinking) {
+    } else if (game->treasure.isActive && !game->treasure.isBlinking) {
         if (delta > TREASURE_LIFE_TIME) {
-            game->treasureBlinking = true;
-            game->treasureTime = t;
+            game->treasure.isBlinking = true;
+            game->treasure.time = t;
         }
     } else {
         if (delta > TREASURE_LIFE_TIME) {
             Engine_PlaySound(SND_JEWELAPPEAR);
-            game->treasureActive = true;
-            game->treasurePos = randInt(0, game->graphics->coinsLen - 1);
-            game->treasureTime = t;
+            game->treasure.isActive = true;
+            game->treasure.pos = randInt(0, game->graphics->coinsLen - 1);
+            game->treasure.time = t;
         }
-        if (game->treasureFading) {
-            if (game->treasureAnim.scale > TREASURE_MAX_SCALE)  {
-                game->treasureFading = false;
-                game->treasureAnim.color.a = 255;
-                game->treasureAnim.scale = 1;
-                game->treasureAnim.spd = 0.25;
+        if (game->treasure.isFading) {
+            if (game->treasure.anim.scale > TREASURE_MAX_SCALE)  {
+                game->treasure.isFading = false;
+                game->treasure.anim.color.a = 255;
+                game->treasure.anim.scale = 1;
+                game->treasure.anim.spd = 0.25;
             }
         }
     }
  
-    if (game->treasureActive) {
+    if (game->treasure.isActive) {
         //Check bullets collide with treasure
         for (int i = 0; i < game->bullets.len; i++) {
             if (!game->bullets.bullets[i].onScreen) continue;
-            float coinX = (game->graphics->coinsPos[game->treasurePos].x + 104) * engine.scale_x;
-            float coinY = game->graphics->coinsPos[game->treasurePos].y * engine.scale_y;
+            float coinX = (game->graphics->coinsPos[game->treasure.pos].x + 104) * engine.scale_x;
+            float coinY = game->graphics->coinsPos[game->treasure.pos].y * engine.scale_y;
 
             float dist = (game->bullets.bullets[i].x - coinX) * (game->bullets.bullets[i].x - coinX);
             dist += (game->bullets.bullets[i].y - coinY) * (game->bullets.bullets[i].y - coinY);
 
             if (dist < TREASURE_COLLIDE_DIST) {
                 game->chain.chainBonus = 0;
-                game->treasureActive = false;
-                game->treasureBlinking = false;
-                game->treasureFading = true;
-                game->treasureAnim.spd = 1;
-                game->treasureTime = t;
+                game->treasure.isActive = false;
+                game->treasure.isBlinking = false;
+                game->treasure.isFading = true;
+                game->treasure.anim.spd = 1;
+                game->treasure.time = t;
                 game->bullets.bullets[i].onScreen = 0;
                 game->score += 500;
                 game->totalCoins++;
@@ -524,24 +537,24 @@ void Game_UpdateTreasure(Game* game) {
 }
 
 void Game_DrawTreasure(Game* game) {
-    float x = (game->graphics->coinsPos[game->treasurePos].x + 104) * engine.scale_x;
-    float y = game->graphics->coinsPos[game->treasurePos].y * engine.scale_y;
+    float x = (game->graphics->coinsPos[game->treasure.pos].x + 104) * engine.scale_x;
+    float y = game->graphics->coinsPos[game->treasure.pos].y * engine.scale_y;
 
-    if (game->treasureFading) {
-        float rescale = (1 - game->treasureAnim.scale / TREASURE_MAX_SCALE);
+    if (game->treasure.isFading) {
+        float rescale = (1 - game->treasure.anim.scale / TREASURE_MAX_SCALE);
         if (rescale > 0)
-            game->treasureAnim.color.a = 255.0 * rescale;
+            game->treasure.anim.color.a = 255.0 * rescale;
         else
-            game->treasureAnim.color.a = 0;
+            game->treasure.anim.color.a = 0;
     }
 
-    SDL_Color tc = game->treasureAnim.color;
-    SDL_Color c = {0, 0, 0, game->treasureAnim.color.a / 2};
-    game->treasureAnim.color = c;
-    Animation_Draw(&game->treasureAnim, x-12, y+16);
+    SDL_Color tc = game->treasure.anim.color;
+    SDL_Color c = {0, 0, 0, game->treasure.anim.color.a / 2};
+    game->treasure.anim.color = c;
+    Animation_Draw(&game->treasure.anim, x-12, y+16);
 
-    game->treasureAnim.color = tc;
-    Animation_Draw(&game->treasureAnim, x, y);
+    game->treasure.anim.color = tc;
+    Animation_Draw(&game->treasure.anim, x, y);
 }
 
 void Game_DrawFinish(Game* game) {
