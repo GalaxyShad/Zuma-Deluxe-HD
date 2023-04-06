@@ -26,9 +26,9 @@ include(FetchContent)
 
 message("Fetching expat")
 FetchContent_Declare(
-  expat
-  URL https://github.com/libexpat/libexpat/archive/refs/tags/R_2_4_8.zip
-  FIND_PACKAGE_ARGS
+    expat
+    GIT_REPOSITORY https://github.com/libexpat/libexpat.git
+    GIT_TAG        d8f43d6757af5ca5aae6cc185d6481f37f6c3be2
 )
 
 FetchContent_MakeAvailable(expat)
@@ -39,18 +39,18 @@ add_subdirectory(${expat_SOURCE_DIR}/expat ${expat_BINARY_DIR})
 
 message("Fetching sdl2")
 FetchContent_Declare(
-  sdl2
-  URL https://github.com/libsdl-org/SDL/archive/refs/tags/release-2.24.0.zip
-  FIND_PACKAGE_ARGS
+    sdl2
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+    GIT_TAG        7914234b2601eeb2c6563462649f269e8cfbb16c
 )
 
 FetchContent_MakeAvailable(sdl2)
 
 message("Fetching sdl2 image")
 FetchContent_Declare(
-  sdl2_image
-  URL https://github.com/libsdl-org/SDL_image/archive/refs/tags/release-2.6.2.zip
-  FIND_PACKAGE_ARGS
+    sdl2_image
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
+    GIT_TAG        c1b7cf959c7d3150b0707f95a0c5268689c9e537
 )
 
 set(SDL2IMAGE_SAMPLES OFF)
@@ -78,7 +78,7 @@ target_include_directories(
 link_directories(
     ${PROJECT_SOURCE_DIR}/lib/bass/c
     ${PROJECT_SOURCE_DIR}/lib/bass-fx/C
-    )
+)
 
 target_link_libraries(
     ZumaHD PRIVATE
@@ -88,7 +88,7 @@ target_link_libraries(
     ${isBassFxFound}
     
     expat
-    )
+)
 
 # Copy DLLs needed for runtime on Windows
 if(WIN32)
