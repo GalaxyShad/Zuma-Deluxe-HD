@@ -3,20 +3,28 @@
 // ==== Common ==== //
 void Engine_PushError(const char* header, const char* main) {
     char errMsg[STR_ERR_BUFFER_SIZE];
+
     sprintf(errMsg, "%s\n%s", header, main);
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
-                             "Error",
-                             errMsg,
-                             NULL);
+
+    SDL_ShowSimpleMessageBox(
+        SDL_MESSAGEBOX_ERROR,
+        "Error",
+        errMsg,
+        NULL
+    );
 }
 
 void Engine_PushErrorCode(const char* header, int code) {
     char errMsg[STR_ERR_BUFFER_SIZE];
+
     sprintf(errMsg, "%s\nError code: %d", header, code);
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
-                             "Error",
-                             errMsg,
-                             NULL);
+
+    SDL_ShowSimpleMessageBox(
+        SDL_MESSAGEBOX_ERROR,
+        "Error",
+        errMsg,
+        NULL
+    );
 }
 
 void Engine_PushErrorFile(const char* file, const char* main) {
@@ -58,8 +66,10 @@ int Engine_Init() {
     engine.volSnd = 1.0f;
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        Engine_PushError("SDL.dll graphics library initialization error:", 
-                            SDL_GetError());
+        Engine_PushError(
+            "SDL.dll graphics library initialization error:", 
+            SDL_GetError()
+        );
         return 0;
     }
 

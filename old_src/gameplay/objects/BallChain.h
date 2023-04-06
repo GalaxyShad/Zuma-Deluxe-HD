@@ -72,7 +72,7 @@ int BallChain_GetLastMovingBall(BallChain*);
 char BallChain_CollidesFront(BallChain*, int, int);
 char BallChain_CollidesBack(BallChain*, int, int);
 
-void BallChain_Update(BallChain*, SpiralDot*, int, int*, Messages*);
+void BallChain_Update(BallChain*, CurveDot*, int, int*, Messages*);
 void BallChain_Draw(BallChain*, bool);
 void BallChain_UpdateColorInChain(BallChain* chain);
 void BallChain_ExplodeBalls(BallChain*, int, int);

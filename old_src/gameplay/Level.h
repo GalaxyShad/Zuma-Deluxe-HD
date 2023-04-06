@@ -14,62 +14,70 @@
 
 #define XML_BUFF_SIZE 32678
 
-typedef struct _SpiralDot {
-    float dx, dy;
-    bool t1, t2;
-} SpiralDot;
+typedef struct LevelCoins {
+    size_t count;
+    v2f_t* posList;
+} LevelCoins;
 
-typedef struct _LevelGraphics {
-    char id[BUFF_SIZE];
+typedef struct LevelGraphics {
+    const char* name;
 
-    char spiralFile[BUFF_SIZE];
-    char spiral2File[BUFF_SIZE];
+    const char* spiralAFile;
+    const char* spiralBFile;
 
-    char textureFile[BUFF_SIZE];
-    char textureTopLayerFile[BUFF_SIZE];
+    const char* textureFile;
+    const char* textureTopLayerFile;
 
-    char dispName[BUFF_SIZE];
+    const char* dispName;
 
-    SDL_FPoint frogPos;
+    v2f_t       frogPos;
 
-    int coinsLen;
-    SDL_FPoint* coinsPos;
+    LevelCoins  coins;
 } LevelGraphics;
 
-typedef struct _LevelSettings {
-    char id[BUFF_SIZE];
-    float ballSpd;
-    int ballStartCount;
-    int gaugeScore;
-    int repeatChance;
-    int singleChance;
-    int ballColors;
-    int partTime;
-    float slowFactor;
+typedef struct LevelSettings {
+    const char* name;
+
+    float       ballSpd;
+    int         ballStartCount;
+    int         gaugeScore;
+    int         repeatChance;
+    int         singleChance;
+    int         ballColors;
+    int         partTime;
+    float       slowFactor;
 } LevelSettings;
 
-typedef struct _Level {
-    int* settingsID;
-    int graphicsID;
+typedef struct CurveDot {
+    float       dx, dy;
+    bool        t1, t2;
+} CurveDot;
+
+
+typedef struct Curve {
+    CurveDot*   dotList;
+    size_t      dotListCount;
+    v2f_t       startPosition;
+} Curve;
+
+
+typedef struct Level {
+    LevelSettings** settingsList;
+    LevelGraphics*  graphics;
 
     SDL_Texture* texture;
     SDL_Texture* textureTopLayer;
 
-    int spiralLen;
-    SpiralDot* spiral;
-    SDL_FPoint spiralStart;
-
-    int spiral2Len;
-    SpiralDot* spiral2;
-    SDL_FPoint spiral2Start;
+    Curve* curveA;
+    Curve* curveB;
 } Level;
 
-int Level_Load(Level*);
-void Level_Draw(Level*);
-void Level_DrawTopLayer(Level* lvl);
-void Level_DrawDebug(Level*);
-char* Level_GetInfo(Level*);
-void Level_Free(Level*);
+int     Level_Load(Level*);
+void    Level_Draw(Level*);
+void    Level_DrawTopLayer(Level* lvl);
+void    Level_DrawDebug(Level*);
+char*   Level_GetInfo(Level*);
+void    Level_Free(Level*);
 
 typedef struct _Stage {
     int levelsLen;

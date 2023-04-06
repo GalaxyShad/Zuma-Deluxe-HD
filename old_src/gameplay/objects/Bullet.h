@@ -34,7 +34,7 @@ void Bullet_Init(Bullet*, float, float, float, float, char);
 void Bullet_Update(Bullet*);
 void Bullet_Draw(Bullet*);
 
-void BulletsArr_CollideWithChainUpdate(BulletsArr*, BallChain*, SpiralDot*);
+void BulletsArr_CollideWithChainUpdate(BulletsArr*, BallChain*, CurveDot*);
 void BulletsArr_UpdateOnScreenStatus(BulletsArr*, int*);
 void BulletsArr_AddBullet(BulletsArr*, Frog*);
 void BulletsArr_Update(BulletsArr*);

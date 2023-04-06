@@ -1,11 +1,9 @@
 #include "Application.h"
 
 #include "global/HQC.h"
+#include "global/Consts.h"
+#include "global/Enums.h"
 
-#include "zuma/ResourceStore.h"
-#include "zuma/Game.h" 
-
-#include <stdlib.h>
 
 // #include "global/Engine.h"
 
@@ -35,15 +33,7 @@ static struct {
 } app;
 
 
-static void _Init() {
-    app.curLvl          = 0;
-    app.curDifficulty   = 0;
-    app.inMenu          = 1;
-    app.isRunning       = true;
-}
-
-
-static int _LoadResources(void) {
+static int ApplicationZuma_LoadResources(void) {
     // if (!Engine_LoadSettings())
     //     return 9;
 
@@ -63,7 +53,7 @@ static int _LoadResources(void) {
 }
 
 
-static int _ShowStartupImage(void) {
+static int ApplicationZuma_ShowStartupImage(void) {
     HQC_Texture texDisclaimer = HQC_Artist_LoadTexture("images\\disclaimer.jpg");
     
     HQC_Artist_DrawTexture(texDisclaimer, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
@@ -73,9 +63,9 @@ static int _ShowStartupImage(void) {
 }
 
 
-static void _HandleEvents(void) {
+static void ApplicationZuma_HandleEvents(void) {
     HQC_Event event;
-    while (HQC_Window_PollEvent(&event)) {
+    while ((event = HQC_Window_PollEvent()) != 0) {
         switch (event) {
             case HQC_EVENT_QUIT:
                 exit(0);
@@ -85,20 +75,30 @@ static void _HandleEvents(void) {
 }
 
 
-static void _Start(void) {
-    Store_LoadAll();
-    Game_Start();
-}
+static void ApplicationZuma_Update(void) {
 
-
-static void _Update(void) {
-    Game_Update();
-}
-
-
-static void _Draw(void) {
     HQC_Artist_Clear();
-    Game_Draw();
+
+    // if (app.inMenu) {
+    //     MenuMgr_Update(&app.menuMgr);
+        
+    //     if (app.menuMgr.roomID == MR_GAME && app.inMenu) {
+    //         app.inMenu = 0;
+    //         Game_Init(&app.game, app.curLvl, app.curDifficulty);
+    //     }
+
+    //     MenuMgr_Draw(&app.menuMgr);
+    // } else {
+    //     Game_Update(&app.game, &app.inMenu, app.mouseClicked);
+    //     if (app.inMenu) {
+    //         MenuMgr_Set(&app.menuMgr, MR_GAUNTLET);
+    //         return;
+    //     }
+
+    //     Game_Draw(&app.game);
+    // }
+
+
     HQC_Artist_Display();
 }
 
@@ -107,32 +107,33 @@ int ApplicationZuma_Start(void) {
     
     
     HQC_Init();
-    HQC_CreateWindow(
-        "Zuma HD. By GalaxyShad and s4lat", 
-        WINDOW_WIDTH, WINDOW_HEIGHT
-    );
+    HQC_CreateWindow("Zuma HD. By GalaxyShad and s4lat", WINDOW_WIDTH, WINDOW_HEIGHT);
 
-    _LoadResources();
-    _ShowStartupImage();
+    ApplicationZuma_ShowStartupImage();
+    ApplicationZuma_LoadResources();
 
-    _Init();
+    // srand(time(NULL));
+
+    app.curLvl = 0;
+    app.curDifficulty = 0;
+    app.inMenu = 1;
+    app.isRunning = true;
 
     //MenuMgr_Init(&app.menuMgr, &app.curLvl, &app.curDifficulty);
     //MenuMgr_Set(&app.menuMgr, MR_MAIN);
-    _Start();
+
     while (app.isRunning) {
-        _HandleEvents();
+        ApplicationZuma_HandleEvents();
 
         app.frameStart = HQC_GetTicks();
-        _Update();
-        _Draw();
-        app.frameTime  = HQC_GetTicks() - app.frameStart;
+
+        ApplicationZuma_Update();
+
+        app.frameTime = HQC_GetTicks() - app.frameStart;
 
         if (app.frameTime < FRAME_DELAY)
             HQC_Delay(FRAME_DELAY - app.frameTime);
     }
-
-    HQC_Cleanup();
 
     // LevelMgr_Free();
     // Engine_Destroy();

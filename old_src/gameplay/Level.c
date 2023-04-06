@@ -49,7 +49,7 @@ static void LevelParser_ParseGraphics(
     }
 
 }
-
+    
 
 static void LevelParser_ParseTreasurePoints(
     void *data, const char *element, const char **attribute

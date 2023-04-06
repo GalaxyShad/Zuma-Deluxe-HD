@@ -7,7 +7,6 @@ project(
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-
 find_library (isBassFound bass NO_CACHE PATHS ${PROJECT_SOURCE_DIR}/lib/bass/c/x64)
 if (${isBassFound} STREQUAL isBassFound-NOTFOUND)
     message(STATUS "Downloading bass...")

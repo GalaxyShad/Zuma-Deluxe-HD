@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "UsefulTypes.h"
+
 #define STR_ERR_BUFFER_SIZE 128
 #define STR_PATH_BUFFER_SIZE 48
 
@@ -60,6 +62,7 @@ struct {
 
     HMUSIC 			music;
 	unsigned int 	soundsLen;
+	
 	HSAMPLE* 		sounds;
 	unsigned int 	soundsSfxLen;
 	HSTREAM*		soundsSfx;
