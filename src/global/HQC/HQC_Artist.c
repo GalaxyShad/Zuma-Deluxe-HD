@@ -36,6 +36,21 @@ void HQC_CreateWindow(const char* caption, int width, int height) {
 }
 
 
+v2i_t   HQC_Input_MouseGetPosition() {
+    // int wWidth, wHeight;
+    // int _mx, _my;
+
+    v2i_t pos;
+
+    SDL_GetMouseState(&pos.x, &pos.y);
+    // SDL_GetWindowSize(graphics.window, &wWidth, &wHeight);
+    // _mx /= wWidth / WINDOW_WIDTH;
+    // _my /= wHeight / WINDOW_HEIGHT;
+
+    return pos;
+}
+
+
 bool HQC_Window_PollEvent(HQC_Event* event) {
     SDL_Event sdlEvent;
     bool res = SDL_PollEvent(&sdlEvent);
@@ -47,6 +62,18 @@ bool HQC_Window_PollEvent(HQC_Event* event) {
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
+
+static float _drawAngle = 0;
+
+void HQC_Artist_DrawSetAngle(float angle) {
+    _drawAngle = angle;
+}
+
+
+void HQC_Artist_DrawSetAngleDegrees(float angleInDegrees) {
+    HQC_Artist_DrawSetAngle(HQC_DegreesToRadian(angleInDegrees));
+}
+
 
 HQC_Texture HQC_Artist_LoadTexture(const char* texfile) {
     SDL_Surface* loadedSurface = IMG_Load(texfile);
@@ -107,7 +134,16 @@ void HQC_Artist_DrawTextureRect(HQC_Texture texture, float x, float y, irect_t r
         rect.width, rect.height
     };
 
-    SDL_RenderCopyF(graphics.render, sdlTexture, sdlRect, &posRect);
+    SDL_RenderCopyExF(
+        graphics.render, 
+        sdlTexture, 
+        sdlRect, 
+        &posRect, 
+        HQC_RadianToDegrees(_drawAngle),
+        NULL,
+        SDL_FLIP_NONE
+    );
+    // SDL_RenderCopyF(graphics.render, sdlTexture, sdlRect, &posRect);
 }
 
 

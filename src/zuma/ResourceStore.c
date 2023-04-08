@@ -1,6 +1,7 @@
 #include "ResourceStore.h"
 
-
+#define private static
+#define public
 
 
 static const char* _TEXTURE_FILES[] = {
@@ -89,19 +90,24 @@ static const char* _MUSIC_FILE = "zuma.mo3";
 //////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-static HQC_VECTOR(HQC_Texture) _textureList = NULL;
-static HQC_VECTOR(HQC_Sound)   _soundList   = NULL;
-static HQC_VECTOR(HQC_Font)    _fontList    = NULL;
-static HQC_Music               _music       = NULL;
+private HQC_VECTOR(HQC_Texture)      _textureList    = NULL;
+
+private HQC_VECTOR(HQC_Sprite)       _spriteList     = NULL;
+private HQC_VECTOR(HQC_Animation)    _animationList  = NULL;
+
+private HQC_VECTOR(HQC_Sound)        _soundList      = NULL;
+private HQC_VECTOR(HQC_Font)         _fontList       = NULL;
+private HQC_Music                    _music          = NULL;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-void _LoadTextures() {
+private void _LoadTextures() {
     size_t count = sizeof(_TEXTURE_FILES) / sizeof(_TEXTURE_FILES[0]);
 
     HQC_Log("Size %d", sizeof(HQC_Texture));
-    // HQC_Log("%d", sizeof(HQC_Texture));
+    
     _textureList = HQC_Container_CreateVector(sizeof(HQC_Texture));
 
     for (int i = 0; i < count; i++) {
@@ -114,7 +120,55 @@ void _LoadTextures() {
 }
 
 
-void _LoadSounds() {
+private void _MakeSprites() {
+    _spriteList = HQC_Container_CreateVector(sizeof(HQC_Sprite));
+
+    HQC_Texture texFrog = Store_GetTextureByID(TEX_FROG);
+
+    HQC_Sprite sprFrog = HQC_Sprite_Create(
+        texFrog, 0, 0, 162, 162);
+    HQC_Sprite sprFrogPlate = HQC_Sprite_Create(
+        texFrog, 162, 162, 162, 162);
+    HQC_Sprite sprFrogTongue = HQC_Sprite_Create(
+        texFrog, 162, 0, 162, 162);
+
+    HQC_Container_VectorAdd(_spriteList, &sprFrog);
+    HQC_Container_VectorAdd(_spriteList, &sprFrogPlate);
+    HQC_Container_VectorAdd(_spriteList, &sprFrogTongue);
+}
+
+
+private void _MakeAnimations() {
+    _animationList = HQC_Container_CreateVector(sizeof(HQC_Animation));
+    
+    HQC_Texture texObjects = Store_GetTextureByID(TEX_GAME_OBJECTS);
+
+    irect_t rectBall = { 0, 0, 48, 48 };
+    for (int c = 0; c < 7; c++) {
+        HQC_Animation animBall = HQC_Animation_Create();
+
+        for (int i = 0; i < 50; i++) {
+            HQC_Sprite sprFrameBall = HQC_Sprite_Create(
+                texObjects,
+                rectBall.x, rectBall.y, rectBall.width, rectBall.height
+            );
+
+            HQC_Animation_AddFrame(animBall, sprFrameBall);
+
+            rectBall.y += rectBall.height;
+        }
+
+        HQC_Container_VectorAdd(_animationList, &animBall);
+
+        rectBall.x += rectBall.width;
+        rectBall.y = 0;
+    }
+
+
+}
+
+
+private void _LoadSounds() {
     // size_t count = sizeof(_SOUND_FILES) / sizeof(_SOUND_FILES[0]);
 
     // _soundList = HQC_Container_CreateVector(sizeof(HQC_Sound));
@@ -125,7 +179,7 @@ void _LoadSounds() {
 }
 
 
-void _LoadFonts() {
+private void _LoadFonts() {
     // size_t count = sizeof(_FONT_FILES) / sizeof(_FONT_FILES[0]);
 
     // _fontList = HQC_Container_CreateVector(sizeof(HQC_Font));
@@ -136,16 +190,28 @@ void _LoadFonts() {
 }
 
 
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-void Store_LoadAll() {
+public void Store_LoadAll() {
     _LoadTextures();
+    _MakeSprites();
+    _MakeAnimations();
     // _LoadSounds();
     // _LoadFonts();
 }
 
 
-HQC_Texture Store_GetTextureByID(int id) {
+public HQC_Texture Store_GetTextureByID(int id) {
     return *((HQC_Texture*)HQC_Container_VectorGet(_textureList, id));
+}
+
+public HQC_Sprite  Store_GetSpriteByID(int id) {
+    return *((HQC_Sprite*)HQC_Container_VectorGet(_spriteList, id));
+}
+
+public HQC_Animation  Store_GetAnimationByID(int id) {
+    return *((HQC_Animation*)HQC_Container_VectorGet(_animationList, id));
 }

@@ -4,10 +4,11 @@
 
 void Store_LoadAll();
 
-HQC_Texture Store_GetTextureByID(int id);
-HQC_Sprite  Store_GetSpriteByID(int id);
-HQC_Sound   Store_GetSoundByID(int id);
-HQC_Music   Store_GetMusicByID(int id);
+HQC_Texture     Store_GetTextureByID(int id);
+HQC_Sprite      Store_GetSpriteByID(int id);
+HQC_Animation   Store_GetAnimationByID(int id);
+HQC_Sound       Store_GetSoundByID(int id);
+HQC_Music       Store_GetMusicByID(int id);
 
 enum _TextureID {
 	TEX_FROG,
@@ -78,4 +79,8 @@ enum _FontID {
 	FONT_NATIVE_ALIEN_48,
 	FONT_NATIVE_ALIEN_EXT_16,
 	FONT_NATIVE_ALIEN_EXT_18,
+};
+
+enum _SpriteID {
+    SPR_FROG
 };

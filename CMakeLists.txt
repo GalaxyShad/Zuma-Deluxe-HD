@@ -56,6 +56,15 @@ FetchContent_Declare(
 set(SDL2IMAGE_SAMPLES OFF)
 FetchContent_MakeAvailable(sdl2_image)
 
+# message("Fetching SDL2_ttf")
+# FetchContent_Declare(
+#     SDL2_TTF
+#     GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
+#     GIT_TAG        52f81247c52ccd1161523081736c2ccb738078bd
+# )
+# FetchContent_MakeAvailable(SDL2_TTF)
+
+# 
 FILE(GLOB_RECURSE SOURCES RELATIVE ${PROJECT_SOURCE_DIR} "src/*.c")
 
 add_executable(
@@ -73,6 +82,7 @@ target_include_directories(
     "${expat_SOURCE_DIR}/expat/lib"
     "${sdl2_SOURCE_DIR}/include"
     "${sdl2_image_SOURCE_DIR}"
+    # "${SDL2_TTF_SOURCE_DIR}"
 )
 
 link_directories(
@@ -84,6 +94,8 @@ target_link_libraries(
     ZumaHD PRIVATE
     SDL2
     SDL2_Image
+    # SDL2_TTF
+
     ${isBassFound}
     ${isBassFxFound}
     
@@ -91,7 +103,7 @@ target_link_libraries(
 )
 
 # Copy DLLs needed for runtime on Windows
-if(WIN32)
+if (WIN32)
     if(BUILD_SHARED_LIBS)
         add_custom_command(TARGET ZumaHD POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different

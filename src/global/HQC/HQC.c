@@ -70,3 +70,12 @@ void HQC_Cleanup() {
     SDL_Quit();
     BASS_Free();
 }
+
+float HQC_RadianToDegrees(float radian) {
+    return radian * 57.2958f;
+}
+
+float HQC_DegreesToRadian(float degree) {
+    return degree * 0.0174533f;
+}
+

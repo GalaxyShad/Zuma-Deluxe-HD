@@ -45,6 +45,8 @@ HQC_Key HQC_Input_KeyboardGetKey();
 void        HQC_Delay(uint32_t ms);
 uint32_t    HQC_GetTicks();
 
+float HQC_RadianToDegrees(float radian);
+float HQC_DegreesToRadian(float degree);
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
@@ -69,7 +71,6 @@ const char*  HQC_StringConcat(const char* strA, const char* strB);
 // Artist
 typedef void* HQC_Texture;
 typedef void* HQC_Font;
-typedef void* HQC_Sprite;
 
 HQC_Texture HQC_Artist_LoadTexture(const char* texfile);
 
@@ -79,9 +80,11 @@ HQC_Font    HQC_Artist_MakeFontFromTexture();
 void HQC_Artist_FreeFont(HQC_Font font);
 void HQC_Artist_SetImageFont(HQC_Font font);
 
+void HQC_Artist_DrawSetAngle(float angle);
+void HQC_Artist_DrawSetAngleDegrees(float angleInDegrees);
+
 void HQC_Artist_DrawTexture(HQC_Texture texture, float x, float y);
 void HQC_Artist_DrawTextureRect(HQC_Texture texture, float x, float y, irect_t rect);
-void HQC_Artist_DrawSprite(HQC_Sprite sprite, float x, float y);
 void HQC_Artist_DrawLine(float x1, float y1, float x2, float y2);
 void HQC_Artist_DrawPoint(float x, float y);
 void HQC_Artist_SetColorHex(uint32_t color);
@@ -186,6 +189,34 @@ void HQC_File_ReadToBuffer(HQC_File file, void* buffer, size_t size, size_t coun
 void HQC_File_Seek(HQC_File file, long offset);
 void HQC_File_Close(HQC_File file);
 
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 
-#endif
+typedef void* HQC_Sprite;
+
+void HQC_Artist_DrawSprite(HQC_Sprite sprite, float x, float y);
+HQC_Sprite HQC_Sprite_Create(HQC_Texture tex, int rx, int ry, int rwidth, int rheight);
+void HQC_Artist_DrawSprite(HQC_Sprite hsprite, float x, float y);
+void HQC_Sprite_Free(HQC_Sprite hsprite);
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+typedef void* HQC_Animation;
+
+HQC_Animation HQC_Animation_Create();
+
+void    HQC_Animation_AddFrame(HQC_Animation anim, HQC_Sprite frame);
+void    HQC_Animation_SetFrame(HQC_Animation anim, int frame);
+
+void    HQC_Animation_Tick(HQC_Animation anim);
+void    HQC_Artist_DrawAnimation(HQC_Animation anim, float x, float y);
+
+void    HQC_Animation_SetSpeed(HQC_Animation anim, float spd);
+float   HQC_Animation_GetSpeed(HQC_Animation anim);
+
+void    HQC_Animation_Free(HQC_Animation anim);
+
+
+#endif // HQC_H
 

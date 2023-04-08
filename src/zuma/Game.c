@@ -1,9 +1,11 @@
 #include "Game.h"
 
 #include "Level.h"
+#include "Frog.h"
 #include "ResourceStore.h"
 
 struct {
+    HFrog  frog;
     HLevel level;
 } game;
 
@@ -27,11 +29,13 @@ void Game_Start() {
 
 
     HQC_Log("ss -> %p", Store_GetTextureByID(TEX_FROG));
+
+    game.frog = Frog_Create(1280 / 2, 720  / 2);
 }
 
 
 void Game_Update() {
-
+    Frog_Update(game.frog);
 }
 
 
@@ -39,9 +43,14 @@ void Game_Draw() {
     float cx = 1280 / 2;
     float cy = 720  / 2;
 
-    // Level_Draw(game.level, 1280 / 2, 720 / 2);
-    // HQC_Log("%p", Store_GetTextureByID(0));
+    Level_Draw(game.level, 1280 / 2, 720 / 2);       
 
-    irect_t rect = {0, 0, 64, 64};
-    HQC_Artist_DrawTexture(Store_GetTextureByID(TEX_FROG), cx, cy);
+    Frog_Draw(game.frog);
+
+    for (int i = 0; i < 7; i++) {
+        HQC_Animation_Tick(Store_GetAnimationByID(i));
+        HQC_Artist_DrawAnimation(Store_GetAnimationByID(i), 78 + 64*i, 78+ 64*i);
+    }
+    
+    // HQC_Artist_DrawAnimation(Store_GetAnimationByID(0), 78, 78);
 }
