@@ -17,7 +17,7 @@ Thanks to [hclxing](https://hclxing.wordpress.com/2017/06/27/reverse-engineering
 
 # Build via CMake
 ```
-CMake ../code -G <your generator>
+CMake -G <your generator>
 ```
 
 # Build via console
@@ -29,4 +29,4 @@ CMake ../code -G <your generator>
 Source code is under MIT License, but all assets (in content folder) belong to [PopCap and EA games](https://www.ea.com/ea-studios/popcap)
 
 # 10.04.2023 Status
-Currently project framework is under reconstruction, check "framework rework" branch
+Currently project framework is under reconstruction, check ["api-rework" branch](https://github.com/GalaxyShad/Zuma-Deluxe-HD/tree/api-rework).
