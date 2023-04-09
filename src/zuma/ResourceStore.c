@@ -381,30 +381,39 @@ private void _MakeSprites() {
     HQC_Container_VectorAdd(_spriteList, &menuGauntBtnSunGodHover);
     HQC_Container_VectorAdd(_spriteList, &menuGauntBtnSunGodPressed);
 
-
     //////////////////////////////////////////////////////////////
+
+    HQC_Log("[ResourceStore] Common sprite mappings count: %d", HQC_Container_VectorCount(_spriteList));
 }
 
+private HQC_Animation _MakeAnimationFromStrip(HQC_Texture tex, int framesCount, irect_t frameRect) {
+    HQC_Animation anim = HQC_Animation_Create();
+
+    for (int i = 0; i < framesCount; i++) {
+        HQC_Sprite frame = HQC_Sprite_Create(
+            tex, frameRect.x, frameRect.y, frameRect.width, frameRect.height);
+
+        HQC_Animation_AddFrame(anim, frame);
+
+        frameRect.y += frameRect.height;
+    }
+
+    return anim;
+}
 
 private void _MakeAnimations() {
     _animationList = HQC_Container_CreateVector(sizeof(HQC_Animation));
     
     HQC_Texture texObjects = Store_GetTextureByID(TEX_GAME_OBJECTS);
 
+    ////////////////////////////////////////////////////////////////////////////
+    //    Balls
+    ////////////////////////////////////////////////////////////////////////////
+
     irect_t rectBall = { 0, 0, 48, 48 };
     for (int c = 0; c < 7; c++) {
-        HQC_Animation animBall = HQC_Animation_Create();
-
-        for (int i = 0; i < 50; i++) {
-            HQC_Sprite sprFrameBall = HQC_Sprite_Create(
-                texObjects,
-                rectBall.x, rectBall.y, rectBall.width, rectBall.height
-            );
-
-            HQC_Animation_AddFrame(animBall, sprFrameBall);
-
-            rectBall.y += rectBall.height;
-        }
+        HQC_Animation animBall = 
+            _MakeAnimationFromStrip(texObjects, (c == 0) ? 47 : 50, rectBall);
 
         HQC_Container_VectorAdd(_animationList, &animBall);
 
@@ -412,6 +421,54 @@ private void _MakeAnimations() {
         rectBall.y = 0;
     }
 
+    ////////////////////////////////////////////////////////////////////////////
+    //    Coin
+    ////////////////////////////////////////////////////////////////////////////
+    
+    irect_t rectCoin = { 340, 0, 54, 54 };
+    HQC_Animation animCoin = 
+        _MakeAnimationFromStrip(texObjects, 30, rectCoin);
+    HQC_Container_VectorAdd(_animationList, &animCoin);
+
+    ////////////////////////////////////////////////////////////////////////////
+    //    Ball Destroy Effect
+    ////////////////////////////////////////////////////////////////////////////
+    
+    irect_t rectBallDestroy = { 395, 0, 105, 120 };
+    HQC_Animation animBallDestroy = 
+        _MakeAnimationFromStrip(texObjects, 13, rectBallDestroy);
+    HQC_Container_VectorAdd(_animationList, &animBallDestroy);
+
+    ////////////////////////////////////////////////////////////////////////////
+    //    Explosion
+    ////////////////////////////////////////////////////////////////////////////
+    
+    irect_t rectExplosion = { 528, 0, 100, 130 };
+    HQC_Animation animExplosion = 
+        _MakeAnimationFromStrip(texObjects, 17, rectExplosion);
+    HQC_Container_VectorAdd(_animationList, &animExplosion);
+
+    ////////////////////////////////////////////////////////////////////////////
+    //    Skull
+    ////////////////////////////////////////////////////////////////////////////
+    
+    irect_t rectSkull = { 629, 132, 132, 132 };
+    HQC_Animation animSkull = 
+        _MakeAnimationFromStrip(texObjects, 12, rectSkull);
+    HQC_Container_VectorAdd(_animationList, &animSkull);
+
+    ////////////////////////////////////////////////////////////////////////////
+    //    Sparkle
+    ////////////////////////////////////////////////////////////////////////////
+    
+    irect_t rectSparkle = { 732, 2253, 30, 30 };
+    HQC_Animation animSparkle = 
+        _MakeAnimationFromStrip(texObjects, 14, rectSparkle);
+    HQC_Container_VectorAdd(_animationList, &animSparkle);
+
+
+
+    HQC_Log("[ResourceStore] Common animations count: %d", HQC_Container_VectorCount(_animationList));
 
 }
 

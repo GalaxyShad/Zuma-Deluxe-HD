@@ -47,9 +47,9 @@ void Game_Draw() {
 
     Frog_Draw(game.frog);
 
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 12; i++) {
         HQC_Animation_Tick(Store_GetAnimationByID(i));
-        HQC_Artist_DrawAnimation(Store_GetAnimationByID(i), 78 + 64*i, 78+ 64*i);
+        HQC_Artist_DrawAnimation(Store_GetAnimationByID(i), 78 + 64*i, 78);
     }
 
     HQC_Artist_DrawTextShadow(Store_GetFontByID(FONT_CANCUN_12), 
