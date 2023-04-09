@@ -71,20 +71,6 @@ static const char* _SOUND_FILES[] = {
     "warning1.ogg",
 };
 
-static const char* _FONT_FILES[] = {
-    "arial12bold",
-    "cancun10",
-    "cancun12",
-    "cancun13",
-    "cancun8",
-    //"cancunfat8",
-    "cancunfloat14",
-    //"cancunoutline10",
-    "nativealien48",
-    "nativealienextended16",
-    "nativealienextended18",
-};
-
 static const char* _MUSIC_FILE = "zuma.mo3";
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -180,13 +166,21 @@ private void _LoadSounds() {
 
 
 private void _LoadFonts() {
-    // size_t count = sizeof(_FONT_FILES) / sizeof(_FONT_FILES[0]);
+    _fontList = HQC_Container_CreateVector(sizeof(HQC_Font));
+    
+    HQC_Font cancun10 = HQC_Font_LoadTrueType("fonts/ttf/Cancun Regular.ttf", 20);
+    HQC_Font cancun12 = HQC_Font_LoadTrueType("fonts/ttf/Cancun Regular.ttf", 24);
+    HQC_Font cancun13 = HQC_Font_LoadTrueType("fonts/ttf/Cancun Regular.ttf", 26);
+    HQC_Font cancun8  = HQC_Font_LoadTrueType("fonts/ttf/Cancun Regular.ttf", 16);
+    HQC_Font nativea  = HQC_Font_LoadTrueType("fonts/ttf/native.ttf", 96);
 
-    // _fontList = HQC_Container_CreateVector(sizeof(HQC_Font));
-    // for (int i = 0; i < count; i++)
-    //     HQC_Container_VectorAdd(_fontList, HQC_Artist_LoadFont(_FONT_FILES[i]));
+    HQC_Container_VectorAdd(_fontList, &cancun10);
+    HQC_Container_VectorAdd(_fontList, &cancun12);
+    HQC_Container_VectorAdd(_fontList, &cancun13);
+    HQC_Container_VectorAdd(_fontList, &cancun8);
+    HQC_Container_VectorAdd(_fontList, &nativea);
 
-    // HQC_Log("[ResourceStore] Common fonts count: %d", HQC_Container_VectorCount(_fontList));
+    HQC_Log("[ResourceStore] Common fonts count: %d", HQC_Container_VectorCount(_fontList));
 }
 
 
@@ -200,7 +194,7 @@ public void Store_LoadAll() {
     _MakeSprites();
     _MakeAnimations();
     // _LoadSounds();
-    // _LoadFonts();
+    _LoadFonts();
 }
 
 
@@ -214,4 +208,8 @@ public HQC_Sprite  Store_GetSpriteByID(int id) {
 
 public HQC_Animation  Store_GetAnimationByID(int id) {
     return *((HQC_Animation*)HQC_Container_VectorGet(_animationList, id));
+}
+
+public HQC_Font Store_GetFontByID(int id) {
+    return *((HQC_Font*)HQC_Container_VectorGet(_fontList, id));
 }

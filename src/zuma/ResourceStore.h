@@ -9,6 +9,8 @@ HQC_Sprite      Store_GetSpriteByID(int id);
 HQC_Animation   Store_GetAnimationByID(int id);
 HQC_Sound       Store_GetSoundByID(int id);
 HQC_Music       Store_GetMusicByID(int id);
+HQC_Font        Store_GetFontByID(int id);
+
 
 enum _TextureID {
 	TEX_FROG,
@@ -70,17 +72,18 @@ enum _MusicID {
 };
 
 enum _FontID {
-	FONT_ARIAL_12,
+	// FONT_ARIAL_12,
 	FONT_CANCUN_10,
 	FONT_CANCUN_12,
 	FONT_CANCUN_13,
 	FONT_CANCUN_8,
-	FONT_CANCUN_FLOAT_14,
+	// FONT_CANCUN_FLOAT_14,
 	FONT_NATIVE_ALIEN_48,
-	FONT_NATIVE_ALIEN_EXT_16,
-	FONT_NATIVE_ALIEN_EXT_18,
+	// FONT_NATIVE_ALIEN_EXT_16,
+	// FONT_NATIVE_ALIEN_EXT_18,
 };
 
 enum _SpriteID {
     SPR_FROG
 };
+

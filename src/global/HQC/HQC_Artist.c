@@ -2,6 +2,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 
 static struct {
     SDL_Window*     window;
@@ -156,15 +157,42 @@ void HQC_Artist_DrawPoint(float x, float y) {
     SDL_RenderDrawPointF(graphics.render, x, y);
 }
 
+void HQC_Artist_SetColor(HQC_Color color) {
+    SDL_SetRenderDrawColor(
+        graphics.render, color.R, color.G, color.B, color.A
+    );
+}
+
+
+HQC_Color HQC_Artist_GetColor() {
+    HQC_Color color;
+    SDL_GetRenderDrawColor(graphics.render, &color.R, &color.G, &color.B, &color.A);
+    return color;
+}
+
 
 void HQC_Artist_SetColorHex(uint32_t color) {
-    SDL_SetRenderDrawColor(
-        graphics.render, 
-        (color & C_RED)         >> 16,
-        (color & C_GREEN)       >> 8,
-        (color & C_BLUE),
-        (~color & 0xFF000000)   >> 24
-    );
+    HQC_Color hqcColor;
+
+    hqcColor.R = (color  & C_RED     )  >> 16;
+    hqcColor.G = (color  & C_GREEN   )  >> 8;
+    hqcColor.B = (color  & C_BLUE    );
+    hqcColor.A = (~color & 0xFF000000)  >> 24;
+
+    HQC_Artist_SetColor(hqcColor);
+}
+
+
+uint32_t HQC_Artist_GetColorHex() {
+    HQC_Color hqcColor = HQC_Artist_GetColor();
+
+    uint32_t res = 
+        ((uint32_t)hqcColor.A << 24) | 
+        (hqcColor.R << 16) | 
+        (hqcColor.G << 8) | 
+        hqcColor.B; 
+
+    return res;
 }
 
 
@@ -178,3 +206,45 @@ void HQC_Artist_Display() {
 }
 
 
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+typedef struct Font {
+    TTF_Font* ttf;
+} Font;
+
+
+HQC_Font HQC_Font_LoadTrueType(const char* filepath, int size) {
+    Font* font = HQC_Memory_Allocate(sizeof(*font));
+
+    font->ttf = TTF_OpenFont(filepath, size);
+    if (!font->ttf)
+        HQC_RaiseErrorHeaderFormat(
+            "HQC_Font_LoadTrueType",
+            "Cannot load font %s with size %d",
+            filepath, size
+        );
+
+    
+
+    return font;
+}
+
+void HQC_Artist_DrawText(HQC_Font hfont, const char* text, float x, float y) {
+    Font* font = (Font*)hfont;
+    
+    if (font->ttf == NULL)
+        return;
+    
+    HQC_Color color = HQC_Artist_GetColor();
+    SDL_Color sdlColor = { color.R, color.G, color.B, color.A };
+
+    SDL_Surface* surface = TTF_RenderText_Solid(font->ttf, text, sdlColor);
+
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(graphics.render, surface);
+
+    HQC_Artist_DrawTexture(texture, x, y);
+
+    SDL_FreeSurface(surface);
+    SDL_DestroyTexture(texture);
+}

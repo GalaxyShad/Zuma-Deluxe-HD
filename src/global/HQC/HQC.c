@@ -4,18 +4,20 @@
 #include <SDL2/SDL_image.h>
 #include <bass.h>
 
+#include <SDL2/SDL_ttf.h>
+
 #define MUSIC_FREQUENCY 44100
 
 #define WINDOW_WIDTH 1280.0
 #define WINDOW_HEIGHT 720.0
 
 
-void        HQC_Delay(uint32_t ms) {
+void HQC_Delay(uint32_t ms) {
     SDL_Delay(ms);
 }
 
 
-uint32_t    HQC_GetTicks() {
+uint32_t HQC_GetTicks() {
     return SDL_GetTicks();
 }
 
@@ -44,6 +46,8 @@ static void _VideoInit() {
     if (!(IMG_Init(flags) & flags))
         HQC_RaiseErrorHeaderFormat(
             "SDL Image Error", "Initialization fail [%s]", IMG_GetError());
+
+    (TTF_Init() != 0) ?  _RaiseSDLError("SDL TTF Init Fail") : NULL;
 }
 
 

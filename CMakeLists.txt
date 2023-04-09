@@ -82,10 +82,12 @@ target_include_directories(
     "${expat_SOURCE_DIR}/expat/lib"
     "${sdl2_SOURCE_DIR}/include"
     "${sdl2_image_SOURCE_DIR}"
+    "D:/workspace/zuma-hd/code/lib/SDL2_ttf-2.20.0/x86_64-w64-mingw32/include"
     # "${SDL2_TTF_SOURCE_DIR}"
 )
 
 link_directories(
+    "D:/workspace/zuma-hd/code/lib/SDL2_ttf-2.20.0/x86_64-w64-mingw32/lib"
     ${PROJECT_SOURCE_DIR}/lib/bass/c
     ${PROJECT_SOURCE_DIR}/lib/bass-fx/C
 )
@@ -94,7 +96,9 @@ target_link_libraries(
     ZumaHD PRIVATE
     SDL2
     SDL2_Image
-    # SDL2_TTF
+
+    # "D:/workspace/zuma-hd/code/lib/SDL2_ttf-2.20.0/x86_64-w64-mingw32/lib/libSDL2_ttf.a"
+    "D:/workspace/zuma-hd/code/lib/SDL2_ttf-2.20.0/x86_64-w64-mingw32/SDL2_ttf.lib"
 
     ${isBassFound}
     ${isBassFxFound}

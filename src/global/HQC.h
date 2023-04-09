@@ -72,9 +72,11 @@ const char*  HQC_StringConcat(const char* strA, const char* strB);
 typedef void* HQC_Texture;
 typedef void* HQC_Font;
 
+typedef struct HQC_Color {
+    uint8_t R, G, B, A;
+} HQC_Color;
+
 HQC_Texture HQC_Artist_LoadTexture(const char* texfile);
-
-
 HQC_Font    HQC_Artist_MakeFontFromTexture();
 
 void HQC_Artist_FreeFont(HQC_Font font);
@@ -87,7 +89,13 @@ void HQC_Artist_DrawTexture(HQC_Texture texture, float x, float y);
 void HQC_Artist_DrawTextureRect(HQC_Texture texture, float x, float y, irect_t rect);
 void HQC_Artist_DrawLine(float x1, float y1, float x2, float y2);
 void HQC_Artist_DrawPoint(float x, float y);
+
+
+void HQC_Artist_SetColor(HQC_Color color);
+HQC_Color  HQC_Artist_GetColor();
+
 void HQC_Artist_SetColorHex(uint32_t color);
+uint32_t HQC_Artist_GetColorHex();
 
 #define C_WHITE     0xFFFFFF
 #define C_BLACK     0x000000
@@ -100,9 +108,12 @@ void HQC_Artist_SetColorHex(uint32_t color);
 #define C_MAGNETTA  0xFF00FF
 #define C_YELLOW    0xFFFF00
 
-void HQC_Artist_DrawText();
 void HQC_Artist_Clear();
 void HQC_Artist_Display();
+
+
+HQC_Font HQC_Font_LoadTrueType(const char* filepath, int size);
+void HQC_Artist_DrawText(HQC_Font hfont, const char* text, float x, float y);
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////

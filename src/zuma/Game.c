@@ -51,6 +51,19 @@ void Game_Draw() {
         HQC_Animation_Tick(Store_GetAnimationByID(i));
         HQC_Artist_DrawAnimation(Store_GetAnimationByID(i), 78 + 64*i, 78+ 64*i);
     }
+
+    HQC_Artist_DrawText(Store_GetFontByID(FONT_CANCUN_12), 
+        "Hello", 256, 256);
+    
+    HQC_Artist_SetColorHex(C_CYAN);
+    HQC_Artist_DrawText(Store_GetFontByID(FONT_NATIVE_ALIEN_48), 
+        "Myau Its Working?", 256, 320);
+
+    HQC_Artist_SetColorHex(C_GREEN);
+    HQC_Artist_DrawText(Store_GetFontByID(FONT_CANCUN_8), 
+        "Myau Its Working?", 256, 400);
+
+    HQC_Artist_SetColorHex(C_WHITE);
     
     // HQC_Artist_DrawAnimation(Store_GetAnimationByID(0), 78, 78);
 }
