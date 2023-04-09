@@ -157,6 +157,7 @@ void HQC_Artist_DrawPoint(float x, float y) {
     SDL_RenderDrawPointF(graphics.render, x, y);
 }
 
+
 void HQC_Artist_SetColor(HQC_Color color) {
     SDL_SetRenderDrawColor(
         graphics.render, color.R, color.G, color.B, color.A
@@ -230,6 +231,7 @@ HQC_Font HQC_Font_LoadTrueType(const char* filepath, int size) {
     return font;
 }
 
+
 void HQC_Artist_DrawText(HQC_Font hfont, const char* text, float x, float y) {
     Font* font = (Font*)hfont;
     
@@ -247,4 +249,15 @@ void HQC_Artist_DrawText(HQC_Font hfont, const char* text, float x, float y) {
 
     SDL_FreeSurface(surface);
     SDL_DestroyTexture(texture);
+}
+
+
+void HQC_Artist_DrawTextShadow(HQC_Font hfont, const char* text, float x, float y) {
+    uint32_t pcolor = HQC_Artist_GetColorHex();
+
+    HQC_Artist_SetColorHex(C_BLACK);
+    HQC_Artist_DrawText(hfont, text, x+2, y+2);
+    HQC_Artist_SetColorHex(pcolor);
+
+    HQC_Artist_DrawText(hfont, text, x, y);
 }

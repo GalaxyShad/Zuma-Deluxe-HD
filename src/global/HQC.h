@@ -113,7 +113,9 @@ void HQC_Artist_Display();
 
 
 HQC_Font HQC_Font_LoadTrueType(const char* filepath, int size);
+
 void HQC_Artist_DrawText(HQC_Font hfont, const char* text, float x, float y);
+void HQC_Artist_DrawTextShadow(HQC_Font hfont, const char* text, float x, float y);
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
