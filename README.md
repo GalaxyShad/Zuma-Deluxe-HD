@@ -16,3 +16,5 @@ Thanks to [hclxing](https://hclxing.wordpress.com/2017/06/27/reverse-engineering
 ```
 <your compiler> src\*.c -I include\ -o bin\Zuma.exe -lSDL2 -lSDL2main -lSDL2_Image -lBass -lBass_Fx -llibexpat -mwindows
 ```
+
+
