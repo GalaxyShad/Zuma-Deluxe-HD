@@ -92,8 +92,6 @@ private HQC_Music                    _music          = NULL;
 private void _LoadTextures() {
     size_t count = sizeof(_TEXTURE_FILES) / sizeof(_TEXTURE_FILES[0]);
 
-    HQC_Log("Size %d", sizeof(HQC_Texture));
-    
     _textureList = HQC_Container_CreateVector(sizeof(HQC_Texture));
 
     for (int i = 0; i < count; i++) {
@@ -386,6 +384,7 @@ private void _MakeSprites() {
     HQC_Log("[ResourceStore] Common sprite mappings count: %d", HQC_Container_VectorCount(_spriteList));
 }
 
+
 private HQC_Animation _MakeAnimationFromStrip(HQC_Texture tex, int framesCount, irect_t frameRect) {
     HQC_Animation anim = HQC_Animation_Create();
 
@@ -400,6 +399,7 @@ private HQC_Animation _MakeAnimationFromStrip(HQC_Texture tex, int framesCount, 
 
     return anim;
 }
+
 
 private void _MakeAnimations() {
     _animationList = HQC_Container_CreateVector(sizeof(HQC_Animation));
@@ -474,16 +474,19 @@ private void _MakeAnimations() {
 
 
 private void _LoadSounds() {
-    // size_t count = sizeof(_SOUND_FILES) / sizeof(_SOUND_FILES[0]);
+    size_t count = sizeof(_SOUND_FILES) / sizeof(_SOUND_FILES[0]);
 
-    // _soundList = HQC_Container_CreateVector(sizeof(HQC_Sound));
-    // for (int i = 0; i < count; i++)
-    //     HQC_Container_VectorAdd(_soundList, HQC_DJ_LoadSound(_SOUND_FILES[i]));
+    _soundList = HQC_Container_CreateVector(sizeof(HQC_Sound));
+    for (int i = 0; i < count; i++) {
+        const char* path = HQC_StringConcat("sounds/", _SOUND_FILES[i]);
+        HQC_Sound sound = HQC_DJ_LoadSound(path);
+        HQC_Container_VectorAdd(_soundList, &sound);
+    }
 
-    // HQC_Log("[ResourceStore] Common sounds count: %d", HQC_Container_VectorCount(_soundList));
+    HQC_Log("[ResourceStore] Common sounds count: %d", HQC_Container_VectorCount(_soundList));
 }
 
-
+ 
 private void _LoadFonts() {
     _fontList = HQC_Container_CreateVector(sizeof(HQC_Font));
     
@@ -502,9 +505,6 @@ private void _LoadFonts() {
     HQC_Log("[ResourceStore] Common fonts count: %d", HQC_Container_VectorCount(_fontList));
 }
 
-
-
-
 //////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -512,23 +512,30 @@ public void Store_LoadAll() {
     _LoadTextures();
     _MakeSprites();
     _MakeAnimations();
-    // _LoadSounds();
+    _LoadSounds();
     _LoadFonts();
 }
 
-
+ 
 public HQC_Texture Store_GetTextureByID(int id) {
     return *((HQC_Texture*)HQC_Container_VectorGet(_textureList, id));
 }
+
 
 public HQC_Sprite  Store_GetSpriteByID(int id) {
     return *((HQC_Sprite*)HQC_Container_VectorGet(_spriteList, id));
 }
 
+
 public HQC_Animation  Store_GetAnimationByID(int id) {
     return *((HQC_Animation*)HQC_Container_VectorGet(_animationList, id));
 }
 
+
 public HQC_Font Store_GetFontByID(int id) {
     return *((HQC_Font*)HQC_Container_VectorGet(_fontList, id));
+}
+
+public HQC_Sound Store_GetSoundByID(int id) {
+    return *((HQC_Sound*)HQC_Container_VectorGet(_soundList, id));
 }

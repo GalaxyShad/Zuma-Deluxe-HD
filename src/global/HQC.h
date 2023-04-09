@@ -137,7 +137,9 @@ typedef void* HQC_Sound;
 typedef void* HQC_Music;
 
 HQC_Music HQC_DJ_LoadMusic();
-HQC_Sound HQC_DJ_LoadSound();
+HQC_Sound HQC_DJ_LoadSound(const char* filepath);
+
+void HQC_DJ_SetSoundPith(float pitch);
 
 void HQC_DJ_PlayMusic(HQC_Music music);
 void HQC_DJ_StopMusic(HQC_Music music);

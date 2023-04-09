@@ -28,6 +28,8 @@ void Game_Start() {
     game.level = Level_Load(&levelSettings, levelGx);
 
     game.frog = Frog_Create(levelGx->frogPos.x, levelGx->frogPos.y);
+
+    HQC_DJ_PlaySound(Store_GetSoundByID(SND_CHANT1));
 }
 
 
