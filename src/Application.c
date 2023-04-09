@@ -113,7 +113,7 @@ int ApplicationZuma_Start(void) {
     );
 
     _LoadResources();
-    _ShowStartupImage();
+    // _ShowStartupImage();
 
     _Init();
 

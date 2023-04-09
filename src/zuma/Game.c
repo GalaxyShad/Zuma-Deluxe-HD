@@ -14,23 +14,20 @@ void Game_Start() {
     LevelSettings levelSettings;
     levelSettings.id = "some settings";
 
-    LevelGraphics levelGx;
-    levelGx.dispName            = "Nice lol";
-    levelGx.coinsPosList        = HQC_Container_CreateVector(sizeof(v2f_t));
-    levelGx.frogPos.x           = 32;
-    levelGx.frogPos.y           = 32;
-    levelGx.id                  = "id nice lol";
-    levelGx.textureFile         = "levels/spiral/spiral.jpg";
-    levelGx.textureTopLayerFile = NULL;
-    levelGx.curveAFile          = "levels/spiral/spiral.dat";
-    levelGx.curveBFile          = NULL;
+    LevelGraphics* levelGx = HQC_Memory_Allocate(sizeof(*levelGx));
+    levelGx->dispName            = "When Spirals Attack";
+    levelGx->coinsPosList        = HQC_Container_CreateVector(sizeof(v2f_t));
+    levelGx->frogPos.x           = (242.0f + 104) * 1.5f;
+    levelGx->frogPos.y           = 248.0f * 1.5f;
+    levelGx->id                  = "tiltspiral";
+    levelGx->textureFile         = "levels/tiltspiral/tiltspiral.jpg";
+    levelGx->textureTopLayerFile = NULL;
+    levelGx->curveAFile          = "levels/tiltspiral/tiltspiral.dat";
+    levelGx->curveBFile          = NULL;
 
-    game.level = Level_Load(&levelSettings, &levelGx);
+    game.level = Level_Load(&levelSettings, levelGx);
 
-
-    HQC_Log("ss -> %p", Store_GetTextureByID(TEX_FROG));
-
-    game.frog = Frog_Create(1280 / 2, 720  / 2);
+    game.frog = Frog_Create(levelGx->frogPos.x, levelGx->frogPos.y);
 }
 
 
@@ -47,7 +44,7 @@ void Game_Draw() {
 
     Frog_Draw(game.frog);
 
-    for (int i = 0; i < 12; i++) {
+    for (int i = 0; i < 11; i++) {
         HQC_Animation_Tick(Store_GetAnimationByID(i));
         HQC_Artist_DrawAnimation(Store_GetAnimationByID(i), 78 + 64*i, 78);
     }
@@ -55,17 +52,19 @@ void Game_Draw() {
     HQC_Artist_DrawTextShadow(Store_GetFontByID(FONT_CANCUN_12), 
         "Hello", 256, 256);
     
-    HQC_Artist_SetColorHex(C_CYAN);
+    HQC_Artist_SetColorHex(0xffb347);
     HQC_Artist_DrawTextShadow(Store_GetFontByID(FONT_NATIVE_ALIEN_48), 
-        "Myau Its Working?", 256, 320);
+        Level_GetDisplayName(game.level), cx, 600);
 
     HQC_Artist_SetColorHex(C_GREEN);
-    HQC_Artist_DrawText(Store_GetFontByID(FONT_CANCUN_8), 
+    HQC_Artist_DrawTextShadow(Store_GetFontByID(FONT_CANCUN_8), 
         "Myau Its Working?", 256, 400);
 
     HQC_Artist_SetColorHex(C_WHITE);
 
     HQC_Artist_DrawSprite(Store_GetSpriteByID(SPR_MENU_HEAD), 500, 500);
+
+    HQC_Artist_DrawSprite(Store_GetSpriteByID(SPR_GAME_HUD_BORDER), cx, cy);
     
     // HQC_Artist_DrawAnimation(Store_GetAnimationByID(0), 78, 78);
 }

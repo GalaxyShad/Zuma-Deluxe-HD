@@ -411,7 +411,7 @@ private void _MakeAnimations() {
     ////////////////////////////////////////////////////////////////////////////
 
     irect_t rectBall = { 0, 0, 48, 48 };
-    for (int c = 0; c < 7; c++) {
+    for (int c = 0; c < 6; c++) {
         HQC_Animation animBall = 
             _MakeAnimationFromStrip(texObjects, (c == 0) ? 47 : 50, rectBall);
 

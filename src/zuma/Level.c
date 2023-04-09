@@ -132,3 +132,9 @@ void Level_Draw(HLevel hlevel, float x, float y) {
     }
     HQC_Artist_SetColorHex(C_WHITE);
 }
+
+const char* Level_GetDisplayName(HLevel hlevel) {
+    Level* level = (Level*)hlevel;
+
+    return level->graphics->dispName;
+}

@@ -36,4 +36,5 @@ typedef struct LevelSettings {
 typedef void* HLevel;
 
 HLevel Level_Load(LevelSettings* settings, LevelGraphics* graphics);
+const char* Level_GetDisplayName(HLevel hlevel);
 void Level_Draw(HLevel hlevel, float x, float y);
