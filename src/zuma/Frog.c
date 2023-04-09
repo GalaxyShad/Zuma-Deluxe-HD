@@ -27,9 +27,9 @@ HFrog Frog_Create(float x, float y) {
     Frog* frog = HQC_Memory_Allocate(sizeof(*frog));
 
     frog->angle         = 0.f;
-    frog->spr           = Store_GetSpriteByID(0);
-    frog->sprTongue     = Store_GetSpriteByID(2);
-    frog->sprPlate      = Store_GetSpriteByID(1);
+    frog->spr           = Store_GetSpriteByID(SPR_FROG);
+    frog->sprTongue     = Store_GetSpriteByID(SPR_FROG_TONGUE);
+    frog->sprPlate      = Store_GetSpriteByID(SPR_FROG_PLATE);
 
     frog->pos.x         = x;
     frog->pos.y         = y;

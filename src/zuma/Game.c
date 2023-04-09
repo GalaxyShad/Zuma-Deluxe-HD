@@ -64,6 +64,8 @@ void Game_Draw() {
         "Myau Its Working?", 256, 400);
 
     HQC_Artist_SetColorHex(C_WHITE);
+
+    HQC_Artist_DrawSprite(Store_GetSpriteByID(SPR_MENU_HEAD), 500, 500);
     
     // HQC_Artist_DrawAnimation(Store_GetAnimationByID(0), 78, 78);
 }
