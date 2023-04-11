@@ -11,12 +11,15 @@ struct {
     HButton btn;
 } game;
 
+static void _GoBack() {
+    Scene_Change(SC_TEST);
+}
 
 static void _Game_Start() {
     LevelSettings levelSettings;
     levelSettings.id = "some settings";
 
-    LevelGraphics* levelGx = HQC_Memory_Allocate(sizeof(*levelGx));
+    LevelGraphics* levelGx       = HQC_Memory_Allocate(sizeof(*levelGx));
     levelGx->dispName            = "When Spirals Attack";
     levelGx->coinsPosList        = HQC_Container_CreateVector(sizeof(v2f_t));
     levelGx->frogPos.x           = (242.0f + 104) * 1.5f;
@@ -25,13 +28,16 @@ static void _Game_Start() {
     levelGx->textureFile         = "levels/tiltspiral/tiltspiral.jpg";
     levelGx->textureTopLayerFile = NULL;
     levelGx->curveAFile          = "levels/tiltspiral/tiltspiral.dat";
-    levelGx->curveBFile          = NULL;
+    levelGx->curveBFile          = NULL;                                        
 
     game.level = Level_Load(&levelSettings, levelGx);
 
     game.frog = Frog_Create(levelGx->frogPos.x, levelGx->frogPos.y);
 
     game.btn = Button_Create(312, 312);
+    Button_OnClick(game.btn, _GoBack);
+
+    HQC_Animation_SetSpeed(Store_GetAnimationByID(ANIM_SKULL), 0);
 
     HQC_DJ_SetSoundPith(2);
     HQC_DJ_PlaySound(Store_GetSoundByID(SND_CHANT1));

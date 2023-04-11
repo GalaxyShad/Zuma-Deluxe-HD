@@ -143,11 +143,16 @@ void Button_Update(HButton hbutton) {
                 btn->state = BTN_PRESSED;
                 btn->sndPressed ? HQC_DJ_PlaySound(btn->sndPressed) : NULL;
             } else {
-                btn->onClick ? btn->onClick() : NULL;
+                // btn->onClick ? btn->onClick() : NULL;
             }
         } else {
+            if (btn->state == BTN_PRESSED) {
+                btn->onClick ? btn->onClick() : NULL;
+            }
+
             if (btn->state != BTN_HOVERED)
                 btn->sndHover ? HQC_DJ_PlaySound(btn->sndHover) : NULL;
+
 
             btn->state = BTN_HOVERED;
         }

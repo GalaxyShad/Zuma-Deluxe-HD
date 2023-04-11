@@ -221,9 +221,9 @@ private void _MakeSprites() {
     HQC_Sprite menuMainBtnGauntlet = HQC_Sprite_Create(texMenu,  
         2648+270*0, 776, 270, 125);
     HQC_Sprite menuMainBtnGauntletHover = HQC_Sprite_Create(texMenu,  
-        2648+270*1, 647, 299, 129);
+        2648+270*1, 776, 270, 125);
     HQC_Sprite menuMainBtnGauntletPressed = HQC_Sprite_Create(texMenu,  
-        2648+270*2, 647, 299, 129);
+        2648+270*2, 776, 270, 125);
 
     HQC_Sprite menuMainBtnAdventure = HQC_Sprite_Create(texMenu,  
         2724+245*0, 901, 245, 138);
