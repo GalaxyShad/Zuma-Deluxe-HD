@@ -15,6 +15,7 @@ void Button_SetSpritePressed(HButton hbutton, HQC_Sprite sprPressed);
 void Button_SetSoundHover(HButton hbutton, HQC_Sound sndHover);
 void Button_SetSoundPressed(HButton hbutton, HQC_Sound sndPressed);
 
+void Button_SetScale(HButton hbutton, int scale);
 void Button_SetRectDivider(HButton hbutton, int divWidth);
 void Button_SetText(HButton hbutton, const char* text);
 

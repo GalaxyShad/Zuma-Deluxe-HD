@@ -39,7 +39,7 @@ void HQC_CreateWindow(const char* caption, int width, int height);
 
 // System
 v2i_t   HQC_Input_MouseGetPosition();
-bool    HQC_Input_MouseButtonIsClicked();
+bool    HQC_Input_MouseLeftPressed();
 HQC_Key HQC_Input_KeyboardGetKey();
 
 void        HQC_Delay(uint32_t ms);
@@ -86,6 +86,7 @@ void HQC_Artist_DrawSetAngle(float angle);
 void HQC_Artist_DrawSetAngleDegrees(float angleInDegrees);
 
 void HQC_Artist_DrawTexture(HQC_Texture texture, float x, float y);
+void HQC_Artist_DrawTextureRectLeft(HQC_Texture texture, float x, float y, irect_t rect);
 void HQC_Artist_DrawTextureRect(HQC_Texture texture, float x, float y, irect_t rect);
 void HQC_Artist_DrawLine(float x1, float y1, float x2, float y2);
 void HQC_Artist_DrawPoint(float x, float y);
@@ -211,6 +212,8 @@ typedef void* HQC_Sprite;
 
 void HQC_Artist_DrawSprite(HQC_Sprite sprite, float x, float y);
 HQC_Sprite HQC_Sprite_Create(HQC_Texture tex, int rx, int ry, int rwidth, int rheight);
+irect_t HQC_Sprite_GetRect(HQC_Sprite hsprite);
+HQC_Texture HQC_Sprite_GetTexture(HQC_Sprite hsprite);
 void HQC_Artist_DrawSprite(HQC_Sprite hsprite, float x, float y);
 void HQC_Sprite_Free(HQC_Sprite hsprite);
 

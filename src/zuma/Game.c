@@ -3,10 +3,12 @@
 #include "Level.h"
 #include "Frog.h"
 #include "ResourceStore.h"
+#include "Menu.h"
 
 struct {
     HFrog  frog;
     HLevel level;
+    HButton btn;
 } game;
 
 
@@ -29,12 +31,16 @@ void Game_Start() {
 
     game.frog = Frog_Create(levelGx->frogPos.x, levelGx->frogPos.y);
 
+    game.btn = Button_Create(312, 312);
+
+    HQC_DJ_SetSoundPith(2);
     HQC_DJ_PlaySound(Store_GetSoundByID(SND_CHANT1));
 }
 
 
 void Game_Update() {
     Frog_Update(game.frog);
+    Button_Update(game.btn);
 }
 
 
@@ -51,22 +57,18 @@ void Game_Draw() {
         HQC_Artist_DrawAnimation(Store_GetAnimationByID(i), 78 + 64*i, 78);
     }
 
+    HQC_Artist_DrawSprite(Store_GetSpriteByID(SPR_GAME_HUD_BORDER), cx, cy);
+
     HQC_Artist_DrawTextShadow(Store_GetFontByID(FONT_CANCUN_12), 
-        "Hello", 256, 256);
+        "Hello", cx, 16);
     
     HQC_Artist_SetColorHex(0xffb347);
     HQC_Artist_DrawTextShadow(Store_GetFontByID(FONT_NATIVE_ALIEN_48), 
         Level_GetDisplayName(game.level), cx, 600);
 
-    HQC_Artist_SetColorHex(C_GREEN);
-    HQC_Artist_DrawTextShadow(Store_GetFontByID(FONT_CANCUN_8), 
-        "Myau Its Working?", 256, 400);
-
     HQC_Artist_SetColorHex(C_WHITE);
 
-    HQC_Artist_DrawSprite(Store_GetSpriteByID(SPR_MENU_HEAD), 500, 500);
+    HQC_Artist_DrawSprite(Store_GetSpriteByID(SPR_GAME_HUD_LIVE), 64, 24);
 
-    HQC_Artist_DrawSprite(Store_GetSpriteByID(SPR_GAME_HUD_BORDER), cx, cy);
-    
-    // HQC_Artist_DrawAnimation(Store_GetAnimationByID(0), 78, 78);
+    Button_Draw(game.btn);
 }

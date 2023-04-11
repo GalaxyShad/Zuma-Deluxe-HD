@@ -20,6 +20,16 @@ HQC_Sprite HQC_Sprite_Create(HQC_Texture tex, int rx, int ry, int rwidth, int rh
     return sprite;
 }
 
+irect_t HQC_Sprite_GetRect(HQC_Sprite hsprite) {
+    Sprite* sprite = (Sprite*)hsprite;
+    return sprite->textureRect;
+}
+
+HQC_Texture HQC_Sprite_GetTexture(HQC_Sprite hsprite) {
+    Sprite* sprite = (Sprite*)hsprite;
+    return sprite->texture;
+}
+
 
 void HQC_Artist_DrawSprite(HQC_Sprite hsprite, float x, float y) {
     Sprite* sprite = (Sprite*)hsprite;

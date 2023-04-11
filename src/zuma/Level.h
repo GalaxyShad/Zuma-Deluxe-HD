@@ -29,6 +29,7 @@ typedef struct LevelSettings {
     int                 singleChance;
     int                 ballColors;
     int                 partTime;
+    
     float               slowFactor;
 } LevelSettings;
 

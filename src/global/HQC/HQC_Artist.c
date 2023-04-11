@@ -51,6 +51,10 @@ v2i_t   HQC_Input_MouseGetPosition() {
     return pos;
 }
 
+bool HQC_Input_MouseLeftPressed() {
+    return SDL_GetMouseState(NULL, NULL) & 1;
+}
+
 
 bool HQC_Window_PollEvent(HQC_Event* event) {
     SDL_Event sdlEvent;
@@ -120,7 +124,7 @@ void HQC_Artist_DrawTexture(HQC_Texture texture, float x, float y) {
 }
 
 
-void HQC_Artist_DrawTextureRect(HQC_Texture texture, float x, float y, irect_t rect) {
+void HQC_Artist_DrawTextureRectLeft(HQC_Texture texture, float x, float y, irect_t rect) {
     if (!texture) 
         HQC_RaiseErrorHeaderFormat(
             "HQC_Artist_DrawTextureRect", 
@@ -130,10 +134,7 @@ void HQC_Artist_DrawTextureRect(HQC_Texture texture, float x, float y, irect_t r
     SDL_Texture* sdlTexture = (SDL_Texture*)texture;
 
     SDL_Rect* sdlRect = (SDL_Rect*)&rect;
-    SDL_FRect  posRect = {
-        x - rect.width / 2, y - rect.height / 2,
-        rect.width, rect.height
-    };
+    SDL_FRect  posRect = {x, y, rect.width, rect.height};
 
     SDL_RenderCopyExF(
         graphics.render, 
@@ -144,7 +145,15 @@ void HQC_Artist_DrawTextureRect(HQC_Texture texture, float x, float y, irect_t r
         NULL,
         SDL_FLIP_NONE
     );
-    // SDL_RenderCopyF(graphics.render, sdlTexture, sdlRect, &posRect);
+}
+
+void HQC_Artist_DrawTextureRect(HQC_Texture texture, float x, float y, irect_t rect) {
+    HQC_Artist_DrawTextureRectLeft(
+        texture, 
+        x - rect.width / 2, 
+        y - rect.height / 2, 
+        rect
+    );
 }
 
 
