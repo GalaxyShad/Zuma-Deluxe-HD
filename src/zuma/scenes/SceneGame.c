@@ -1,9 +1,9 @@
-#include "Game.h"
+#include "Index.h"
 
-#include "Level.h"
-#include "Frog.h"
-#include "ResourceStore.h"
-#include "Menu.h"
+#include "../Level.h"
+#include "../Frog.h"
+#include "../ResourceStore.h"
+#include "../Menu.h"
 
 struct {
     HFrog  frog;
@@ -12,7 +12,7 @@ struct {
 } game;
 
 
-void Game_Start() {
+static void _Game_Start() {
     LevelSettings levelSettings;
     levelSettings.id = "some settings";
 
@@ -38,13 +38,13 @@ void Game_Start() {
 }
 
 
-void Game_Update() {
+static void _Game_Update() {
     Frog_Update(game.frog);
     Button_Update(game.btn);
 }
 
 
-void Game_Draw() {
+static void _Game_Draw() {
     float cx = 1280 / 2;
     float cy = 720  / 2;
 
@@ -71,4 +71,12 @@ void Game_Draw() {
     HQC_Artist_DrawSprite(Store_GetSpriteByID(SPR_GAME_HUD_LIVE), 64, 24);
 
     Button_Draw(game.btn);
+}
+
+static void _Game_Free() {
+
+}
+
+HScene Scene_Register_Game() {
+    return Scene_New("game", _Game_Start, _Game_Update, _Game_Draw, _Game_Free); 
 }

@@ -3,7 +3,8 @@
 #include "global/HQC.h"
 
 #include "zuma/ResourceStore.h"
-#include "zuma/Game.h" 
+#include "zuma/Scene.h" 
+#include "zuma/scenes/Index.h"
 
 #include <stdlib.h>
 
@@ -85,20 +86,27 @@ static void _HandleEvents(void) {
 }
 
 
+
+
 static void _Start(void) {
     Store_LoadAll();
-    Game_Start();
+
+    Scene_RegisterAll();
+    // Game_Start();
+    Scene_Change(SC_TEST);
 }
 
 
 static void _Update(void) {
-    Game_Update();
+    Scene_Update();
+    // Game_Update();
 }
 
 
 static void _Draw(void) {
     HQC_Artist_Clear();
-    Game_Draw();
+    Scene_Draw();
+    // Game_Draw();
     HQC_Artist_Display();
 }
 
