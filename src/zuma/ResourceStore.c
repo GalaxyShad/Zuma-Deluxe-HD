@@ -539,3 +539,13 @@ public HQC_Font Store_GetFontByID(int id) {
 public HQC_Sound Store_GetSoundByID(int id) {
     return *((HQC_Sound*)HQC_Container_VectorGet(_soundList, id));
 }
+
+
+public int Store_CountSounds() {
+    return HQC_Container_VectorCount(_soundList);
+}
+
+
+public int Store_CountSprites() {
+    return HQC_Container_VectorCount(_spriteList);
+}

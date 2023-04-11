@@ -12,15 +12,27 @@ private int spritesCount;
 private int sprId;
 private int sndId;
 
-private void _OnBtnNextClick() { sprId++; }
-private void _OnBtnPrevClick() { sprId--; }
+private void _OnBtnNextClick() { 
+    sprId++; 
+    sprId %= Store_CountSprites();
+}
+
+
+private void _OnBtnPrevClick() { 
+    sprId--; 
+    if (sprId < 0) sprId = Store_CountSprites()-1;
+}
+
+
 private void _OnBtnNextSndClick() { 
     HQC_DJ_PlaySound(Store_GetSoundByID(sndId)); 
     sndId++; 
+    sndId %= Store_CountSounds();
 }
 private void _OnBtnPrevSndClick() {  
     HQC_DJ_PlaySound(Store_GetSoundByID(sndId)); 
     sndId--; 
+    if (sndId < 0) sndId = Store_CountSounds()-1;
 }
 
 private void _Load() {

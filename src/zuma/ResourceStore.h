@@ -11,6 +11,9 @@ HQC_Sound       Store_GetSoundByID(int id);
 HQC_Music       Store_GetMusicByID(int id);
 HQC_Font        Store_GetFontByID(int id);
 
+int Store_CountSounds();
+int Store_CountSprites();
+
 
 enum _TextureID {
 	TEX_FROG,
