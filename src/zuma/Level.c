@@ -138,3 +138,15 @@ const char* Level_GetDisplayName(HLevel hlevel) {
 
     return level->graphics->dispName;
 }
+
+v2f_t Level_GetCurveCoords(HLevel hlevel, float pos) {
+    Level* level = (Level*)hlevel;
+
+    int len = HQC_Container_VectorCount(level->curveA->dotList);
+    if ((int)pos > len-1) pos = len-1;
+
+    CurveDot* cdot = (CurveDot*)HQC_Container_VectorGet(level->curveA->dotList, (int)pos);
+    v2f_t coords = { (cdot->x+104) * 1.5, cdot->y * 1.5 };
+
+    return coords;
+}

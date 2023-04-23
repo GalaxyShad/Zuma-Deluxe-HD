@@ -29,6 +29,7 @@ private void _OnBtnNextSndClick() {
     sndId++; 
     sndId %= Store_CountSounds();
 }
+
 private void _OnBtnPrevSndClick() {  
     HQC_DJ_PlaySound(Store_GetSoundByID(sndId)); 
     sndId--; 

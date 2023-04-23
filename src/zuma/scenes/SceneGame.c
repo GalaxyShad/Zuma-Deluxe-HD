@@ -4,11 +4,12 @@
 #include "../Frog.h"
 #include "../ResourceStore.h"
 #include "../Menu.h"
+#include "../BallChain.h"
 
 struct {
     HFrog  frog;
     HLevel level;
-    HButton btn;
+    HBallChain chain;
 } game;
 
 static void _GoBack() {
@@ -34,8 +35,10 @@ static void _Game_Start() {
 
     game.frog = Frog_Create(levelGx->frogPos.x, levelGx->frogPos.y);
 
-    game.btn = Button_Create(312, 312);
-    Button_OnClick(game.btn, _GoBack);
+    game.chain = BallChain_Create(game.level);
+
+    for (int i = 0; i < 40; i++)
+        BallChain_AddToStart(game.chain, HQC_RandomRange(0, 1));
 
     HQC_Animation_SetSpeed(Store_GetAnimationByID(ANIM_SKULL), 0);
 
@@ -45,8 +48,8 @@ static void _Game_Start() {
 
 
 static void _Game_Update() {
+    BallChain_Update(game.chain);
     Frog_Update(game.frog);
-    Button_Update(game.btn);
 }
 
 
@@ -76,7 +79,7 @@ static void _Game_Draw() {
 
     HQC_Artist_DrawSprite(Store_GetSpriteByID(SPR_GAME_HUD_LIVE), 64, 24);
 
-    Button_Draw(game.btn);
+    BallChain_Draw(game.chain);
 }
 
 static void _Game_Free() {

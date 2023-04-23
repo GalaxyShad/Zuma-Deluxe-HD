@@ -93,7 +93,7 @@ static void _Start(void) {
 
     Scene_RegisterAll();
     // Game_Start();
-    Scene_Change(SC_TEST);
+    Scene_Change(SC_GAME);
 }
 
 

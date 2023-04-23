@@ -21,6 +21,10 @@ uint32_t HQC_GetTicks() {
     return SDL_GetTicks();
 }
 
+int HQC_RandomRange(int min, int max) {
+    return min + rand() % (max+1);
+}
+
 
 static void _RaiseSDLError(const char* errmsg) {
     HQC_RaiseErrorHeaderFormat(
