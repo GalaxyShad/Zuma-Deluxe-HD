@@ -90,6 +90,7 @@ private HQC_Music                    _music          = NULL;
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 private void _LoadTextures() {
+    
     size_t count = sizeof(_TEXTURE_FILES) / sizeof(_TEXTURE_FILES[0]);
 
     _textureList = HQC_Container_CreateVector(sizeof(HQC_Texture));

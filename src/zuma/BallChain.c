@@ -123,7 +123,6 @@ static void _Ball_Update(Ball* ball) {
         (mpos.y > pos.y - BALL_RADIUS) && (mpos.y < pos.y + BALL_RADIUS)
     ) {
         _BallChain_ExplodeBalls(ball);
-        // _Ball_Destroy(ball);
         prs = true;
         return;
     }

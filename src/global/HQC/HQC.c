@@ -1,10 +1,10 @@
 #include "../HQC.h"
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL.h>
+#include <SDL_Image.h>
 #include <bass.h>
 
-#include <SDL2/SDL_ttf.h>
+#include <SDL_ttf.h>
 
 #define MUSIC_FREQUENCY 44100
 
@@ -44,25 +44,30 @@ static void _RaiseSDLImageError(const char* errmsg) {
 }
 
 static void _VideoInit() {
-    SDL_Init(SDL_INIT_VIDEO)    ? _RaiseSDLError("Init fail") : NULL;
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+        _RaiseSDLError("Init fail");
 
     int flags = IMG_INIT_JPG | IMG_INIT_PNG;
     if (!(IMG_Init(flags) & flags))
         HQC_RaiseErrorHeaderFormat(
             "SDL Image Error", "Initialization fail [%s]", IMG_GetError());
 
-    (TTF_Init() != 0) ?  _RaiseSDLError("SDL TTF Init Fail") : NULL;
+
+    if (TTF_Init() != 0)
+        _RaiseSDLError("SDL TTF Init Fail");
 }
 
 
 static void _AudioInit() {
-    BASS_Init(
-        -1, 
-        MUSIC_FREQUENCY, 
-        BASS_DEVICE_STEREO, 
-        0, 
-        NULL
-    ) ? NULL : HQC_RaiseErrorHeaderFormat("BASS DLL", "Initialization fail [%d]", BASS_ErrorGetCode());
+    if (BASS_Init(
+        -1,
+        MUSIC_FREQUENCY,
+        BASS_DEVICE_STEREO,
+        0,
+        NULL) == 0
+    ) {
+        HQC_RaiseErrorHeaderFormat("BASS DLL", "Initialization fail [%d]", BASS_ErrorGetCode());
+    }
 }
 
 

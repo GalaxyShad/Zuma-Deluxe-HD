@@ -15,9 +15,8 @@ void HQC_XmlParser_SetHandlers(
 
 
 void HQC_XmlParser_Parse(HQC_XmlParser parser, const char* buffer, size_t count, bool isDone) {
-    return (XML_Parse(parser, buffer, count, isDone) == XML_STATUS_OK) ?
-        NULL :
-        HQC_RaiseErrorHeaderFormat(
+    if (XML_Parse(parser, buffer, count, isDone) != XML_STATUS_OK)
+        return HQC_RaiseErrorHeaderFormat(
             "Expat fail",
             "%s",
             XML_ErrorString(XML_GetErrorCode(parser))

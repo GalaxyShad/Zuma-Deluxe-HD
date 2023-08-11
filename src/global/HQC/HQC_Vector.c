@@ -1,6 +1,6 @@
 #include "../HQC.h"
 
-#define VECTOR_INITIAL_CAPACITY 5
+#define VECTOR_INITIAL_CAPACITY 80
 
 
 typedef struct Vector {
@@ -66,7 +66,8 @@ void HQC_Container_VectorAdd(HQC_VectorContainer vector, void* element) {
     _Expand(vec);
 
     size_t memShift = (vec->elementsCount-1) * (vec->elementSize);
-    HQC_Memory_Copy(vec->elements + memShift, element, vec->elementSize);
+
+    HQC_Memory_Copy((char*)vec->elements + memShift, element, vec->elementSize);
 }
 
 
@@ -75,7 +76,9 @@ void* HQC_Container_VectorGet(HQC_VectorContainer vector, int index) {
     
     _HandleOutOfRange(vec, index);
 
-    return vec->elements + index * vec->elementSize;
+    char* res = vec->elements;
+
+    return (void*)(res + index * vec->elementSize);
 }
 
 

@@ -5,6 +5,7 @@ project(
     VERSION 0.1.0
 )
 
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 find_library (isBassFound bass NO_CACHE PATHS ${PROJECT_SOURCE_DIR}/lib/bass/c/x64)
@@ -41,7 +42,7 @@ message("Fetching sdl2")
 FetchContent_Declare(
     sdl2
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-    GIT_TAG        7914234b2601eeb2c6563462649f269e8cfbb16c
+    GIT_TAG        SDL2
 )
 
 FetchContent_MakeAvailable(sdl2)
@@ -50,27 +51,28 @@ message("Fetching sdl2 image")
 FetchContent_Declare(
     sdl2_image
     GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
-    GIT_TAG        c1b7cf959c7d3150b0707f95a0c5268689c9e537
+    GIT_TAG        SDL2
 )
 
 set(SDL2IMAGE_SAMPLES OFF)
 FetchContent_MakeAvailable(sdl2_image)
 
-# message("Fetching SDL2_ttf")
-# FetchContent_Declare(
-#     SDL2_TTF
-#     GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
-#     GIT_TAG        52f81247c52ccd1161523081736c2ccb738078bd
-# )
-# FetchContent_MakeAvailable(SDL2_TTF)
+message("Fetching SDL2_ttf")
+FetchContent_Declare(
+    sdl2_ttf
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
+    GIT_TAG        SDL2
+)
+FetchContent_MakeAvailable(sdl2_ttf)
 
-# 
 FILE(GLOB_RECURSE SOURCES RELATIVE ${PROJECT_SOURCE_DIR} "src/*.c")
 
 add_executable(
     ZumaHD
     ${SOURCES}
 )
+
+
 
 target_include_directories(
     ZumaHD PUBLIC
@@ -81,13 +83,12 @@ target_include_directories(
 
     "${expat_SOURCE_DIR}/expat/lib"
     "${sdl2_SOURCE_DIR}/include"
-    "${sdl2_image_SOURCE_DIR}"
-    "D:/workspace/zuma-hd/code/lib/SDL2_ttf-2.20.0/x86_64-w64-mingw32/include"
-    # "${SDL2_TTF_SOURCE_DIR}"
+    "${sdl2_image_SOURCE_DIR}/include"
+    "${sdl2_ttf_SOURCE_DIR}"
 )
 
 link_directories(
-    "D:/workspace/zuma-hd/code/lib/SDL2_ttf-2.20.0/x86_64-w64-mingw32/lib"
+    # "D:/workspace/zuma-hd/code/lib/SDL2_ttf-2.20.0/x86_64-w64-mingw32/lib"
     ${PROJECT_SOURCE_DIR}/lib/bass/c
     ${PROJECT_SOURCE_DIR}/lib/bass-fx/C
 )
@@ -95,10 +96,8 @@ link_directories(
 target_link_libraries(
     ZumaHD PRIVATE
     SDL2
-    SDL2_Image
-
-    # "D:/workspace/zuma-hd/code/lib/SDL2_ttf-2.20.0/x86_64-w64-mingw32/lib/libSDL2_ttf.a"
-    "D:/workspace/zuma-hd/code/lib/SDL2_ttf-2.20.0/x86_64-w64-mingw32/SDL2_ttf.lib"
+    SDL2_image
+    SDL2_ttf
 
     ${isBassFound}
     ${isBassFxFound}
