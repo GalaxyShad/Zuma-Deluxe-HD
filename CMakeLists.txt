@@ -8,19 +8,22 @@ project(
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-find_library (isBassFound bass NO_CACHE PATHS ${PROJECT_SOURCE_DIR}/lib/bass/c/x64)
+set(isBassFound)
+set(isBassFxFound)
+
+find_library (isBassFound bass NO_CACHE PATHS "${PROJECT_SOURCE_DIR}/lib/bass/c/x64")
 if (${isBassFound} STREQUAL isBassFound-NOTFOUND)
     message(STATUS "Downloading bass...")
-    file(DOWNLOAD "https://www.un4seen.com/files/bass24.zip" "lib/bass-win.zip" SHOW_PROGRESS)
-    file(ARCHIVE_EXTRACT INPUT "lib/bass-win.zip" DESTINATION lib/bass)
+    file(DOWNLOAD "https://www.un4seen.com/files/bass24.zip" "${PROJECT_SOURCE_DIR}/lib/bass-win.zip" SHOW_PROGRESS)
+    file(ARCHIVE_EXTRACT INPUT "${PROJECT_SOURCE_DIR}/lib/bass-win.zip" DESTINATION "${PROJECT_SOURCE_DIR}/lib/bass")
 endif()
 
 
-find_library (isBassFxFound bass_fx NO_CACHE PATHS ${PROJECT_SOURCE_DIR}/lib/bass-fx/C/x64)
+find_library (isBassFxFound bass_fx NO_CACHE PATHS "${PROJECT_SOURCE_DIR}/lib/bass-fx/C/x64")
 if (${isBassFxFound} STREQUAL isBassFxFound-NOTFOUND)
     message(STATUS "Downloading bass fx...")
-    file(DOWNLOAD "https://www.un4seen.com/files/z/0/bass_fx24.zip" "lib/bass-fx-win.zip" SHOW_PROGRESS)
-    file(ARCHIVE_EXTRACT INPUT "lib/bass-fx-win.zip" DESTINATION lib/bass-fx)
+    file(DOWNLOAD "https://www.un4seen.com/files/z/0/bass_fx24.zip" "${PROJECT_SOURCE_DIR}/lib/bass-fx-win.zip" SHOW_PROGRESS)
+    file(ARCHIVE_EXTRACT INPUT "${PROJECT_SOURCE_DIR}/lib/bass-fx-win.zip" DESTINATION "${PROJECT_SOURCE_DIR}/lib/bass-fx")
 endif()
 
 include(FetchContent)
@@ -72,8 +75,6 @@ add_executable(
     ${SOURCES}
 )
 
-
-
 target_include_directories(
     ZumaHD PUBLIC
     "${PROJECT_BINARY_DIR}"
@@ -88,7 +89,6 @@ target_include_directories(
 )
 
 link_directories(
-    # "D:/workspace/zuma-hd/code/lib/SDL2_ttf-2.20.0/x86_64-w64-mingw32/lib"
     ${PROJECT_SOURCE_DIR}/lib/bass/c
     ${PROJECT_SOURCE_DIR}/lib/bass-fx/C
 )

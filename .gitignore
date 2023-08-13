@@ -1,5 +1,7 @@
 .vscode
+.vs
 .gitignore
+out
 CMakeFiles
 lib
 bin
