@@ -65,7 +65,8 @@ static void _Ball_Destroy(Ball* ball) {
 }
 
 
-static void _BallChain_ExplodeBalls(Ball* startBall) {
+// returns pointer to next ball after removing
+static Ball* _BallChain_ExplodeBalls(Ball* startBall) {
     if (!startBall) return;
     
     int count = -1;
@@ -87,13 +88,16 @@ static void _BallChain_ExplodeBalls(Ball* startBall) {
         count--;
     }
 
-    for (Ball* ball = left; (ball != right) && (ball != NULL); ) { 
+    Ball* ball;
+    for (ball = left; (ball != right) && (ball != NULL); ) { 
         Ball* next = ball->next;
         _Ball_Destroy(ball);
         ball = next;
     }
-
+    
     HQC_DJ_PlaySound(Store_GetSoundByID(SND_CHIME1));
+
+    return ball;
 }
 
 
@@ -112,7 +116,18 @@ static Ball* _Ball_Create(BallChain* chain, BallColor color) {
 
 static bool prs = false;
 
-static void _Ball_Update(Ball* ball) {
+static void _print_pointer_list(BallChain* chain, Ball* dball) {
+    
+    int i = 0;
+    printf("chain %p\n", chain);
+    printf("start-%p end-%p\n", chain->start, chain->end);
+    for (Ball* ball = chain->start; ball != NULL; ball = ball->next) {
+        printf("[%d] p-%p m-%p n-%p     color-%d %d\n", i, ball->prev, ball, ball->next, ball->color, ball == dball);
+        i++;
+    }
+}
+
+static Ball* _Ball_Update(Ball* ball) {
     if (!ball) return;
 
     v2f_t pos = Level_GetCurveCoords(ball->chain->level, ball->pos);
@@ -122,19 +137,22 @@ static void _Ball_Update(Ball* ball) {
         (mpos.x > pos.x - BALL_RADIUS) && (mpos.x < pos.x + BALL_RADIUS) &&
         (mpos.y > pos.y - BALL_RADIUS) && (mpos.y < pos.y + BALL_RADIUS)
     ) {
-        _BallChain_ExplodeBalls(ball);
         prs = true;
-        return;
+        return _BallChain_ExplodeBalls(ball);
     }
 
-    if (!HQC_Input_MouseLeftPressed()) prs = false;
+    if (!HQC_Input_MouseLeftPressed()) 
+        prs = false;
     
     if (ball->prev == NULL) {
         ball->pos += ball->chain->spd;
-        return; 
+        return ball->next;
     }
 
-    ball->pos = ball->prev->pos + BALL_RADIUS;
+    if (ball->prev->pos + BALL_RADIUS >= ball->pos)
+        ball->pos = ball->prev->pos + BALL_RADIUS;
+
+    return ball->next;
 }
 
 
@@ -165,17 +183,12 @@ HBallChain BallChain_Create(HLevel level) {
 }
 
 
-
-
-
 void BallChain_AddToStart(HBallChain hchain, BallColor color) {
     BallChain* chain = _Cast(hchain);
 
     Ball* ball = _Ball_Create(chain, color);
 
-    // Привязка нового узла к началу списка
     if (chain->start == NULL) {
-        // Список пустой - создаем единственный элемент
         ball->prev = NULL;
         ball->next = NULL;
         chain->start = ball;
@@ -191,9 +204,7 @@ void BallChain_AddToStart(HBallChain hchain, BallColor color) {
 void BallChain_Update(HBallChain hchain) {
     BallChain* chain = _Cast(hchain);
 
-    for (Ball* ball = chain->start; ball != NULL; ball = ball->next) {
-        _Ball_Update(ball);
-    }
+    for (Ball* ball = chain->start; ball != NULL; ball = _Ball_Update(ball));
 }
 
 
