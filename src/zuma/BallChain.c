@@ -22,6 +22,7 @@ typedef struct Ball {
     struct BallChain*  chain;
 
     float       pos;
+    float       spd;
 
     BallColor   color;
     BallBonus   bonus;
@@ -105,7 +106,8 @@ static Ball* _Ball_Create(BallChain* chain, BallColor color) {
     Ball* ball = HQC_Memory_Allocate(sizeof(*ball));
 
     ball->chain = chain;
-    ball->pos   = 0;
+    ball->pos   = 0.0;
+    ball->spd   = 0.0;
     ball->prev  = NULL;
     ball->next  = NULL;
     ball->bonus = BALL_BONUS_NONE;
@@ -127,6 +129,22 @@ static void _print_pointer_list(BallChain* chain, Ball* dball) {
     }
 }
 
+static bool _Ball_IsCollidingBack(Ball* ball) {
+    if (ball->prev == NULL) 
+        return false;
+
+    return (ball->prev->pos + BALL_RADIUS * 1.5 >= ball->pos);
+}
+
+
+static bool _Ball_IsCollidingFront(Ball* ball) {
+    if (ball->next == NULL)
+        return false;
+
+    return (ball->next->pos - BALL_RADIUS <= ball->pos);
+}
+
+
 static Ball* _Ball_Update(Ball* ball) {
     if (!ball) return;
 
@@ -143,21 +161,49 @@ static Ball* _Ball_Update(Ball* ball) {
 
     if (!HQC_Input_MouseLeftPressed()) 
         prs = false;
+
+    ball->pos += ball->spd;
     
+    
+
     if (ball->prev == NULL) {
-        ball->pos += ball->chain->spd;
+        ball->spd += 0.25; 
+
+        if (ball->spd > ball->chain->spd)
+            ball->spd = ball->chain->spd;
+
         return ball->next;
     }
 
-    if (ball->prev->pos + BALL_RADIUS >= ball->pos)
+    if (_Ball_IsCollidingBack(ball)) {
+        if (ball->spd < 0.0) {
+            printf("Collide");
+
+            for (Ball* b = ball->prev; b != NULL; b = b->prev)
+                b->spd = ball->spd;
+
+            return ball->next;
+        }
+
         ball->pos = ball->prev->pos + BALL_RADIUS;
+        ball->spd = ball->prev->spd;
+    }
+
+    if (!_Ball_IsCollidingBack(ball)) {
+        if (ball->prev->color == ball->color) {
+            ball->spd -= 0.125;
+        } else {
+            ball->spd = 0;
+        }
+    }
 
     return ball->next;
 }
 
-
+#include <stdio.h>
 static void _Ball_Draw(Ball* ball) {
     if (!ball) return;
+    if (ball->pos < 0.0) return;
 
     v2f_t pos = Level_GetCurveCoords(ball->chain->level, ball->pos);
 
@@ -165,6 +211,12 @@ static void _Ball_Draw(Ball* ball) {
         Store_GetAnimationByID(ANIM_BALL_BLUE + ball->color),
         pos.x, pos.y
     );
+
+    char text[25];
+
+    
+    sprintf(text, "s: %0.2lf", ball->spd);
+    HQC_Artist_DrawTextShadow(Store_GetFontByID(FONT_CANCUN_8), text, pos.x, pos.y);
 }
 
 

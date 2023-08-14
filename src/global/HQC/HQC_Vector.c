@@ -1,6 +1,6 @@
 #include "../HQC.h"
 
-#define VECTOR_INITIAL_CAPACITY 80
+#define VECTOR_INITIAL_CAPACITY 8
 
 
 typedef struct Vector {
