@@ -30,10 +30,32 @@ HQC_Animation HQC_Animation_Create() {
 }
 
 
+HQC_Animation HQC_Animation_Clone(HQC_Animation hsrc) {
+    Animation* src = (Animation*)hsrc;
+    Animation* dst = (Animation*)HQC_Animation_Create();
+
+    for (int i = 0; i < HQC_Container_VectorCount(src->frameList); i++) {
+        HQC_Container_VectorAdd(dst->frameList, HQC_Container_VectorGet(src->frameList, i));
+    }
+
+    dst->spd            = src->spd;
+    dst->currentFrame   = src->currentFrame;
+    dst->frameCount     = src->frameCount;
+
+    return dst;
+}
+
+
 void    HQC_Animation_AddFrame(HQC_Animation anim, HQC_Sprite frame) {
     Animation* animation = _Cast(anim);
     HQC_Container_VectorAdd(animation->frameList, &frame);
     animation->frameCount = (float)HQC_Container_VectorCount(animation->frameList);
+}
+
+
+size_t HQC_Animation_FramesCount(HQC_Animation anim) {
+    Animation* animation = _Cast(anim);
+    return animation->frameCount;
 }
 
 

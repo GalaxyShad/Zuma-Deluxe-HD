@@ -5,11 +5,13 @@
 #include "../ResourceStore.h"
 #include "../Menu.h"
 #include "../BallChain.h"
+#include "../Bullets.h"
 
 struct {
     HFrog  frog;
     HLevel level;
     HBallChain chain;
+    HBulletList bulletList;
 } game;
 
 static void _GoBack() {
@@ -33,11 +35,11 @@ static void _Game_Start() {
 
     game.level = Level_Load(&levelSettings, levelGx);
 
-    game.frog = Frog_Create(levelGx->frogPos.x, levelGx->frogPos.y);
+    game.bulletList = BulletList_Create();
+    game.frog = Frog_Create(levelGx->frogPos.x, levelGx->frogPos.y, game.bulletList);
+    game.chain = BallChain_Create(game.level, game.bulletList);
 
-    game.chain = BallChain_Create(game.level);
-
-    for (int i = 0; i < 40; i++)
+    for (int i = 0; i < 20; i++)
         BallChain_AddToStart(game.chain, HQC_RandomRange(0, 1));
 
     HQC_Animation_SetSpeed(Store_GetAnimationByID(ANIM_SKULL), 0);
@@ -50,6 +52,7 @@ static void _Game_Start() {
 static void _Game_Update() {
     BallChain_Update(game.chain);
     Frog_Update(game.frog);
+    BulletList_Update(game.bulletList);
 }
 
 
@@ -80,6 +83,7 @@ static void _Game_Draw() {
     HQC_Artist_DrawSprite(Store_GetSpriteByID(SPR_GAME_HUD_LIVE), 64, 24);
 
     BallChain_Draw(game.chain);
+    BulletList_Draw(game.bulletList);
 }
 
 static void _Game_Free() {

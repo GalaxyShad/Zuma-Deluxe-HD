@@ -3,7 +3,7 @@
 #include "../global/HQC.h"
 #include "ResourceStore.h"
 
-#define BALL_RADIUS         32
+#define BALL_RADIUS         24
 #define BALLS_TO_EXPLODE    3
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -24,8 +24,13 @@ typedef struct Ball {
     float       pos;
     float       spd;
 
+    bool        isGoingBack;
+    bool        isBulletInserting;
+
     BallColor   color;
     BallBonus   bonus;
+
+    HQC_Animation animation;
 
     struct Ball* prev;
     struct Ball* next;
@@ -39,6 +44,8 @@ typedef struct BallChain {
     Ball* end;
 
     float spd;
+
+    HBulletList bulletList;
 } BallChain;
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -67,10 +74,12 @@ static void _Ball_Destroy(Ball* ball) {
 
 
 // returns pointer to next ball after removing
-static Ball* _BallChain_ExplodeBalls(Ball* startBall) {
-    if (!startBall) return;
+HBall BallChain_ExplodeBalls(HBall hstartBall) {
+    Ball* startBall = (Ball*)hstartBall;
     
-    int count = -1;
+    if (!startBall) return NULL;
+    
+    int count = 0;
 
     Ball* right;
     for (right = startBall; right != NULL; right = right->next) {
@@ -88,6 +97,9 @@ static Ball* _BallChain_ExplodeBalls(Ball* startBall) {
         left = left->next;
         count--;
     }
+
+    if (count < 3)
+        return startBall;
 
     Ball* ball;
     for (ball = left; (ball != right) && (ball != NULL); ) { 
@@ -108,10 +120,14 @@ static Ball* _Ball_Create(BallChain* chain, BallColor color) {
     ball->chain = chain;
     ball->pos   = 0.0;
     ball->spd   = 0.0;
+    ball->isGoingBack = false;
+    ball->isBulletInserting = false;
     ball->prev  = NULL;
     ball->next  = NULL;
     ball->bonus = BALL_BONUS_NONE;
     ball->color = color;
+
+    ball->animation = HQC_Animation_Clone(Store_GetAnimationByID(ANIM_BALL_BLUE + ball->color));
 
     return ball;
 }
@@ -129,11 +145,11 @@ static void _print_pointer_list(BallChain* chain, Ball* dball) {
     }
 }
 
-static bool _Ball_IsCollidingBack(Ball* ball) {
+static bool _Ball_IsCollidingBack(Ball* ball, float expand) {
     if (ball->prev == NULL) 
         return false;
 
-    return (ball->prev->pos + BALL_RADIUS * 1.5 >= ball->pos);
+    return (ball->prev->pos + 32 + expand >= ball->pos);
 }
 
 
@@ -141,33 +157,179 @@ static bool _Ball_IsCollidingFront(Ball* ball) {
     if (ball->next == NULL)
         return false;
 
-    return (ball->next->pos - BALL_RADIUS <= ball->pos);
+    return (ball->next->pos - 32 <= ball->pos);
 }
 
+float Ball_GetPositionOnCurve(HBall hball) {
+    Ball* b = (Ball*)hball;
+
+    if (b == NULL)
+        return;
+
+    return b->pos;
+}
+
+v2f_t Ball_GetPositionCoords(HBall ball) {
+    Ball* b = (Ball*)ball;
+
+    if (b == NULL)
+        return;
+
+    return  Level_GetCurveCoords(b->chain->level, (b->pos >= 0) ? b->pos : 0);
+}
+
+float Ball_GetDistanceBetween(HBall hballLeft, HBall hballRight) {
+    Ball* left = (Ball*)hballLeft;
+    Ball* right = (Ball*)hballRight;
+
+    return right->pos - left->pos;
+}
+
+HBallChain Ball_GetChain(HBall ball) {
+    Ball* b = ((Ball*)ball);
+
+    if (b == NULL)
+        return;
+
+    return b->chain;
+}
+
+HBall BallChain_InsertBeforeBall(HBallChain hchain, BallColor color, HBall nextBall, float pos) {
+    Ball* ball = (Ball*)nextBall;
+
+    if (ball == NULL) return;
+    
+    Ball* newBall = _Ball_Create(ball->chain, color);
+
+    newBall->pos = pos;//ball->pos - 32;
+
+    newBall->prev = ball->prev;
+    newBall->next = ball;
+
+    if (ball->prev != NULL) {
+        ball->prev->next = newBall;
+    } else {
+        ball->chain->start = newBall;
+    }
+
+    ball->prev = newBall;
+
+    return newBall;
+}
+
+HBall BallChain_InsertAfterBall(HBallChain hchain, BallColor color, HBall prevBall, float pos) {
+    Ball* ball = (Ball*)prevBall;
+
+    if (ball == NULL) return;
+
+    Ball* newBall = _Ball_Create(ball->chain, color);
+
+    newBall->pos = pos;//ball->pos + 32;
+
+    newBall->prev = ball;
+    newBall->next = ball->next;
+
+    if (ball->next != NULL) {
+        ball->next->prev = newBall;
+    } else {
+        ball->chain->end = newBall;
+    }
+
+    ball->next = newBall;
+
+    return newBall;
+}
+
+
+void  Ball_MoveSubChainFrom(HBall hball, float value) {
+    Ball* ball = ((Ball*)hball);
+
+    if (ball == NULL) return;
+
+    ball->pos += value;
+
+    for (Ball* b = ball->next; b != NULL; b = b->next) {
+        if (!_Ball_IsCollidingBack(b, 8))
+            return;
+
+        b->pos += value;
+    }
+}
+
+HBall Ball_Next(HBall hball) {
+    Ball* ball = ((Ball*)hball)->next;
+
+    return ball;
+}
+
+
+static Ball* _Ball_HandleBulletCollision(Ball* ball, HBullet bullet) {
+    if (bullet == NULL) 
+        return;
+
+    v2f_t ballPos   = Level_GetCurveCoords(ball->chain->level, (ball->pos >= 0) ? ball->pos : 0);
+    v2f_t bulletPos = Bullet_GetPosition(bullet);
+
+    if (HQC_PointDistance(ballPos.x, ballPos.y, bulletPos.x, bulletPos.y) > 24 * 2)
+        return;
+
+    if (Bullet_GetInsertionBallLeft(bullet) == NULL && Bullet_GetInsertionBallRight(bullet) == NULL) {
+        v2f_t pointLeft  = Level_GetCurveCoords(ball->chain->level, ball->pos - BALL_RADIUS);
+        v2f_t pointRight = Level_GetCurveCoords(ball->chain->level, ball->pos + BALL_RADIUS);
+
+        float distanceLeft  = HQC_PointDistance(bulletPos.x, bulletPos.y, pointLeft.x, pointLeft.y);
+        float distanceRight = HQC_PointDistance(bulletPos.x, bulletPos.y, pointRight.x, pointRight.y);
+
+        ball->isBulletInserting = true;
+
+        if (distanceLeft < distanceRight) {
+            Bullet_SetInsertion(bullet, ball->prev, ball, true);
+
+            if (ball->prev != NULL)
+                ball->prev->isBulletInserting = true;
+        } else {
+            Bullet_SetInsertion(bullet, ball, ball->next, false);
+
+            if (ball->next != NULL)
+                ball->next->isBulletInserting = true;
+        }
+
+        printf(":((( %d\n", (distanceLeft < distanceRight));
+    }
+}
+
+
+static Ball* _Ball_HandleBulletListCollision(Ball* ball) {
+    for (int i = 0; i < 8; i++) {
+        _Ball_HandleBulletCollision(ball, BulletList_GetBullet(ball->chain->bulletList, i));
+    }
+}
+
+void  Ball_BulletInsertDone(HBall hball) {
+    Ball* ball = (Ball*)hball;
+
+    if (ball == NULL) return;
+
+    ball->isBulletInserting = false;
+}
 
 static Ball* _Ball_Update(Ball* ball) {
     if (!ball) return;
 
-    v2f_t pos = Level_GetCurveCoords(ball->chain->level, ball->pos);
-    v2i_t mpos = HQC_Input_MouseGetPosition();
-
-    if (HQC_Input_MouseLeftPressed() && !prs && 
-        (mpos.x > pos.x - BALL_RADIUS) && (mpos.x < pos.x + BALL_RADIUS) &&
-        (mpos.y > pos.y - BALL_RADIUS) && (mpos.y < pos.y + BALL_RADIUS)
-    ) {
-        prs = true;
-        return _BallChain_ExplodeBalls(ball);
-    }
-
-    if (!HQC_Input_MouseLeftPressed()) 
-        prs = false;
+    v2f_t pos = Level_GetCurveCoords(ball->chain->level, (ball->pos >= 0) ? ball->pos : 0);
 
     ball->pos += ball->spd;
-    
+    if (ball->pos >= (float)Level_GetCurveLength(ball->chain->level)) {
+        ball->pos -= (float)Level_GetCurveLength(ball->chain->level);
+        
+        return ball->next;
+    }
     
 
+    _Ball_HandleBulletListCollision(ball);
+ 
     if (ball->prev == NULL) {
-        ball->spd += 0.25; 
+        ball->spd += 0.025; 
 
         if (ball->spd > ball->chain->spd)
             ball->spd = ball->chain->spd;
@@ -175,23 +337,26 @@ static Ball* _Ball_Update(Ball* ball) {
         return ball->next;
     }
 
-    if (_Ball_IsCollidingBack(ball)) {
-        if (ball->spd < 0.0) {
-            printf("Collide");
 
+    if (_Ball_IsCollidingBack(ball, 8)) {
+        if (ball->isGoingBack && _Ball_IsCollidingBack(ball, 0)) {
             for (Ball* b = ball->prev; b != NULL; b = b->prev)
-                b->spd = ball->spd;
+                b->spd = ball->spd / 2;
 
-            return ball->next;
+            ball->isGoingBack = false;
+
+            return BallChain_ExplodeBalls(ball);
         }
 
-        ball->pos = ball->prev->pos + BALL_RADIUS;
+        ball->pos = ball->prev->pos + 32;
         ball->spd = ball->prev->spd;
     }
 
-    if (!_Ball_IsCollidingBack(ball)) {
-        if (ball->prev->color == ball->color) {
-            ball->spd -= 0.125;
+    
+    if (!_Ball_IsCollidingBack(ball, 8)) {
+        if (ball->prev->color == ball->color && !ball->isBulletInserting) {
+            ball->spd -= 0.05;
+            ball->isGoingBack = true;
         } else {
             ball->spd = 0;
         }
@@ -201,21 +366,24 @@ static Ball* _Ball_Update(Ball* ball) {
 }
 
 #include <stdio.h>
+#include <corecrt_math_defines.h>
 static void _Ball_Draw(Ball* ball) {
     if (!ball) return;
     if (ball->pos < 0.0) return;
 
-    v2f_t pos = Level_GetCurveCoords(ball->chain->level, ball->pos);
+    v2f_t pos       = Level_GetCurveCoords(ball->chain->level, ball->pos);
+    v2f_t posNext   = Level_GetCurveCoords(ball->chain->level, ball->pos+1);
 
-    HQC_Artist_DrawAnimation(
-        Store_GetAnimationByID(ANIM_BALL_BLUE + ball->color),
-        pos.x, pos.y
-    );
+    HQC_Animation_SetFrame(ball->animation, ((int)ball->pos) % HQC_Animation_FramesCount(ball->animation));
+
+    float angle = HQC_FAtan2(pos.y - posNext.y, pos.x - posNext.x) + M_PI_2;
+
+    HQC_Artist_DrawSetAngle(angle);
+    HQC_Artist_DrawAnimation(ball->animation, pos.x, pos.y);
+    HQC_Artist_DrawSetAngle(0);
 
     char text[25];
-
-    
-    sprintf(text, "s: %0.2lf", ball->spd);
+    sprintf(text, "s: %0.2lf %d", ball->pos, Level_GetCurveLength(ball->chain->level));
     HQC_Artist_DrawTextShadow(Store_GetFontByID(FONT_CANCUN_8), text, pos.x, pos.y);
 }
 
@@ -223,13 +391,14 @@ static void _Ball_Draw(Ball* ball) {
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 
-HBallChain BallChain_Create(HLevel level) {
+HBallChain BallChain_Create(HLevel level, HBulletList bulletList) {
     BallChain* ballChain = HQC_Memory_Allocate(sizeof(*ballChain));
 
     ballChain->level    = level;
     ballChain->start    = NULL;
     ballChain->end      = NULL;
     ballChain->spd      = 1.0f;
+    ballChain->bulletList = bulletList;
 
     return ballChain;
 }
@@ -252,11 +421,28 @@ void BallChain_AddToStart(HBallChain hchain, BallColor color) {
     }
 }
 
+HLevel BallChain_GetLevel(HBallChain hchain) {
+    BallChain* chain = _Cast(hchain);
+
+    return chain->level;
+}
+
 
 void BallChain_Update(HBallChain hchain) {
     BallChain* chain = _Cast(hchain);
 
     for (Ball* ball = chain->start; ball != NULL; ball = _Ball_Update(ball));
+}
+
+
+HBall BallChain_HasBall(HBallChain hchain, HBall hball) {
+    BallChain* chain = _Cast(hchain);
+
+    for (Ball* ball = chain->start; ball != NULL; ball = ball->next) {
+        if (ball == hball) return ball;
+    }
+
+    return NULL;
 }
 
 

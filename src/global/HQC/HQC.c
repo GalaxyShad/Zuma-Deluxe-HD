@@ -92,3 +92,38 @@ float HQC_DegreesToRadian(float degree) {
     return degree * 0.0174533f;
 }
 
+float HQC_Lerp(float start, float end, float val) {
+    return start * (1.0 - val) + end * val;
+}
+
+float HQC_FAtan2(float y, float x) {
+    return atan2f(y, x);
+}
+
+float HQC_FSin(float rad) {
+    return sinf(rad);
+}
+
+
+float HQC_FCos(float rad) {
+    return cosf(rad);
+}
+
+float HQC_FSqrt(float x) {
+    return sqrtf(x);
+}
+
+float HQC_FMin(float a, float b) {
+    return (a < b) ? a : b;
+}
+
+float HQC_FMax(float a, float b) {
+    return (a > b) ? a : b;
+}
+
+float HQC_PointDistance(float x1, float y1, float x2, float y2) {
+    float h = (x2 - x1);
+    float v = (y2 - y1);
+    
+    return HQC_FSqrt(h * h + v * v);
+}

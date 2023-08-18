@@ -136,6 +136,7 @@ int ApplicationZuma_Start(void) {
         _Draw();
         app.frameTime  = HQC_GetTicks() - app.frameStart;
 
+        
         if (app.frameTime < FRAME_DELAY)
             HQC_Delay(FRAME_DELAY - app.frameTime);
     }

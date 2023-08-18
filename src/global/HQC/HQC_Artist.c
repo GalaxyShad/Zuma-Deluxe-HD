@@ -51,10 +51,14 @@ v2i_t   HQC_Input_MouseGetPosition() {
     return pos;
 }
 
-bool HQC_Input_MouseLeftPressed() {
+
+bool HQC_Input_MouseLeft() {
     return SDL_GetMouseState(NULL, NULL) & 1;
 }
 
+bool HQC_Input_MouseLeftPressed() {    
+    return HQC_Input_MouseLeft();
+}
 
 bool HQC_Window_PollEvent(HQC_Event* event) {
     SDL_Event sdlEvent;
