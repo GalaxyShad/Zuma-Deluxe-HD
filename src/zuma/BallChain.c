@@ -377,9 +377,12 @@ static void _Ball_Draw(Ball* ball) {
     HQC_Animation_SetFrame(ball->animation, ((int)ball->pos) % HQC_Animation_FramesCount(ball->animation));
 
     float angle = HQC_FAtan2(pos.y - posNext.y, pos.x - posNext.x) + M_PI_2;
+    float alpha = HQC_FMin(ball->pos / 32.f, 1.f);
 
     HQC_Artist_DrawSetAngle(angle);
+    HQC_Artist_DrawSetAlpha(alpha);
     HQC_Artist_DrawAnimation(ball->animation, pos.x, pos.y);
+    HQC_Artist_DrawSetAlpha(1);
     HQC_Artist_DrawSetAngle(0);
 
     char text[25];
@@ -404,7 +407,7 @@ HBallChain BallChain_Create(HLevel level, HBulletList bulletList) {
 }
 
 
-void BallChain_AddToStart(HBallChain hchain, BallColor color) {
+HBall BallChain_AddToStart(HBallChain hchain, BallColor color) {
     BallChain* chain = _Cast(hchain);
 
     Ball* ball = _Ball_Create(chain, color);
@@ -419,6 +422,8 @@ void BallChain_AddToStart(HBallChain hchain, BallColor color) {
         chain->start->prev = ball; 
         chain->start = ball;
     }
+
+    return ball;
 }
 
 HLevel BallChain_GetLevel(HBallChain hchain) {
@@ -452,9 +457,82 @@ void BallChain_Draw(HBallChain hchain) {
     for (Ball* ball = chain->start; ball != NULL; ball = ball->next) {
         _Ball_Draw(ball);
     }
-
-
 }   
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+typedef struct _Generator {
+    BallChain* ballChain;
+
+    bool fastMode;
+    int fastModeBallsCountdown;
+} Generator;
+
+
+HBallChainGenerator BallChainGenerator_Create(HBallChain hballChain) {
+    Generator* gen = HQC_Memory_Allocate(sizeof(*gen));
+
+    gen->ballChain = hballChain;
+    gen->fastMode = true;
+    gen->fastModeBallsCountdown = 32;
+
+    HQC_DJ_PlaySound(Store_GetSoundByID(SND_ROLLING));
+
+    return gen;
+}
+
+
+void BallChainGenerator_GenerateSequence(HBallChainGenerator hballChainGenerator, size_t count) {
+
+}
+
+
+void BallChainGenerator_Stop(HBallChainGenerator hballChainGenerator) {
+
+}
+
+
+static void _Generator_UpdateFastMode(Generator* gen) {
+    Ball* headBall = gen->ballChain->start;
+
+    if (!headBall) {
+        BallChain_AddToStart(gen->ballChain, 1);
+        return;
+    }
+
+    headBall->pos += 8;
+
+    if (headBall->pos > 32) {
+        Ball* ball = BallChain_InsertBeforeBall(gen->ballChain, HQC_RandomRange(0, 3), headBall, headBall->pos - 32);
+        ball->spd = headBall->spd;
+        gen->fastModeBallsCountdown--;
+    }
+
+    if (gen->fastModeBallsCountdown <= 0)
+        gen->fastMode = false;
+}
+
+void BallChainGenerator_Update(HBallChainGenerator hballChainGenerator) {
+    Generator* gen = (Generator*)hballChainGenerator;
+
+    if (gen->fastMode) {
+        _Generator_UpdateFastMode(gen);
+        return;
+    }
+
+    Ball* headBall = gen->ballChain->start;
+
+    if (!headBall) {
+        BallChain_AddToStart(gen->ballChain, 1);
+        return;
+    }
+
+    if (headBall->pos > 32) {
+        Ball* ball = BallChain_InsertBeforeBall(gen->ballChain, HQC_RandomRange(0, 3), headBall, 0);
+        ball->spd = headBall->spd;
+    }
+}
 
  
 

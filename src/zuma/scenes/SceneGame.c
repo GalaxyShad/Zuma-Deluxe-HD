@@ -12,6 +12,7 @@ struct {
     HLevel level;
     HBallChain chain;
     HBulletList bulletList;
+    HBallChainGenerator generator;
 } game;
 
 static void _GoBack() {
@@ -38,9 +39,10 @@ static void _Game_Start() {
     game.bulletList = BulletList_Create();
     game.frog = Frog_Create(levelGx->frogPos.x, levelGx->frogPos.y, game.bulletList);
     game.chain = BallChain_Create(game.level, game.bulletList);
+    game.generator = BallChainGenerator_Create(game.chain);
 
-    for (int i = 0; i < 20; i++)
-        BallChain_AddToStart(game.chain, HQC_RandomRange(0, 1));
+    //for (int i = 0; i < 20; i++)
+      //  BallChain_AddToStart(game.chain, HQC_RandomRange(0, 1));
 
     HQC_Animation_SetSpeed(Store_GetAnimationByID(ANIM_SKULL), 0);
 
@@ -51,6 +53,8 @@ static void _Game_Start() {
 
 static void _Game_Update() {
     BallChain_Update(game.chain);
+    BallChainGenerator_Update(game.generator);
+
     Frog_Update(game.frog);
     BulletList_Update(game.bulletList);
 }

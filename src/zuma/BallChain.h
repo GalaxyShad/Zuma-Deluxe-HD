@@ -28,10 +28,21 @@ HBall BallChain_ExplodeBalls(HBall hstartBall);
 
 HBallChain BallChain_Create(HLevel level, HBulletList bulletList);
 HLevel BallChain_GetLevel(HBallChain hchain);
-void BallChain_AddToStart(HBallChain hchain, BallColor color);
+HBall BallChain_AddToStart(HBallChain hchain, BallColor color);
 
 HBall BallChain_InsertBeforeBall(HBallChain hchain, BallColor color, HBall nextBall, float pos);
 HBall BallChain_InsertAfterBall(HBallChain hchain, BallColor color, HBall prevBall, float pos);
 
 void BallChain_Update(HBallChain hchain);
 void BallChain_Draw(HBallChain hchain);
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+typedef void* HBallChainGenerator;
+
+HBallChainGenerator BallChainGenerator_Create(HBallChain hballChain);
+void BallChainGenerator_GenerateSequence(HBallChainGenerator hballChainGenerator, size_t count);
+
+void BallChainGenerator_Stop(HBallChainGenerator hballChainGenerator);
+void BallChainGenerator_Update(HBallChainGenerator hballChainGenerator);
