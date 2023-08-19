@@ -2,8 +2,11 @@
 
 typedef struct Animation {
     HQC_VECTOR(HQC_Sprite)  frameList;
+
     float                   spd;
     float                   currentFrame;
+
+    bool                    isLooping;
 
     size_t                  frameCount;
 } Animation;
@@ -25,10 +28,28 @@ HQC_Animation HQC_Animation_Create() {
     anim->spd           = 1.f;
     anim->currentFrame  = 0.f;
     anim->frameCount    = 1;
+    anim->isLooping     = true;
+
 
     return anim;
 }
 
+
+void HQC_Animation_SetLooping(HQC_Animation anim, bool looping) {
+    Animation* animation = _Cast(anim);
+
+    animation->isLooping = looping;
+}
+
+
+bool HQC_Animation_IsEnded(HQC_Animation anim) {
+    Animation* animation = _Cast(anim);
+
+    if (animation->isLooping)
+        return false;
+
+    return (animation->currentFrame >= animation->frameCount - 1);
+}
 
 HQC_Animation HQC_Animation_Clone(HQC_Animation hsrc) {
     Animation* src = (Animation*)hsrc;
@@ -41,6 +62,7 @@ HQC_Animation HQC_Animation_Clone(HQC_Animation hsrc) {
     dst->spd            = src->spd;
     dst->currentFrame   = src->currentFrame;
     dst->frameCount     = src->frameCount;
+    dst->isLooping      = src->isLooping;
 
     return dst;
 }
@@ -70,8 +92,12 @@ void    HQC_Animation_Tick(HQC_Animation anim) {
 
     animation->currentFrame += animation->spd;
 
-    if (animation->currentFrame >= animation->frameCount)
-        animation->currentFrame -= animation->frameCount;
+    if (animation->currentFrame >= animation->frameCount) {
+        if (animation->isLooping)
+            animation->currentFrame -= animation->frameCount;
+        else
+            animation->currentFrame = animation->frameCount - 1;
+    }
 
 }
 

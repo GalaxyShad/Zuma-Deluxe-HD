@@ -23,14 +23,14 @@ static void _Game_Start() {
     levelSettings.id = "some settings";
 
     LevelGraphics* levelGx       = HQC_Memory_Allocate(sizeof(*levelGx));
-    levelGx->dispName            = "When Spirals Attack";
+    levelGx->dispName            = "Coding is Hard :(";
     levelGx->coinsPosList        = HQC_Container_CreateVector(sizeof(v2f_t));
-    levelGx->frogPos.x           = (242.0f + 104) * 1.5f;
-    levelGx->frogPos.y           = 248.0f * 1.5f;
-    levelGx->id                  = "tiltspiral";
-    levelGx->textureFile         = "levels/tiltspiral/tiltspiral.jpg";
+    levelGx->frogPos.x           = (450.f + 104) * 1.5f;
+    levelGx->frogPos.y           = 240.f * 1.5f;
+    levelGx->id                  = "longrange";
+    levelGx->textureFile         = "levels/longrange/longrange.jpg";
     levelGx->textureTopLayerFile = NULL;
-    levelGx->curveAFile          = "levels/tiltspiral/tiltspiral.dat";
+    levelGx->curveAFile          = "levels/longrange/longrange.dat";
     levelGx->curveBFile          = NULL;                                        
 
     game.level = Level_Load(&levelSettings, levelGx);
@@ -44,7 +44,7 @@ static void _Game_Start() {
 
     HQC_Animation_SetSpeed(Store_GetAnimationByID(ANIM_SKULL), 0);
 
-    HQC_DJ_SetSoundPith(2);
+    HQC_DJ_SetSoundPith(4);
     HQC_DJ_PlaySound(Store_GetSoundByID(SND_CHANT1));
 }
 
@@ -84,6 +84,8 @@ static void _Game_Draw() {
 
     BallChain_Draw(game.chain);
     BulletList_Draw(game.bulletList);
+
+    Frog_DrawTop(game.frog);
 }
 
 static void _Game_Free() {

@@ -168,6 +168,8 @@ enum _SpriteID {
 };
 
 enum _AnimationID {
+    ANIM_FROG_BLINK,
+    ANIM_FROG_BALLS,
     ANIM_BALL_BLUE,
     ANIM_BALL_GREEN,
     ANIM_BALL_YELLOW,

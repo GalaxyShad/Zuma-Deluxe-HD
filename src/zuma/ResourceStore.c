@@ -117,6 +117,7 @@ private void _MakeSprites() {
     HQC_Sprite sprFrogTongue = HQC_Sprite_Create(texFrog, 
         162,    0,      162,    162);
 
+
     HQC_Container_VectorAdd(_spriteList, &sprFrog);
     HQC_Container_VectorAdd(_spriteList, &sprFrogPlate);
     HQC_Container_VectorAdd(_spriteList, &sprFrogTongue);
@@ -386,7 +387,7 @@ private void _MakeSprites() {
 }
 
 
-private HQC_Animation _MakeAnimationFromStrip(HQC_Texture tex, int framesCount, irect_t frameRect) {
+private HQC_Animation _MakeAnimationFromStrip(HQC_Texture tex, int framesCount, irect_t frameRect, bool horizontal) {
     HQC_Animation anim = HQC_Animation_Create();
 
     for (int i = 0; i < framesCount; i++) {
@@ -395,7 +396,8 @@ private HQC_Animation _MakeAnimationFromStrip(HQC_Texture tex, int framesCount, 
 
         HQC_Animation_AddFrame(anim, frame);
 
-        frameRect.y += frameRect.height;
+        if (horizontal) frameRect.x += frameRect.width;
+        else            frameRect.y += frameRect.height;
     }
 
     return anim;
@@ -406,6 +408,35 @@ private void _MakeAnimations() {
     _animationList = HQC_Container_CreateVector(sizeof(HQC_Animation));
     
     HQC_Texture texObjects = Store_GetTextureByID(TEX_GAME_OBJECTS);
+    HQC_Texture texFrog = Store_GetTextureByID(TEX_FROG);
+
+    ////////////////////////////////////////////////////////////////////////////
+    //    Frog Blink
+    ////////////////////////////////////////////////////////////////////////////
+
+    HQC_Sprite sprListFrogBlink[3];
+    sprListFrogBlink[0] = HQC_Sprite_Create(texFrog, 0, 162 * 1, 162, 162);
+    sprListFrogBlink[1] = HQC_Sprite_Create(texFrog, 0, 162 * 2, 162, 162);
+    sprListFrogBlink[2] = HQC_Sprite_Create(texFrog, 0, 162 * 3, 162, 162);
+    
+    HQC_Animation animFrogBlink = HQC_Animation_Create();
+    HQC_Animation_AddFrame(animFrogBlink, sprListFrogBlink[0]);
+    HQC_Animation_AddFrame(animFrogBlink, sprListFrogBlink[1]);
+    HQC_Animation_AddFrame(animFrogBlink, sprListFrogBlink[2]);
+    HQC_Animation_AddFrame(animFrogBlink, sprListFrogBlink[2]);
+    HQC_Animation_AddFrame(animFrogBlink, sprListFrogBlink[1]);
+    HQC_Animation_AddFrame(animFrogBlink, sprListFrogBlink[0]);
+    
+    HQC_Container_VectorAdd(_animationList, &animFrogBlink);
+
+    ////////////////////////////////////////////////////////////////////////////
+    //    Frog Balls
+    ////////////////////////////////////////////////////////////////////////////
+
+    irect_t rectFrogBall = { 234, 633, 15, 15 };
+    HQC_Animation animFrogBall =
+        _MakeAnimationFromStrip(texFrog, 6, rectFrogBall, true);
+    HQC_Container_VectorAdd(_animationList, &animFrogBall);
 
     ////////////////////////////////////////////////////////////////////////////
     //    Balls
@@ -414,7 +445,7 @@ private void _MakeAnimations() {
     irect_t rectBall = { 0, 0, 48, 48 };
     for (int c = 0; c < 6; c++) {
         HQC_Animation animBall = 
-            _MakeAnimationFromStrip(texObjects, (c == 0) ? 47 : 50, rectBall);
+            _MakeAnimationFromStrip(texObjects, (c == 0) ? 47 : 50, rectBall, false);
 
         HQC_Container_VectorAdd(_animationList, &animBall);
 
@@ -428,7 +459,7 @@ private void _MakeAnimations() {
     
     irect_t rectCoin = { 340, 0, 54, 54 };
     HQC_Animation animCoin = 
-        _MakeAnimationFromStrip(texObjects, 30, rectCoin);
+        _MakeAnimationFromStrip(texObjects, 30, rectCoin, false);
     HQC_Container_VectorAdd(_animationList, &animCoin);
 
     ////////////////////////////////////////////////////////////////////////////
@@ -437,7 +468,7 @@ private void _MakeAnimations() {
     
     irect_t rectBallDestroy = { 395, 0, 105, 120 };
     HQC_Animation animBallDestroy = 
-        _MakeAnimationFromStrip(texObjects, 13, rectBallDestroy);
+        _MakeAnimationFromStrip(texObjects, 13, rectBallDestroy, false);
     HQC_Container_VectorAdd(_animationList, &animBallDestroy);
 
     ////////////////////////////////////////////////////////////////////////////
@@ -446,7 +477,7 @@ private void _MakeAnimations() {
     
     irect_t rectExplosion = { 528, 0, 100, 130 };
     HQC_Animation animExplosion = 
-        _MakeAnimationFromStrip(texObjects, 17, rectExplosion);
+        _MakeAnimationFromStrip(texObjects, 17, rectExplosion, false);
     HQC_Container_VectorAdd(_animationList, &animExplosion);
 
     ////////////////////////////////////////////////////////////////////////////
@@ -455,7 +486,7 @@ private void _MakeAnimations() {
     
     irect_t rectSkull = { 629, 132, 132, 132 };
     HQC_Animation animSkull = 
-        _MakeAnimationFromStrip(texObjects, 12, rectSkull);
+        _MakeAnimationFromStrip(texObjects, 12, rectSkull, false);
     HQC_Container_VectorAdd(_animationList, &animSkull);
 
     ////////////////////////////////////////////////////////////////////////////
@@ -464,7 +495,7 @@ private void _MakeAnimations() {
     
     irect_t rectSparkle = { 732, 2253, 30, 30 };
     HQC_Animation animSparkle = 
-        _MakeAnimationFromStrip(texObjects, 14, rectSparkle);
+        _MakeAnimationFromStrip(texObjects, 14, rectSparkle, false);
     HQC_Container_VectorAdd(_animationList, &animSparkle);
 
 

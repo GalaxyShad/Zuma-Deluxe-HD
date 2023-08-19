@@ -73,6 +73,18 @@ bool HQC_Window_PollEvent(HQC_Event* event) {
 //////////////////////////////////////////////////////////////////////////////
 
 static float _drawAngle = 0;
+static float _drawScale = 1;
+static float _drawAlpha = 1;
+
+void HQC_Artist_DrawSetAlpha(float alpha) {
+    _drawAlpha = alpha;
+}
+
+
+void HQC_Artist_DrawSetScale(float scale) {
+    _drawScale = scale;
+}
+
 
 void HQC_Artist_DrawSetAngle(float angle) {
     _drawAngle = angle;
@@ -138,7 +150,9 @@ void HQC_Artist_DrawTextureRectLeft(HQC_Texture texture, float x, float y, irect
     SDL_Texture* sdlTexture = (SDL_Texture*)texture;
 
     SDL_Rect* sdlRect = (SDL_Rect*)&rect;
-    SDL_FRect  posRect = {x, y, rect.width, rect.height};
+    SDL_FRect posRect = {x, y, rect.width * _drawScale, rect.height * _drawScale};
+
+    SDL_SetTextureAlphaMod(sdlTexture, (Uint8)(_drawAlpha * 255));
 
     SDL_RenderCopyExF(
         graphics.render, 
@@ -149,13 +163,16 @@ void HQC_Artist_DrawTextureRectLeft(HQC_Texture texture, float x, float y, irect
         NULL,
         SDL_FLIP_NONE
     );
+
+    //SDL_SetTextureAlphaMod(sdlTexture, 255);
+
 }
 
 void HQC_Artist_DrawTextureRect(HQC_Texture texture, float x, float y, irect_t rect) {
     HQC_Artist_DrawTextureRectLeft(
         texture, 
-        x - rect.width / 2, 
-        y - rect.height / 2, 
+        x - (rect.width * _drawScale) / 2,
+        y - (rect.height * _drawScale) / 2,
         rect
     );
 }

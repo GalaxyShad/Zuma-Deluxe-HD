@@ -83,6 +83,8 @@ HQC_Font    HQC_Artist_MakeFontFromTexture();
 void HQC_Artist_FreeFont(HQC_Font font);
 void HQC_Artist_SetImageFont(HQC_Font font);
 
+void HQC_Artist_DrawSetAlpha(float alpha);
+void HQC_Artist_DrawSetScale(float scale);
 void HQC_Artist_DrawSetAngle(float angle);
 void HQC_Artist_DrawSetAngleDegrees(float angleInDegrees);
 
@@ -245,6 +247,9 @@ void    HQC_Artist_DrawAnimation(HQC_Animation anim, float x, float y);
 
 void    HQC_Animation_SetSpeed(HQC_Animation anim, float spd);
 float   HQC_Animation_GetSpeed(HQC_Animation anim);
+
+void HQC_Animation_SetLooping(HQC_Animation anim, bool looping);
+bool HQC_Animation_IsEnded(HQC_Animation anim);
 
 void    HQC_Animation_Free(HQC_Animation anim);
 
