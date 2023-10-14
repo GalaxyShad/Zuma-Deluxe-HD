@@ -10,10 +10,8 @@ typedef struct Bullet {
 	float		spd;
 	float		direction;
 
-	void*		insertionBallLeft;
-	void*		insertionBallRight;
-
-	bool		isInsertingRight;
+	void*		insertionBall;
+	bool		isInsertionBallOnRight;
 
 	void*		insertionBallChain;
 
@@ -44,30 +42,14 @@ void Bullet_SetDirection(HBullet hbullet, float direction) {
 	bullet->direction = direction;
 }
 
-void Bullet_SetInsertion(HBullet hbullet, void* leftBall, void* rightBall, bool isInsertingRight) {
-	if (!leftBall && !rightBall) return;
+void Bullet_SetInsertion(HBullet hbullet, void* ball, bool isInsertingRight) {
+	if (!ball) return;
 	
 	Bullet* bullet = (Bullet*)hbullet;
 
-	bullet->insertionBallLeft = leftBall;
-	bullet->insertionBallRight = rightBall;
-
-	bullet->isInsertingRight = isInsertingRight;
-
-	bullet->insertionBallChain = (leftBall != NULL) ?
-		Ball_GetChain(leftBall) : Ball_GetChain(rightBall);
-}
-
-void* Bullet_GetInsertionBallLeft(HBullet hbullet) {
-	Bullet* bullet = (Bullet*)hbullet;
-
-	return bullet->insertionBallLeft;
-}
-
-void* Bullet_GetInsertionBallRight(HBullet hbullet) {
-	Bullet* bullet = (Bullet*)hbullet;
-
-	return bullet->insertionBallRight;
+	bullet->insertionBall = ball;
+	bullet->insertionBallChain = Ball_GetChain(ball);
+	bullet->isInsertionBallOnRight = isInsertingRight;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -109,36 +91,43 @@ static Bullet* _Bullet_CollisionBullet(Bullet* bullet) {
 	return NULL;
 }
 
+void* Bullet_GetInsertionBall(HBullet hbullet) {
+	Bullet* bil = (Bullet*)hbullet;
+
+	return bil->insertionBall;
+}
+
 static void _Bullet_UpdateInserting(Bullet* bullet, int index) {
 	if (!bullet->insertionBallChain)
 		return;
 
-	bullet->insertionBallLeft  = BallChain_HasBall(bullet->insertionBallChain, bullet->insertionBallLeft);
-	bullet->insertionBallRight = BallChain_HasBall(bullet->insertionBallChain, bullet->insertionBallRight);
 
-	if (!bullet->insertionBallLeft && !bullet->insertionBallRight) {
+	// Handle unexisting chain and collision with other bullet
+	bullet->insertionBall = BallChain_HasBall(bullet->insertionBallChain, bullet->insertionBall);
+
+	if (!bullet->insertionBall) {
 		_BulletList_DestroyBullet(bullet->bulletList, index);
 		return;
 	}
-
-	
 
 	Bullet* otherBullet = _Bullet_CollisionBullet(bullet);
 	if (otherBullet) {
 		otherBullet->insertTimer = 0;
 	}
 
+
+	// Detecting insert position
 	HLevel hlvl = BallChain_GetLevel(bullet->insertionBallChain);
 
-	
-	
-	float insertCurvePos = (!bullet->isInsertingRight && bullet->insertionBallLeft != NULL) ? 
-		(Ball_GetPositionOnCurve(bullet->insertionBallLeft)  + 32) :
-		(Ball_GetPositionOnCurve(bullet->insertionBallRight) - 32);
+	float insertCurvePos = (bullet->isInsertionBallOnRight) ? 
+		(Ball_GetPositionOnCurve(bullet->insertionBall) + 32) :
+		(Ball_GetPositionOnCurve(bullet->insertionBall) - 32);
 
 	v2f_t insertPos		 = Level_GetCurveCoords(hlvl, insertCurvePos);
 	v2f_t insertDirPoint = Level_GetCurveCoords(hlvl, insertCurvePos + 1);
 
+
+	// Animation stuff
 	bullet->direction = HQC_FAtan2(insertDirPoint.y - bullet->pos.y, insertDirPoint.x - bullet->pos.x);
 
 	HQC_Animation_SetFrame(
@@ -146,45 +135,55 @@ static void _Bullet_UpdateInserting(Bullet* bullet, int index) {
 		((int)insertCurvePos) % HQC_Animation_FramesCount(bullet->anim)
 	);
 
+
+	// Update position
 	bullet->pos.x = HQC_Lerp(bullet->pos.x, insertPos.x, INSERT_SPEED);
 	bullet->pos.y = HQC_Lerp(bullet->pos.y, insertPos.y, INSERT_SPEED);
 
-	if (bullet->insertionBallRight != NULL && bullet->insertionBallLeft != NULL) {
-		v2f_t ballRightPosCoords = Ball_GetPositionCoords(bullet->insertionBallRight);
-		for (
-			float dist = 0;
 
-			(dist < 48) && (bullet->insertionBallRight != NULL) && 
-			Ball_GetDistanceBetween(bullet->insertionBallLeft, bullet->insertionBallRight) < 64;
+	// Shift chain
+	void* fromBall = (bullet->isInsertionBallOnRight) ? Ball_Next(bullet->insertionBall) : bullet->insertionBall;
+	if (fromBall == NULL)
+		fromBall = bullet->insertionBall;
 
-			Ball_MoveSubChainFrom(bullet->insertionBallRight, 1),
-			ballRightPosCoords = Ball_GetPositionCoords(bullet->insertionBallRight),
-			dist = HQC_PointDistance(bullet->pos.x, bullet->pos.y, ballRightPosCoords.x, ballRightPosCoords.y)
-		);
-	}
+	void* prevBall = Ball_Previous(fromBall);
 
+	v2f_t ballRightPosCoords = Ball_GetPositionCoords(prevBall);
+
+	for (
+		float dist = 0;
+
+		(dist < 48) && (bullet->insertionBall != NULL) &&
+		(Ball_GetDistanceBetween(prevBall, fromBall) < 64);
+
+		Ball_MoveSubChainFrom(fromBall, 1),
+		ballRightPosCoords = Ball_GetPositionCoords(prevBall),
+		dist = HQC_PointDistance(bullet->pos.x, bullet->pos.y, ballRightPosCoords.x, ballRightPosCoords.y)
+	);
+
+
+	// Insert bullet to chain after insert animation
 	if (bullet->insertTimer == 0) {
 		HBall newBall;
 
-		if (bullet->insertionBallLeft != NULL) {
+		if (bullet->isInsertionBallOnRight) {
 			newBall = BallChain_InsertAfterBall(
 				bullet->insertionBallChain,
 				bullet->color,
-				bullet->insertionBallLeft,
+				bullet->insertionBall,
 				insertCurvePos
 			);
 		}
 		else {
 			newBall = BallChain_InsertBeforeBall(
-				Ball_GetChain(bullet->insertionBallRight),
+				bullet->insertionBallChain,
 				bullet->color,
-				bullet->insertionBallRight,
+				bullet->insertionBall,
 				insertCurvePos
 			);
 		}
 
-		Ball_BulletInsertDone(bullet->insertionBallLeft);
-		Ball_BulletInsertDone(bullet->insertionBallRight);
+		Ball_BulletInsertDone(bullet->insertionBall);
 
 		BallChain_ExplodeBalls(newBall);
 
@@ -200,7 +199,7 @@ static void _Bullet_UpdateInserting(Bullet* bullet, int index) {
 static void _Bullet_Update(Bullet* bullet, int index) {
 	if (bullet == NULL) return;
 
-	if (bullet->insertionBallLeft != NULL || bullet->insertionBallRight != NULL) {
+	if (bullet->insertionBall != NULL) {
 		_Bullet_UpdateInserting(bullet, index);
 		return;
 	}
@@ -261,10 +260,8 @@ void BulletList_Add(
 		bullet->direction		= bulletDirection;
 		bullet->spd				= bulletSpd;
 
-		bullet->insertionBallLeft  = NULL;
-		bullet->insertionBallRight = NULL;
-
-		bullet->isInsertingRight = false;
+		bullet->insertionBall			= NULL;
+		bullet->isInsertionBallOnRight	= false;
 
 		bullet->insertTimer		= INSERT_TIME;
 		bullet->bulletList		= bl;

@@ -16,10 +16,9 @@ v2f_t Bullet_GetPosition(HBullet hbullet);
 void Bullet_SetPosition(HBullet hbullet, v2f_t position);
 void Bullet_SetDirection(HBullet hbullet, float direction);
 
-void Bullet_SetInsertion(HBullet hbullet, void* leftBall, void* rightBall, bool isInsertingRight);
+void Bullet_SetInsertion(HBullet hbullet, void* ball, bool isInsertingRight);
 
-void* Bullet_GetInsertionBallLeft(HBullet hbullet);
-void* Bullet_GetInsertionBallRight(HBullet hbullet);
+void* Bullet_GetInsertionBall(HBullet hbullet);
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

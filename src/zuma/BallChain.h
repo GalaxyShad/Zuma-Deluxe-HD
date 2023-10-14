@@ -12,6 +12,7 @@ float Ball_GetPositionOnCurve(HBall hball);
 v2f_t Ball_GetPositionCoords(HBall ball);
 void  Ball_MoveSubChainFrom(HBall hball, float value);
 HBall Ball_Next(HBall hball);
+HBall Ball_Previous(HBall hball);
 void  Ball_BulletInsertDone(HBall hball);
 float Ball_GetDistanceBetween(HBall hballLeft, HBall hballRight);
 

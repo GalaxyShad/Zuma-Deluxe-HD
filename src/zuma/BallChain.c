@@ -56,6 +56,8 @@ static BallChain* _Cast(HBallChain hchain) {
 }
 
 
+
+
 static void _Ball_Destroy(Ball* ball) {
     if (!ball) return;
 
@@ -262,6 +264,12 @@ HBall Ball_Next(HBall hball) {
     return ball;
 }
 
+HBall Ball_Previous(HBall hball) {
+    Ball* ball = ((Ball*)hball)->prev;
+
+    return ball;
+}
+
 
 static Ball* _Ball_HandleBulletCollision(Ball* ball, HBullet bullet) {
     if (bullet == NULL) 
@@ -273,7 +281,7 @@ static Ball* _Ball_HandleBulletCollision(Ball* ball, HBullet bullet) {
     if (HQC_PointDistance(ballPos.x, ballPos.y, bulletPos.x, bulletPos.y) > 24 * 2)
         return;
 
-    if (Bullet_GetInsertionBallLeft(bullet) == NULL && Bullet_GetInsertionBallRight(bullet) == NULL) {
+    if (Bullet_GetInsertionBall(bullet) == NULL) {
         v2f_t pointLeft  = Level_GetCurveCoords(ball->chain->level, ball->pos - BALL_RADIUS);
         v2f_t pointRight = Level_GetCurveCoords(ball->chain->level, ball->pos + BALL_RADIUS);
 
@@ -282,19 +290,12 @@ static Ball* _Ball_HandleBulletCollision(Ball* ball, HBullet bullet) {
 
         ball->isBulletInserting = true;
 
-        if (distanceLeft < distanceRight) {
-            Bullet_SetInsertion(bullet, ball->prev, ball, true);
+        Bullet_SetInsertion(bullet, ball, (distanceRight < distanceLeft));
+        //Bullet_SetInsertion(bullet, ball, false);
+        //Bullet_SetInsertion(bullet, ball, true);
 
-            if (ball->prev != NULL)
-                ball->prev->isBulletInserting = true;
-        } else {
-            Bullet_SetInsertion(bullet, ball, ball->next, false);
 
-            if (ball->next != NULL)
-                ball->next->isBulletInserting = true;
-        }
-
-        printf(":((( %d\n", (distanceLeft < distanceRight));
+        printf(":((( %d\n", (distanceRight < distanceLeft));
     }
 }
 
