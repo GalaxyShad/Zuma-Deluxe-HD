@@ -3,11 +3,15 @@ A remake of the legendary 2003 PopCap game with improved textures and support fo
 
 ![preview](https://user-images.githubusercontent.com/52833080/162574925-d6c9f657-c2e4-43e3-860d-412e60f14834.png)
 
+
 ## [Gameplay video on YouTube](https://www.youtube.com/watch?v=VZYsNUUAozM&ab_channel=GalaxyShad)
 
 ## 🎥 Media 
 ![Zuma_Deluxe_HD_Remake](https://github.com/GalaxyShad/Zuma-Deluxe-HD/assets/52833080/a84a71f4-385a-4d01-b4ce-b9ccf47d6f85)
 ![Zuma_Deluxe_HD_Remake (1)](https://github.com/GalaxyShad/Zuma-Deluxe-HD/assets/52833080/a006a96f-805f-46d1-ac8f-340524df3cdd)
+
+## Direct link to download the latest build
+ [⬇️ [Stable] ZumaHD v0.1.0 Windows.zip ](https://github.com/GalaxyShad/Zuma-Deluxe-HD/releases/download/v0.1.0/zuma-hd-v0.1.0-windows.zip)
 
 ## ⛓️ Dependencies
 * [SDL2 	   2.26.5](https://www.libsdl.org)
