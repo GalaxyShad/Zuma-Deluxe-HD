@@ -4,6 +4,7 @@
 #define HQC_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 #include "UsefulTypes.h"
 

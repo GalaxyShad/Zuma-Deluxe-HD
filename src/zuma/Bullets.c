@@ -1,3 +1,4 @@
+#include <math.h>
 #include "Bullets.h"
 #include "BallChain.h"
 
@@ -227,7 +228,7 @@ void BulletList_Update(HBulletList bulletList) {
 	}
 }
 
-#include <corecrt_math_defines.h>
+
 void BulletList_Draw(HBulletList bulletList) {
 	BulletList* bl = (BulletList*)bulletList;
 

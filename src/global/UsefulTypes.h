@@ -9,6 +9,8 @@ typedef struct v2f {
     float x, y;
 } v2f_t;
 
+static v2f_t v2f_t_default = { 0,0 };
+
 typedef struct frect {
     float x, y, width, height;
 } frect_t;

@@ -1,3 +1,4 @@
+#include <math.h>
 #include "BallChain.h"
 
 #include "../global/HQC.h"
@@ -139,10 +140,10 @@ static bool prs = false;
 static void _print_pointer_list(BallChain* chain, Ball* dball) {
     
     int i = 0;
-    printf("chain %p\n", chain);
-    printf("start-%p end-%p\n", chain->start, chain->end);
+    HQC_Log("chain %p\n", chain);
+    HQC_Log("start-%p end-%p\n", chain->start, chain->end);
     for (Ball* ball = chain->start; ball != NULL; ball = ball->next) {
-        printf("[%d] p-%p m-%p n-%p     color-%d %d\n", i, ball->prev, ball, ball->next, ball->color, ball == dball);
+        HQC_Log("[%d] p-%p m-%p n-%p     color-%d %d\n", i, ball->prev, ball, ball->next, ball->color, ball == dball);
         i++;
     }
 }
@@ -166,7 +167,7 @@ float Ball_GetPositionOnCurve(HBall hball) {
     Ball* b = (Ball*)hball;
 
     if (b == NULL)
-        return;
+        return 0;
 
     return b->pos;
 }
@@ -175,7 +176,7 @@ v2f_t Ball_GetPositionCoords(HBall ball) {
     Ball* b = (Ball*)ball;
 
     if (b == NULL)
-        return;
+        return v2f_t_default;
 
     return  Level_GetCurveCoords(b->chain->level, (b->pos >= 0) ? b->pos : 0);
 }
@@ -191,7 +192,7 @@ HBallChain Ball_GetChain(HBall ball) {
     Ball* b = ((Ball*)ball);
 
     if (b == NULL)
-        return;
+        return NULL;
 
     return b->chain;
 }
@@ -199,7 +200,7 @@ HBallChain Ball_GetChain(HBall ball) {
 HBall BallChain_InsertBeforeBall(HBallChain hchain, BallColor color, HBall nextBall, float pos) {
     Ball* ball = (Ball*)nextBall;
 
-    if (ball == NULL) return;
+    if (ball == NULL) return NULL;
     
     Ball* newBall = _Ball_Create(ball->chain, color);
 
@@ -222,7 +223,7 @@ HBall BallChain_InsertBeforeBall(HBallChain hchain, BallColor color, HBall nextB
 HBall BallChain_InsertAfterBall(HBallChain hchain, BallColor color, HBall prevBall, float pos) {
     Ball* ball = (Ball*)prevBall;
 
-    if (ball == NULL) return;
+    if (ball == NULL) return NULL;
 
     Ball* newBall = _Ball_Create(ball->chain, color);
 
@@ -273,13 +274,13 @@ HBall Ball_Previous(HBall hball) {
 
 static Ball* _Ball_HandleBulletCollision(Ball* ball, HBullet bullet) {
     if (bullet == NULL) 
-        return;
+        return NULL;
 
     v2f_t ballPos   = Level_GetCurveCoords(ball->chain->level, (ball->pos >= 0) ? ball->pos : 0);
     v2f_t bulletPos = Bullet_GetPosition(bullet);
 
     if (HQC_PointDistance(ballPos.x, ballPos.y, bulletPos.x, bulletPos.y) > 24 * 2)
-        return;
+        return NULL;
 
     if (Bullet_GetInsertionBall(bullet) == NULL) {
         v2f_t pointLeft  = Level_GetCurveCoords(ball->chain->level, ball->pos - BALL_RADIUS);
@@ -293,9 +294,6 @@ static Ball* _Ball_HandleBulletCollision(Ball* ball, HBullet bullet) {
         Bullet_SetInsertion(bullet, ball, (distanceRight < distanceLeft));
         //Bullet_SetInsertion(bullet, ball, false);
         //Bullet_SetInsertion(bullet, ball, true);
-
-
-        printf(":((( %d\n", (distanceRight < distanceLeft));
     }
 }
 
@@ -315,7 +313,7 @@ void  Ball_BulletInsertDone(HBall hball) {
 }
 
 static Ball* _Ball_Update(Ball* ball) {
-    if (!ball) return;
+    if (!ball) return NULL;
 
     v2f_t pos = Level_GetCurveCoords(ball->chain->level, (ball->pos >= 0) ? ball->pos : 0);
 
@@ -366,8 +364,6 @@ static Ball* _Ball_Update(Ball* ball) {
     return ball->next;
 }
 
-#include <stdio.h>
-#include <corecrt_math_defines.h>
 static void _Ball_Draw(Ball* ball) {
     if (!ball) return;
     if (ball->pos < 0.0) return;
@@ -385,10 +381,6 @@ static void _Ball_Draw(Ball* ball) {
     HQC_Artist_DrawAnimation(ball->animation, pos.x, pos.y);
     HQC_Artist_DrawSetAlpha(1);
     HQC_Artist_DrawSetAngle(0);
-
-    char text[25];
-    sprintf(text, "s: %0.2lf %d", ball->pos, Level_GetCurveLength(ball->chain->level));
-    HQC_Artist_DrawTextShadow(Store_GetFontByID(FONT_CANCUN_8), text, pos.x, pos.y);
 }
 
 

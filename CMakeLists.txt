@@ -11,19 +11,46 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(isBassFound)
 set(isBassFxFound)
 
-find_library (isBassFound bass NO_CACHE PATHS "${PROJECT_SOURCE_DIR}/lib/bass/c/x64")
-if (${isBassFound} STREQUAL isBassFound-NOTFOUND)
+find_library (isBassFound bass NO_CACHE PATHS "${PROJECT_SOURCE_DIR}/lib/bass")
+message(STATUS ${isBassFound})
+if (${isBassFound} STREQUAL "isBassFound-NOTFOUND")
     message(STATUS "Downloading bass...")
-    file(DOWNLOAD "https://www.un4seen.com/files/bass24.zip" "${PROJECT_SOURCE_DIR}/lib/bass-win.zip" SHOW_PROGRESS)
-    file(ARCHIVE_EXTRACT INPUT "${PROJECT_SOURCE_DIR}/lib/bass-win.zip" DESTINATION "${PROJECT_SOURCE_DIR}/lib/bass")
+
+    set(bassLibBaseUrl "https://www.un4seen.com/files")
+    if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+        set(bassLibTag "bass24-osx")
+    elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+        set(bassLibTag "bass24")
+    elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+        set(bassLibTag "bass24-linux")
+    else ()
+        message(FATAL_ERROR "Unsupported OS. Download BASS LIB manually")
+    endif()
+
+    file(DOWNLOAD "${bassLibBaseUrl}/${bassLibTag}.zip" "${PROJECT_SOURCE_DIR}/lib/bass.zip" SHOW_PROGRESS)
+    file(ARCHIVE_EXTRACT INPUT "${PROJECT_SOURCE_DIR}/lib/bass.zip" DESTINATION "${PROJECT_SOURCE_DIR}/lib/bass")
+    find_library (isBassFound bass NO_CACHE PATHS "${PROJECT_SOURCE_DIR}/lib/bass")
 endif()
 
 
-find_library (isBassFxFound bass_fx NO_CACHE PATHS "${PROJECT_SOURCE_DIR}/lib/bass-fx/C/x64")
+find_library (isBassFxFound bass_fx NO_CACHE PATHS "${PROJECT_SOURCE_DIR}/lib/bass-fx")
 if (${isBassFxFound} STREQUAL isBassFxFound-NOTFOUND)
     message(STATUS "Downloading bass fx...")
-    file(DOWNLOAD "https://www.un4seen.com/files/z/0/bass_fx24.zip" "${PROJECT_SOURCE_DIR}/lib/bass-fx-win.zip" SHOW_PROGRESS)
-    file(ARCHIVE_EXTRACT INPUT "${PROJECT_SOURCE_DIR}/lib/bass-fx-win.zip" DESTINATION "${PROJECT_SOURCE_DIR}/lib/bass-fx")
+
+    set(bassLibBaseUrl "https://www.un4seen.com/files/z/0")
+    if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+        set(bassLibTag "bass_fx24-osx")
+    elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+        set(bassLibTag "bass_fx24")
+    elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+        set(bassLibTag "bass_fx24-linux")
+    else ()
+        message(FATAL_ERROR "Unsupported OS. Download BASS FX LIB manually")
+    endif()
+
+    file(DOWNLOAD "${bassLibBaseUrl}/${bassLibTag}.zip" "${PROJECT_SOURCE_DIR}/lib/bass-fx.zip" SHOW_PROGRESS)
+    file(ARCHIVE_EXTRACT INPUT "${PROJECT_SOURCE_DIR}/lib/bass-fx.zip" DESTINATION "${PROJECT_SOURCE_DIR}/lib/bass-fx")
+    find_library (isBassFxFound bass_fx NO_CACHE PATHS "${PROJECT_SOURCE_DIR}/lib/bass-fx")
 endif()
 
 include(FetchContent)
@@ -79,8 +106,8 @@ target_include_directories(
     ZumaHD PUBLIC
     "${PROJECT_BINARY_DIR}"
     "${PROJECT_SOURCE_DIR}/src"
-    "${PROJECT_SOURCE_DIR}/lib/bass/c"
-    "${PROJECT_SOURCE_DIR}/lib/bass-fx/C"
+    "${PROJECT_SOURCE_DIR}/lib/bass"
+    "${PROJECT_SOURCE_DIR}/lib/bass-fx"
 
     "${expat_SOURCE_DIR}/expat/lib"
     "${sdl2_SOURCE_DIR}/include"

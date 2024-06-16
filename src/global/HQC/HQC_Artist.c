@@ -272,6 +272,11 @@ void HQC_Artist_DrawText(HQC_Font hfont, const char* text, float x, float y) {
     SDL_Color sdlColor = { color.R, color.G, color.B, color.A };
 
     SDL_Surface* surface = TTF_RenderText_Solid(font->ttf, text, sdlColor);
+    if (!surface) {
+        const char* err = SDL_GetError();
+        HQC_RaiseErrorFormat("Cannot draw text of font (%p) with text \"%s\" at (%lf, %lf).\n"
+                             "SDL_Error - %s", hfont, text, x, y, err);
+    }
 
     SDL_Texture* texture = SDL_CreateTextureFromSurface(graphics.render, surface);
 
