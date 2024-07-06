@@ -46,7 +46,7 @@ static void _Game_Start() {
 
     HQC_Animation_SetSpeed(Store_GetAnimationByID(ANIM_SKULL), 0);
 
-    HQC_DJ_SetSoundPith(4);
+   // HQC_DJ_SetSoundPith(4);
     HQC_DJ_PlaySound(Store_GetSoundByID(SND_CHANT1));
 }
 

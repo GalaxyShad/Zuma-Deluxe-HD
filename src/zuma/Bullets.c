@@ -3,8 +3,8 @@
 #include "BallChain.h"
 
 #define ARR_SIZE		8
-#define INSERT_TIME		15
-#define INSERT_SPEED	0.5
+#define INSERT_TIME		10
+#define INSERT_SPEED	0.1
 
 typedef struct Bullet {
 	v2f_t		pos;
@@ -12,7 +12,7 @@ typedef struct Bullet {
 	float		direction;
 
 	void*		insertionBall;
-	bool		isInsertionBallOnRight;
+	bool		isShoudInsertBallToFront;
 
 	void*		insertionBallChain;
 
@@ -50,7 +50,7 @@ void Bullet_SetInsertion(HBullet hbullet, void* ball, bool isInsertingRight) {
 
 	bullet->insertionBall = ball;
 	bullet->insertionBallChain = Ball_GetChain(ball);
-	bullet->isInsertionBallOnRight = isInsertingRight;
+	bullet->isShoudInsertBallToFront = isInsertingRight;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -116,17 +116,30 @@ static void _Bullet_UpdateInserting(Bullet* bullet, int index) {
 		otherBullet->insertTimer = 0;
 	}
 
-
 	// Detecting insert position
 	HLevel hlvl = BallChain_GetLevel(bullet->insertionBallChain);
 
-	float insertCurvePos = (bullet->isInsertionBallOnRight) ? 
-		(Ball_GetPositionOnCurve(bullet->insertionBall) + 32) :
-		(Ball_GetPositionOnCurve(bullet->insertionBall) - 32);
+    HBall shiftingChainBall;
+	float insertCurvePos;
+    if (bullet->isShoudInsertBallToFront) {
+        insertCurvePos = Ball_GetPositionOnCurve(bullet->insertionBall) + 32;
+        shiftingChainBall = Ball_Next(bullet->insertionBall);
+    } else {
+        HBall insertionBallPrev = Ball_Previous(bullet->insertionBall);
+
+        float distance = Ball_GetDistanceBetweenBalls(insertionBallPrev, bullet->insertionBall);
+
+        if (distance < 64) {
+            insertCurvePos = Ball_GetPositionOnCurve(insertionBallPrev) + 32;
+            shiftingChainBall = bullet->insertionBall;
+        } else {
+            insertCurvePos = Ball_GetPositionOnCurve(bullet->insertionBall) - 32;
+            shiftingChainBall = NULL;
+        }
+    }
 
 	v2f_t insertPos		 = Level_GetCurveCoords(hlvl, insertCurvePos);
 	v2f_t insertDirPoint = Level_GetCurveCoords(hlvl, insertCurvePos + 1);
-
 
 	// Animation stuff
 	bullet->direction = HQC_FAtan2(insertDirPoint.y - bullet->pos.y, insertDirPoint.x - bullet->pos.x);
@@ -136,38 +149,27 @@ static void _Bullet_UpdateInserting(Bullet* bullet, int index) {
 		((int)insertCurvePos) % HQC_Animation_FramesCount(bullet->anim)
 	);
 
+    float ballSpd = Ball_Speed(bullet->insertionBall);
+    if (ballSpd < 0) ballSpd *= -1;
 
-	// Update position
-	bullet->pos.x = HQC_Lerp(bullet->pos.x, insertPos.x, INSERT_SPEED);
-	bullet->pos.y = HQC_Lerp(bullet->pos.y, insertPos.y, INSERT_SPEED);
+    // Update position
+    bullet->pos.x = HQC_Lerp(bullet->pos.x, insertPos.x, 0.5f);
+    bullet->pos.y = HQC_Lerp(bullet->pos.y, insertPos.y, 0.5f);
 
+    if (shiftingChainBall != NULL) {
+        v2f_t ballRightPosCoords = Ball_GetPositionCoords(shiftingChainBall);
 
-	// Shift chain
-	void* fromBall = (bullet->isInsertionBallOnRight) ? Ball_Next(bullet->insertionBall) : bullet->insertionBall;
-	if (fromBall == NULL)
-		fromBall = bullet->insertionBall;
-
-	void* prevBall = Ball_Previous(fromBall);
-
-	v2f_t ballRightPosCoords = Ball_GetPositionCoords(prevBall);
-
-	for (
-		float dist = 0;
-
-		(dist < 48) && (bullet->insertionBall != NULL) &&
-		(Ball_GetDistanceBetween(prevBall, fromBall) < 64);
-
-		Ball_MoveSubChainFrom(fromBall, 1),
-		ballRightPosCoords = Ball_GetPositionCoords(prevBall),
-		dist = HQC_PointDistance(bullet->pos.x, bullet->pos.y, ballRightPosCoords.x, ballRightPosCoords.y)
-	);
-
+        while (HQC_PointDistance(bullet->pos.x, bullet->pos.y, ballRightPosCoords.x, ballRightPosCoords.y) < 48.0f) {
+            Ball_MoveSubChainFrom(shiftingChainBall, 1);
+            ballRightPosCoords = Ball_GetPositionCoords(shiftingChainBall);
+        }
+    }
 
 	// Insert bullet to chain after insert animation
 	if (bullet->insertTimer == 0) {
 		HBall newBall;
 
-		if (bullet->isInsertionBallOnRight) {
+		if (bullet->isShoudInsertBallToFront) {
 			newBall = BallChain_InsertAfterBall(
 				bullet->insertionBallChain,
 				bullet->color,
@@ -205,8 +207,13 @@ static void _Bullet_Update(Bullet* bullet, int index) {
 		return;
 	}
 
-	bullet->pos.x += bullet->spd * HQC_FCos(bullet->direction);
-	bullet->pos.y += bullet->spd * HQC_FSin(bullet->direction);
+    v2i_t mpos = HQC_Input_MouseGetPosition();
+
+    bullet->pos.x = mpos.x;
+    bullet->pos.y = mpos.y;
+
+//	bullet->pos.x += bullet->spd * HQC_FCos(bullet->direction);
+//	bullet->pos.y += bullet->spd * HQC_FSin(bullet->direction);
 
 	if (bullet->pos.x < 0 || bullet->pos.x > 1280 || bullet->pos.y < 0 || bullet->pos.y > 720) {
 		_BulletList_DestroyBullet(bullet->bulletList, index);
@@ -262,7 +269,7 @@ void BulletList_Add(
 		bullet->spd				= bulletSpd;
 
 		bullet->insertionBall			= NULL;
-		bullet->isInsertionBallOnRight	= false;
+		bullet->isShoudInsertBallToFront	= false;
 
 		bullet->insertTimer		= INSERT_TIME;
 		bullet->bulletList		= bl;

@@ -150,6 +150,7 @@ v2f_t Level_GetCurveCoords(HLevel hlevel, float pos) {
 
     int len = Level_GetCurveLength(hlevel);
     if ((int)pos > len-1) pos = len-1;
+    if (pos <= 0.0f) pos = 0.0f;
 
     CurveDot* cdot = (CurveDot*)HQC_Container_VectorGet(level->curveA->dotList, (int)pos);
     v2f_t coords = { (cdot->x+104) * 1.5, cdot->y * 1.5 };

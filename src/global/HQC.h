@@ -7,8 +7,7 @@
 #include <stddef.h>
 
 #include "UsefulTypes.h"
-
-typedef int HQC_Key;
+#include "HQC_Key.h"
 
 typedef int bool;
 #define true  1
@@ -42,7 +41,7 @@ void HQC_CreateWindow(const char* caption, int width, int height);
 v2i_t   HQC_Input_MouseGetPosition();
 bool    HQC_Input_MouseLeftPressed();
 bool    HQC_Input_MouseLeft();
-HQC_Key HQC_Input_KeyboardGetKey();
+bool    HQC_Input_IsKeyDown(HQC_Key key);
 
 void        HQC_Delay(uint32_t ms);
 uint32_t    HQC_GetTicks();
@@ -61,7 +60,7 @@ void  HQC_Memory_Free(void* pmem);
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-//Strings
+// Strings
 size_t       HQC_StringLength(const char* src);
 size_t       HQC_StringSize(const char* src);
 const char*  HQC_StringClone(const char* src);
@@ -95,6 +94,7 @@ void HQC_Artist_DrawTextureRect(HQC_Texture texture, float x, float y, irect_t r
 void HQC_Artist_DrawLine(float x1, float y1, float x2, float y2);
 void HQC_Artist_DrawPoint(float x, float y);
 
+void HQC_Artist_SetDrawColorMod(uint32_t color);
 
 void HQC_Artist_SetColor(HQC_Color color);
 HQC_Color  HQC_Artist_GetColor();
@@ -120,7 +120,9 @@ void HQC_Artist_Display();
 HQC_Font HQC_Font_LoadTrueType(const char* filepath, int size);
 
 void HQC_Artist_DrawText(HQC_Font hfont, const char* text, float x, float y);
+void HQC_Artist_DrawTextF(HQC_Font hfont, float x, float y, const char* format, ...);
 void HQC_Artist_DrawTextShadow(HQC_Font hfont, const char* text, float x, float y);
+void HQC_Artist_DrawTextShadowF(HQC_Font hfont, float x, float y, const char* format, ...);
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////

@@ -100,6 +100,7 @@ FILE(GLOB_RECURSE SOURCES RELATIVE ${PROJECT_SOURCE_DIR} "src/*.c")
 add_executable(
     ZumaHD
     ${SOURCES}
+        src/global/HQC_Key.h
 )
 
 target_include_directories(

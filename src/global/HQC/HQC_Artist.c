@@ -60,14 +60,29 @@ bool HQC_Input_MouseLeftPressed() {
     return HQC_Input_MouseLeft();
 }
 
+static bool KEYS[HQC_NUM_SCANCODES] = { 0 };
+
 bool HQC_Window_PollEvent(HQC_Event* event) {
     SDL_Event sdlEvent;
     bool res = SDL_PollEvent(&sdlEvent);
 
     *event = (int)sdlEvent.type;
 
+    switch (sdlEvent.type) {
+        case SDL_KEYDOWN:
+            KEYS[sdlEvent.key.keysym.scancode] = true;
+            break;
+        case SDL_KEYUP:
+            KEYS[sdlEvent.key.keysym.scancode] = false;
+            break;
+    }
+
     return res;
 };
+
+bool HQC_Input_IsKeyDown(HQC_Key key) {
+    return KEYS[key] == true;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -75,6 +90,7 @@ bool HQC_Window_PollEvent(HQC_Event* event) {
 static float _drawAngle = 0;
 static float _drawScale = 1;
 static float _drawAlpha = 1;
+static uint32_t _drawTextureColorMod = C_WHITE;
 
 void HQC_Artist_DrawSetAlpha(float alpha) {
     _drawAlpha = alpha;
@@ -153,6 +169,11 @@ void HQC_Artist_DrawTextureRectLeft(HQC_Texture texture, float x, float y, irect
     SDL_FRect posRect = {x, y, rect.width * _drawScale, rect.height * _drawScale};
 
     SDL_SetTextureAlphaMod(sdlTexture, (Uint8)(_drawAlpha * 255));
+    SDL_SetTextureColorMod(
+            sdlTexture,
+            (_drawTextureColorMod >> 16) & 0xFF,
+            (_drawTextureColorMod >> 8) & 0xFF,
+            (_drawTextureColorMod >> 0) & 0xFF);
 
     SDL_RenderCopyExF(
         graphics.render, 
@@ -187,6 +208,9 @@ void HQC_Artist_DrawPoint(float x, float y) {
     SDL_RenderDrawPointF(graphics.render, x, y);
 }
 
+void HQC_Artist_SetDrawColorMod(uint32_t color) {
+    _drawTextureColorMod = color;
+}
 
 void HQC_Artist_SetColor(HQC_Color color) {
     SDL_SetRenderDrawColor(
@@ -286,6 +310,23 @@ void HQC_Artist_DrawText(HQC_Font hfont, const char* text, float x, float y) {
     SDL_DestroyTexture(texture);
 }
 
+void HQC_Artist_DrawTextF(HQC_Font hfont, float x, float y, const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+
+    int len = vsnprintf(NULL, 0, format, args);
+    va_end(args);
+
+    // format message
+    char* msg = malloc(len + 1);
+    va_start(args, format);
+    vsnprintf(msg, len + 1, format, args);
+    va_end(args);
+
+    HQC_Artist_DrawText(hfont, msg, x, y);
+
+    free(msg);
+}
 
 void HQC_Artist_DrawTextShadow(HQC_Font hfont, const char* text, float x, float y) {
     uint32_t pcolor = HQC_Artist_GetColorHex();

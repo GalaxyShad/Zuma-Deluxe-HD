@@ -2,7 +2,6 @@
 
 #define VECTOR_INITIAL_CAPACITY 8
 
-
 typedef struct Vector {
     size_t capacity;
 

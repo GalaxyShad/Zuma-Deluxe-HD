@@ -28,6 +28,10 @@ typedef struct Ball {
     bool        isGoingBack;
     bool        isBulletInserting;
 
+    bool        isGluedToBack;
+
+    bool        isExploding;
+
     BallColor   color;
     BallBonus   bonus;
 
@@ -56,11 +60,8 @@ static BallChain* _Cast(HBallChain hchain) {
     return (BallChain*)hchain;
 }
 
-
-
-
-static void _Ball_Destroy(Ball* ball) {
-    if (!ball) return;
+static Ball* _Ball_Destroy(Ball* ball) {
+    if (!ball) return NULL;
 
     if (ball->prev != NULL)
         ball->prev->next = ball->next;
@@ -72,50 +73,15 @@ static void _Ball_Destroy(Ball* ball) {
     else 
         ball->chain->end = ball->prev;
 
+    if (ball->next != NULL)
+        ball->next->isGluedToBack = false;
+
+    Ball* nextBall = ball->next;
+
     HQC_Memory_Free(ball);
+
+    return nextBall;
 }
-
-
-// returns pointer to next ball after removing
-HBall BallChain_ExplodeBalls(HBall hstartBall) {
-    Ball* startBall = (Ball*)hstartBall;
-    
-    if (!startBall) return NULL;
-    
-    int count = 0;
-
-    Ball* right;
-    for (right = startBall; right != NULL; right = right->next) {
-        if (right->color != startBall->color) break;
-        count++;
-    }
-
-    Ball* left;
-    for (left = startBall; left->prev != NULL; left = left->prev) {
-        if (left->color != startBall->color) break;
-        count++;
-    }
-
-    if (left->color != startBall->color){
-        left = left->next;
-        count--;
-    }
-
-    if (count < 3)
-        return startBall;
-
-    Ball* ball;
-    for (ball = left; (ball != right) && (ball != NULL); ) { 
-        Ball* next = ball->next;
-        _Ball_Destroy(ball);
-        ball = next;
-    }
-    
-    HQC_DJ_PlaySound(Store_GetSoundByID(SND_CHIME1));
-
-    return ball;
-}
-
 
 static Ball* _Ball_Create(BallChain* chain, BallColor color) {
     Ball* ball = HQC_Memory_Allocate(sizeof(*ball));
@@ -125,6 +91,8 @@ static Ball* _Ball_Create(BallChain* chain, BallColor color) {
     ball->spd   = 0.0;
     ball->isGoingBack = false;
     ball->isBulletInserting = false;
+    ball->isGluedToBack = false;
+    ball->isExploding = false;
     ball->prev  = NULL;
     ball->next  = NULL;
     ball->bonus = BALL_BONUS_NONE;
@@ -133,19 +101,6 @@ static Ball* _Ball_Create(BallChain* chain, BallColor color) {
     ball->animation = HQC_Animation_Clone(Store_GetAnimationByID(ANIM_BALL_BLUE + ball->color));
 
     return ball;
-}
-
-static bool prs = false;
-
-static void _print_pointer_list(BallChain* chain, Ball* dball) {
-    
-    int i = 0;
-    HQC_Log("chain %p\n", chain);
-    HQC_Log("start-%p end-%p\n", chain->start, chain->end);
-    for (Ball* ball = chain->start; ball != NULL; ball = ball->next) {
-        HQC_Log("[%d] p-%p m-%p n-%p     color-%d %d\n", i, ball->prev, ball, ball->next, ball->color, ball == dball);
-        i++;
-    }
 }
 
 static bool _Ball_IsCollidingBack(Ball* ball, float expand) {
@@ -163,6 +118,48 @@ static bool _Ball_IsCollidingFront(Ball* ball) {
     return (ball->next->pos - 32 <= ball->pos);
 }
 
+// returns pointer to next ball after removing
+HBall BallChain_ExplodeBalls(HBall hstartBall) {
+    Ball* startBall = (Ball*)hstartBall;
+
+    if (!startBall) return NULL;
+
+    int count = 0;
+
+    Ball* right;
+    for (right = startBall; right != NULL; right = right->next) {
+        if (right->color != startBall->color || !_Ball_IsCollidingBack(right, 10)) break;
+        count++;
+    }
+
+    Ball* left;
+    for (left = startBall; left->prev != NULL; left = left->prev) {
+        if (left->color != startBall->color || !_Ball_IsCollidingBack(left, 10)) break;
+        count++;
+    }
+
+    if (left->color != startBall->color) {
+        left = left->next;
+        count--;
+    }
+
+    if (count < 3)
+        return startBall;
+
+    Ball* ball;
+    for (ball = left; (ball != right) && (ball != NULL); ball = ball->next ) {
+        ball->isExploding = true;
+        HQC_Animation_Free(ball->animation);
+        ball->animation = HQC_Animation_Clone(Store_GetAnimationByID(ANIM_BALL_DESTROY));
+        HQC_Animation_SetFrame(ball->animation, 0);
+        HQC_Animation_SetLooping(ball->animation, false);
+    }
+
+    HQC_DJ_PlaySound(Store_GetSoundByID(SND_CHIME1));
+
+    return ball;
+}
+
 float Ball_GetPositionOnCurve(HBall hball) {
     Ball* b = (Ball*)hball;
 
@@ -178,14 +175,7 @@ v2f_t Ball_GetPositionCoords(HBall ball) {
     if (b == NULL)
         return v2f_t_default;
 
-    return  Level_GetCurveCoords(b->chain->level, (b->pos >= 0) ? b->pos : 0);
-}
-
-float Ball_GetDistanceBetween(HBall hballLeft, HBall hballRight) {
-    Ball* left = (Ball*)hballLeft;
-    Ball* right = (Ball*)hballRight;
-
-    return right->pos - left->pos;
+    return Level_GetCurveCoords(b->chain->level, (b->pos >= 0) ? b->pos : 0);
 }
 
 HBallChain Ball_GetChain(HBall ball) {
@@ -204,7 +194,7 @@ HBall BallChain_InsertBeforeBall(HBallChain hchain, BallColor color, HBall nextB
     
     Ball* newBall = _Ball_Create(ball->chain, color);
 
-    newBall->pos = pos;//ball->pos - 32;
+    newBall->pos = pos;
 
     newBall->prev = ball->prev;
     newBall->next = ball;
@@ -215,7 +205,12 @@ HBall BallChain_InsertBeforeBall(HBallChain hchain, BallColor color, HBall nextB
         ball->chain->start = newBall;
     }
 
+    ball->isGluedToBack = true;
     ball->prev = newBall;
+
+    if (_Ball_IsCollidingBack(newBall, 4)) {
+        newBall->isGluedToBack = true;
+    }
 
     return newBall;
 }
@@ -227,10 +222,11 @@ HBall BallChain_InsertAfterBall(HBallChain hchain, BallColor color, HBall prevBa
 
     Ball* newBall = _Ball_Create(ball->chain, color);
 
-    newBall->pos = pos;//ball->pos + 32;
+    newBall->pos = pos;
 
     newBall->prev = ball;
     newBall->next = ball->next;
+    newBall->isGluedToBack = true;
 
     if (ball->next != NULL) {
         ball->next->prev = newBall;
@@ -243,6 +239,13 @@ HBall BallChain_InsertAfterBall(HBallChain hchain, BallColor color, HBall prevBa
     return newBall;
 }
 
+float Ball_Speed(HBall hball) {
+    Ball* ball = ((Ball*)hball);
+
+    if (ball == NULL) return 0.f;
+
+    return ball->spd;
+}
 
 void  Ball_MoveSubChainFrom(HBall hball, float value) {
     Ball* ball = ((Ball*)hball);
@@ -271,6 +274,11 @@ HBall Ball_Previous(HBall hball) {
     return ball;
 }
 
+float Ball_GetDistanceBetweenBalls(HBall a, HBall b) {
+    if (a == NULL || b == NULL) return 0.0f;
+
+    return ((Ball*)b)->pos - ((Ball*)a)->pos;
+}
 
 static Ball* _Ball_HandleBulletCollision(Ball* ball, HBullet bullet) {
     if (bullet == NULL) 
@@ -290,10 +298,9 @@ static Ball* _Ball_HandleBulletCollision(Ball* ball, HBullet bullet) {
         float distanceRight = HQC_PointDistance(bulletPos.x, bulletPos.y, pointRight.x, pointRight.y);
 
         ball->isBulletInserting = true;
-
         Bullet_SetInsertion(bullet, ball, (distanceRight < distanceLeft));
-        //Bullet_SetInsertion(bullet, ball, false);
-        //Bullet_SetInsertion(bullet, ball, true);
+
+        HQC_DJ_PlaySound(Store_GetSoundByID(SND_BALLCLICK2));
     }
 }
 
@@ -315,51 +322,58 @@ void  Ball_BulletInsertDone(HBall hball) {
 static Ball* _Ball_Update(Ball* ball) {
     if (!ball) return NULL;
 
-    v2f_t pos = Level_GetCurveCoords(ball->chain->level, (ball->pos >= 0) ? ball->pos : 0);
-
     ball->pos += ball->spd;
     if (ball->pos >= (float)Level_GetCurveLength(ball->chain->level)) {
         ball->pos -= (float)Level_GetCurveLength(ball->chain->level);
         
         return ball->next;
     }
-    
 
     _Ball_HandleBulletListCollision(ball);
  
     if (ball->prev == NULL) {
-        ball->spd += 0.025; 
+//        ball->spd += 0.025;
 
-        if (ball->spd > ball->chain->spd)
-            ball->spd = ball->chain->spd;
+        if (HQC_Input_IsKeyDown(HQC_KEY_D))
+            ball->spd += 0.125f;
+        else if (HQC_Input_IsKeyDown(HQC_KEY_A))
+            ball->spd -= 0.125f;
+
+//        if (ball->spd > ball->chain->spd)
+//            ball->spd = ball->chain->spd;
 
         return ball->next;
     }
 
+    if (ball->isGluedToBack) {
+        ball->pos = ball->prev->pos + 32;
+        ball->spd = ball->prev->spd;
+    } else {
 
-    if (_Ball_IsCollidingBack(ball, 8)) {
-        if (ball->isGoingBack && _Ball_IsCollidingBack(ball, 0)) {
-            for (Ball* b = ball->prev; b != NULL; b = b->prev)
+        if (_Ball_IsCollidingBack(ball, 0)) {
+            ball->isGluedToBack = true;
+            HQC_DJ_PlaySound(Store_GetSoundByID(SND_BALLCLICK1));
+        }
+
+        if (ball->spd < 0.0f && _Ball_IsCollidingBack(ball, 0)) {
+            for (Ball* b = ball->prev; b != NULL; b = b->prev) {
                 b->spd = ball->spd / 2;
 
-            ball->isGoingBack = false;
+                if (b->prev != NULL && b->prev->isGluedToBack) {
+                    break;
+                }
+            }
 
             return BallChain_ExplodeBalls(ball);
         }
 
-        ball->pos = ball->prev->pos + 32;
-        ball->spd = ball->prev->spd;
-    }
-
-    
-    if (!_Ball_IsCollidingBack(ball, 8)) {
-        if (ball->prev->color == ball->color && !ball->isBulletInserting) {
-            ball->spd -= 0.05;
-            ball->isGoingBack = true;
+        if (ball->prev->color == ball->color) {
+            ball->spd -= 0.05f;
         } else {
             ball->spd = 0;
         }
     }
+
 
     return ball->next;
 }
@@ -371,16 +385,37 @@ static void _Ball_Draw(Ball* ball) {
     v2f_t pos       = Level_GetCurveCoords(ball->chain->level, ball->pos);
     v2f_t posNext   = Level_GetCurveCoords(ball->chain->level, ball->pos+1);
 
-    HQC_Animation_SetFrame(ball->animation, ((int)ball->pos) % HQC_Animation_FramesCount(ball->animation));
+    if (ball->isExploding) {
+        HQC_Animation_Tick(ball->animation);
 
-    float angle = HQC_FAtan2(pos.y - posNext.y, pos.x - posNext.x) + M_PI_2;
-    float alpha = HQC_FMin(ball->pos / 32.f, 1.f);
+        uint32_t color = 0;
+        switch (ball->color) {
+            case BALL_BLUE:     color = 0x00FEFD; break;
+            case BALL_GREEN:    color = 0x00FA44; break;
+            case BALL_YELLOW:   color = 0xFDFD06; break;
+            case BALL_RED:      color = 0xF96F4C; break;
+            case BALL_PURPLE:   color = 0xFD88F8; break;
+            case BALL_GRAY:     color = 0xFDEABB; break;
+        }
 
-    HQC_Artist_DrawSetAngle(angle);
-    HQC_Artist_DrawSetAlpha(alpha);
-    HQC_Artist_DrawAnimation(ball->animation, pos.x, pos.y);
-    HQC_Artist_DrawSetAlpha(1);
-    HQC_Artist_DrawSetAngle(0);
+        HQC_Artist_SetDrawColorMod(color);
+        HQC_Artist_DrawAnimation(ball->animation, pos.x, pos.y);
+        HQC_Artist_SetDrawColorMod(C_WHITE);
+
+    } else {
+        HQC_Animation_SetFrame(ball->animation, ((int) ball->pos) % HQC_Animation_FramesCount(ball->animation));
+
+        float angle = HQC_FAtan2(pos.y - posNext.y, pos.x - posNext.x) + M_PI_2;
+        float alpha = HQC_FMin(ball->pos / 32.f, 1.f);
+
+        HQC_Artist_DrawSetAngle(angle);
+        HQC_Artist_DrawSetAlpha(alpha);
+        HQC_Artist_DrawAnimation(ball->animation, pos.x, pos.y);
+        HQC_Artist_DrawSetAlpha(1);
+        HQC_Artist_DrawSetAngle(0);
+    }
+
+    HQC_Artist_DrawTextF(Store_GetFontByID(FONT_CANCUN_8), pos.x, pos.y, "%p", ball);
 }
 
 
@@ -430,6 +465,13 @@ void BallChain_Update(HBallChain hchain) {
     BallChain* chain = _Cast(hchain);
 
     for (Ball* ball = chain->start; ball != NULL; ball = _Ball_Update(ball));
+
+    for (Ball* ball = chain->start; ball != NULL; ) {
+        Ball* nextBall = ball->next;
+        if (ball->isExploding && HQC_Animation_IsEnded(ball->animation))
+            _Ball_Destroy(ball);
+        ball = nextBall;
+    }
 }
 
 
@@ -490,7 +532,8 @@ static void _Generator_UpdateFastMode(Generator* gen) {
     Ball* headBall = gen->ballChain->start;
 
     if (!headBall) {
-        BallChain_AddToStart(gen->ballChain, 1);
+        Ball* ball = BallChain_AddToStart(gen->ballChain, 1);
+        ball ->isGluedToBack = true;
         return;
     }
 
@@ -498,6 +541,7 @@ static void _Generator_UpdateFastMode(Generator* gen) {
 
     if (headBall->pos > 32) {
         Ball* ball = BallChain_InsertBeforeBall(gen->ballChain, HQC_RandomRange(0, 3), headBall, headBall->pos - 32);
+        ball->isGluedToBack = true;
         ball->spd = headBall->spd;
         gen->fastModeBallsCountdown--;
     }
@@ -517,12 +561,14 @@ void BallChainGenerator_Update(HBallChainGenerator hballChainGenerator) {
     Ball* headBall = gen->ballChain->start;
 
     if (!headBall) {
-        BallChain_AddToStart(gen->ballChain, 1);
+        Ball* ball = BallChain_AddToStart(gen->ballChain, 1);
+        ball ->isGluedToBack = true;
         return;
     }
 
     if (headBall->pos > 32) {
         Ball* ball = BallChain_InsertBeforeBall(gen->ballChain, HQC_RandomRange(0, 3), headBall, 0);
+        ball->isGluedToBack = true;
         ball->spd = headBall->spd;
     }
 }
