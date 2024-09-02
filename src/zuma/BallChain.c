@@ -1,8 +1,10 @@
 #include <math.h>
 #include "BallChain.h"
+#include "FloatingText.h"
 
 #include "../global/HQC.h"
 #include "ResourceStore.h"
+#include "Statistics.h"
 
 #define BALL_RADIUS         24
 #define BALLS_TO_EXPLODE    3
@@ -118,6 +120,19 @@ static bool _Ball_IsCollidingFront(Ball* ball) {
     return (ball->next->pos - 32 <= ball->pos);
 }
 
+static uint32_t Ball_GetColorUint32_(Ball* ball) {
+    switch (ball->color) {
+        case BALL_BLUE:     return 0x00FEFD;
+        case BALL_GREEN:    return 0x00FA44;
+        case BALL_YELLOW:   return 0xFDFD06;
+        case BALL_RED:      return 0xF96F4C;
+        case BALL_PURPLE:   return 0xFD88F8;
+        case BALL_GRAY:     return 0xFDEABB;
+
+        default:            return 0;
+    }
+}
+
 // returns pointer to next ball after removing
 HBall BallChain_ExplodeBalls(HBall hstartBall) {
     Ball* startBall = (Ball*)hstartBall;
@@ -145,6 +160,11 @@ HBall BallChain_ExplodeBalls(HBall hstartBall) {
 
     if (count < 3)
         return startBall;
+
+    v2f_t pos = Ball_GetPositionCoords(hstartBall);
+
+    Statistics_AddExplodedBalls(count, startBall->color);
+    Statistics_BuildAndInstantiateFloatingText(pos.x, pos.y);
 
     Ball* ball;
     for (ball = left; (ball != right) && (ball != NULL); ball = ball->next ) {
@@ -388,15 +408,7 @@ static void _Ball_Draw(Ball* ball) {
     if (ball->isExploding) {
         HQC_Animation_Tick(ball->animation);
 
-        uint32_t color = 0;
-        switch (ball->color) {
-            case BALL_BLUE:     color = 0x00FEFD; break;
-            case BALL_GREEN:    color = 0x00FA44; break;
-            case BALL_YELLOW:   color = 0xFDFD06; break;
-            case BALL_RED:      color = 0xF96F4C; break;
-            case BALL_PURPLE:   color = 0xFD88F8; break;
-            case BALL_GRAY:     color = 0xFDEABB; break;
-        }
+        uint32_t color = Ball_GetColorUint32_(ball);
 
         HQC_Artist_SetDrawColorMod(color);
         HQC_Artist_DrawAnimation(ball->animation, pos.x, pos.y);

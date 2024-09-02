@@ -2,10 +2,9 @@
 
 #include "../Level.h"
 #include "../Frog.h"
-#include "../ResourceStore.h"
-#include "../Menu.h"
 #include "../BallChain.h"
-#include "../Bullets.h"
+#include "../FloatingText.h"
+#include "../Statistics.h"
 
 struct {
     HFrog  frog;
@@ -48,10 +47,16 @@ static void _Game_Start() {
 
    // HQC_DJ_SetSoundPith(4);
     HQC_DJ_PlaySound(Store_GetSoundByID(SND_CHANT1));
+
+    FloatingTextFactory_Init();
+
+    Statistics_Init();
 }
 
 
 static void _Game_Update() {
+
+    FloatingTextFactory_Update();
     BallChain_Update(game.chain);
     BallChainGenerator_Update(game.generator);
 
@@ -90,6 +95,8 @@ static void _Game_Draw() {
     BulletList_Draw(game.bulletList);
 
     Frog_DrawTop(game.frog);
+
+    FloatingTextFactory_Draw();
 }
 
 static void _Game_Free() {

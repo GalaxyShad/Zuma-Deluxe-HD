@@ -285,6 +285,13 @@ HQC_Font HQC_Font_LoadTrueType(const char* filepath, int size) {
     return font;
 }
 
+void HQC_Artist_SetFontOutline(HQC_Font hfont, int outlineSize) {
+    Font* font = (Font*)hfont;
+
+    if (font->ttf == NULL) return;
+
+    TTF_SetFontOutline(font->ttf, outlineSize);
+}
 
 void HQC_Artist_DrawText(HQC_Font hfont, const char* text, float x, float y) {
     Font* font = (Font*)hfont;
@@ -295,7 +302,8 @@ void HQC_Artist_DrawText(HQC_Font hfont, const char* text, float x, float y) {
     HQC_Color color = HQC_Artist_GetColor();
     SDL_Color sdlColor = { color.R, color.G, color.B, color.A };
 
-    SDL_Surface* surface = TTF_RenderText_Solid(font->ttf, text, sdlColor);
+    TTF_SetFontWrappedAlign(font->ttf, TTF_WRAPPED_ALIGN_CENTER);
+    SDL_Surface* surface = TTF_RenderText_Solid_Wrapped(font->ttf, text, sdlColor, 0);
     if (!surface) {
         const char* err = SDL_GetError();
         HQC_RaiseErrorFormat("Cannot draw text of font (%p) with text \"%s\" at (%lf, %lf).\n"

@@ -101,6 +101,10 @@ add_executable(
     ZumaHD
     ${SOURCES}
         src/global/HQC_Key.h
+        src/zuma/FloatingText.h
+        src/zuma/FloatingText.c
+        src/zuma/Statistics.c
+        src/zuma/Statistics.h
 )
 
 target_include_directories(

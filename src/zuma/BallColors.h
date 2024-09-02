@@ -6,5 +6,6 @@ typedef enum BallColor {
     BALL_YELLOW,
     BALL_RED,
     BALL_PURPLE,
-    BALL_GRAY
+    BALL_GRAY,
+    BALL_NONE
 } BallColor;
