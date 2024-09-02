@@ -26,7 +26,7 @@ int HQC_RandomRange(int min, int max) {
 }
 
 
-static void _RaiseSDLError(const char* errmsg) {
+static void RaiseSDLError__(const char* errmsg) {
     HQC_RaiseErrorHeaderFormat(
         "SDL Error",
         "%s [%s]",
@@ -35,17 +35,9 @@ static void _RaiseSDLError(const char* errmsg) {
 }
 
 
-static void _RaiseSDLImageError(const char* errmsg) {
-    HQC_RaiseErrorHeaderFormat(
-        "SDL Image Error",
-        "%s [%s]",
-        errmsg, IMG_GetError()
-    );
-}
-
-static void _VideoInit() {
+static void VideoInit__() {
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
-        _RaiseSDLError("Init fail");
+        RaiseSDLError__("Init fail");
 
     int flags = IMG_INIT_JPG | IMG_INIT_PNG;
     if (!(IMG_Init(flags) & flags))
@@ -54,11 +46,11 @@ static void _VideoInit() {
 
 
     if (TTF_Init() != 0)
-        _RaiseSDLError("SDL TTF Init Fail");
+        RaiseSDLError__("SDL TTF Init Fail");
 }
 
 
-static void _AudioInit() {
+static void AudioInit__() {
     if (BASS_Init(
         -1,
         MUSIC_FREQUENCY,
@@ -73,8 +65,8 @@ static void _AudioInit() {
 
 
 void HQC_Init() {
-    _VideoInit();
-    _AudioInit();
+    VideoInit__();
+    AudioInit__();
 }
 
 
@@ -93,7 +85,7 @@ float HQC_DegreesToRadian(float degree) {
 }
 
 float HQC_Lerp(float start, float end, float val) {
-    return start * (1.0 - val) + end * val;
+    return start * (1.0f - val) + end * val;
 }
 
 float HQC_FAtan2(float y, float x) {
@@ -124,6 +116,6 @@ float HQC_FMax(float a, float b) {
 float HQC_PointDistance(float x1, float y1, float x2, float y2) {
     float h = (x2 - x1);
     float v = (y2 - y1);
-    
+
     return HQC_FSqrt(h * h + v * v);
 }

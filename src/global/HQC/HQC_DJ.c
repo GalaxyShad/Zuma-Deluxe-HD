@@ -35,7 +35,7 @@ void HQC_DJ_PlaySound(HQC_Sound sound) {
     HSTREAM snd = *((HSTREAM*)sound);
 
     BASS_ChannelSetAttribute(snd, BASS_ATTRIB_TEMPO_PITCH, _soundPitch);
-    // BASS_ChannelSetAttribute(sound, BASS_ATTRIB_VOL, engine.volSnd);
+    BASS_ChannelSetAttribute(snd, BASS_ATTRIB_VOL, 0.1f);
     BASS_ChannelPlay(snd, TRUE);
 }
 

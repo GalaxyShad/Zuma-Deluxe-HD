@@ -171,19 +171,17 @@ static void _Bullet_UpdateInserting(Bullet* bullet, int index) {
 
 		if (bullet->isShoudInsertBallToFront) {
 			newBall = BallChain_InsertAfterBall(
-				bullet->insertionBallChain,
-				bullet->color,
-				bullet->insertionBall,
-				insertCurvePos
-			);
+                    bullet->color,
+                    bullet->insertionBall,
+                    insertCurvePos
+            );
 		}
 		else {
 			newBall = BallChain_InsertBeforeBall(
-				bullet->insertionBallChain,
-				bullet->color,
-				bullet->insertionBall,
-				insertCurvePos
-			);
+                    bullet->color,
+                    bullet->insertionBall,
+                    insertCurvePos
+            );
 		}
 
 		Ball_BulletInsertDone(bullet->insertionBall);

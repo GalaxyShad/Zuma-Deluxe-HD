@@ -31,8 +31,8 @@ HBallChain BallChain_Create(HLevel level, HBulletList bulletList);
 HLevel BallChain_GetLevel(HBallChain hchain);
 HBall BallChain_AddToStart(HBallChain hchain, BallColor color);
 
-HBall BallChain_InsertBeforeBall(HBallChain hchain, BallColor color, HBall nextBall, float pos);
-HBall BallChain_InsertAfterBall(HBallChain hchain, BallColor color, HBall prevBall, float pos);
+HBall BallChain_InsertBeforeBall(BallColor color, HBall nextBall, float pos);
+HBall BallChain_InsertAfterBall(BallColor color, HBall prevBall, float pos);
 
 void BallChain_Update(HBallChain hchain);
 void BallChain_Draw(HBallChain hchain);

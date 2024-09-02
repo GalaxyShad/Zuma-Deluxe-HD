@@ -14,7 +14,7 @@ typedef struct Animation {
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
-Animation* _Cast(HQC_Animation hanim) {
+Animation* Cast__(HQC_Animation hanim) {
     return (Animation*)hanim;
 }
 
@@ -36,14 +36,14 @@ HQC_Animation HQC_Animation_Create() {
 
 
 void HQC_Animation_SetLooping(HQC_Animation anim, bool looping) {
-    Animation* animation = _Cast(anim);
+    Animation* animation = Cast__(anim);
 
     animation->isLooping = looping;
 }
 
 
 bool HQC_Animation_IsEnded(HQC_Animation anim) {
-    Animation* animation = _Cast(anim);
+    Animation* animation = Cast__(anim);
 
     if (animation->isLooping)
         return false;
@@ -69,26 +69,26 @@ HQC_Animation HQC_Animation_Clone(HQC_Animation hsrc) {
 
 
 void    HQC_Animation_AddFrame(HQC_Animation anim, HQC_Sprite frame) {
-    Animation* animation = _Cast(anim);
+    Animation* animation = Cast__(anim);
     HQC_Container_VectorAdd(animation->frameList, &frame);
     animation->frameCount = (float)HQC_Container_VectorCount(animation->frameList);
 }
 
 
 size_t HQC_Animation_FramesCount(HQC_Animation anim) {
-    Animation* animation = _Cast(anim);
+    Animation* animation = Cast__(anim);
     return animation->frameCount;
 }
 
 
 void    HQC_Animation_SetFrame(HQC_Animation anim, int frame) {
-    Animation* animation = _Cast(anim);
+    Animation* animation = Cast__(anim);
     animation->currentFrame = frame;
 }
 
 
 void    HQC_Animation_Tick(HQC_Animation anim) {
-    Animation* animation = _Cast(anim);
+    Animation* animation = Cast__(anim);
 
     animation->currentFrame += animation->spd;
 
@@ -103,7 +103,7 @@ void    HQC_Animation_Tick(HQC_Animation anim) {
 
 
 void    HQC_Artist_DrawAnimation(HQC_Animation anim, float x, float y) {
-    Animation* animation = _Cast(anim);
+    Animation* animation = Cast__(anim);
 
     HQC_Sprite* spr = ((HQC_Sprite*)HQC_Container_VectorGet(
         animation->frameList, (int)animation->currentFrame));
@@ -113,17 +113,17 @@ void    HQC_Artist_DrawAnimation(HQC_Animation anim, float x, float y) {
 
 
 void    HQC_Animation_SetSpeed(HQC_Animation anim, float spd) {
-    _Cast(anim)->spd = spd;
+    Cast__(anim)->spd = spd;
 }
 
 
 float   HQC_Animation_GetSpeed(HQC_Animation anim) {
-    return _Cast(anim)->spd;
+    return Cast__(anim)->spd;
 }
 
 
 void    HQC_Animation_Free(HQC_Animation anim) {
-    Animation* animation = _Cast(anim);
+    Animation* animation = Cast__(anim);
     
     HQC_Container_FreeVector(animation->frameList);
     HQC_Memory_Free(animation);

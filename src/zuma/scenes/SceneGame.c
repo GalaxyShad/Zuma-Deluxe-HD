@@ -14,11 +14,11 @@ struct {
     HBallChainGenerator generator;
 } game;
 
-static void _GoBack() {
+static void GoBack_() {
     Scene_Change(SC_TEST);
 }
 
-static void _Game_Start() {
+static void Game_Start_() {
     LevelSettings levelSettings;
     levelSettings.id = "some settings";
 
@@ -54,7 +54,7 @@ static void _Game_Start() {
 }
 
 
-static void _Game_Update() {
+static void Game_Update__() {
 
     FloatingTextFactory_Update();
     BallChain_Update(game.chain);
@@ -65,11 +65,11 @@ static void _Game_Update() {
 }
 
 
-static void _Game_Draw() {
-    float cx = 1280 / 2;
-    float cy = 720  / 2;
+static void Game_Draw__() {
+    float cx = 1280.f / 2;
+    float cy = 720.f  / 2;
 
-    Level_Draw(game.level, 1280 / 2, 720 / 2);       
+    Level_Draw(game.level, cx, cy);
 
     Frog_Draw(game.frog);
 
@@ -99,10 +99,10 @@ static void _Game_Draw() {
     FloatingTextFactory_Draw();
 }
 
-static void _Game_Free() {
+static void Game_Free_() {
 
 }
 
 HScene Scene_Register_Game() {
-    return Scene_New("game", _Game_Start, _Game_Update, _Game_Draw, _Game_Free); 
+    return Scene_New("game", Game_Start_, Game_Update__, Game_Draw__, Game_Free_);
 }

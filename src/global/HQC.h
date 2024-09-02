@@ -171,7 +171,8 @@ float HQC_FCos(float rad);
 float HQC_PointDistance(float x1, float y1, float x2, float y2);
 
 float HQC_FMin(float a, float b);
-float HQC_FMax(float a, float b);
+
+__attribute__((unused)) float HQC_FMax(float a, float b);
 
 float HQC_Lerp(float start, float end, float val);
 
