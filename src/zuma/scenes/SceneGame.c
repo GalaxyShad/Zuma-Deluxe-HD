@@ -6,12 +6,19 @@
 #include "../FloatingText.h"
 #include "../Statistics.h"
 
+#include "../ecs/World.h"
+
+#include "../systems/SpriteDrawSystem.h"
+#include "../entities/FrogEntity.h"
+
 struct {
     HFrog  frog;
     HLevel level;
     HBallChain chain;
     HBulletList bulletList;
     HBallChainGenerator generator;
+
+    World* world;
 } game;
 
 static void GoBack_() {
@@ -40,6 +47,21 @@ static void Game_Start_() {
     game.chain = BallChain_Create(game.level, game.bulletList);
     game.generator = BallChainGenerator_Create(game.chain);
 
+    game.world = World_Create();
+
+    FrogEntity_AddToWorld(game.world, 32, 32);
+    FrogEntity_AddToWorld(game.world, 128, 256);
+    FrogEntity_AddToWorld(game.world, 100, 600);
+
+    TestEntity_AddToWorld(game.world, 200, 400, 0);
+    TestEntity_AddToWorld(game.world, 200, 400, 140);
+    TestEntity_AddToWorld(game.world, 200, 400, -140);
+
+    HudEntity_AddToWorld(game.world, game.level);
+
+    World_AddSystem(game.world, SpriteDrawSystem());
+    World_AddSystem(game.world, HudSystem());
+
     //for (int i = 0; i < 20; i++)
       //  BallChain_AddToStart(game.chain, HQC_RandomRange(0, 1));
 
@@ -62,6 +84,8 @@ static void Game_Update__() {
 
     Frog_Update(game.frog);
     BulletList_Update(game.bulletList);
+
+    World_RunSystems(game.world);
 }
 
 
@@ -73,23 +97,7 @@ static void Game_Draw__() {
 
     Frog_Draw(game.frog);
 
-    for (int i = 0; i < 11; i++) {
-        HQC_Animation_Tick(Store_GetAnimationByID(i));
-        HQC_Artist_DrawAnimation(Store_GetAnimationByID(i), 78 + 64*i, 78);
-    }
 
-    HQC_Artist_DrawSprite(Store_GetSpriteByID(SPR_GAME_HUD_BORDER), cx, cy);
-
-    HQC_Artist_DrawTextShadow(Store_GetFontByID(FONT_CANCUN_12), 
-        "Hello", cx, 16);
-    
-    HQC_Artist_SetColorHex(0xffb347);
-    HQC_Artist_DrawTextShadow(Store_GetFontByID(FONT_NATIVE_ALIEN_48), 
-        Level_GetDisplayName(game.level), cx, 600);
-
-    HQC_Artist_SetColorHex(C_WHITE);
-
-    HQC_Artist_DrawSprite(Store_GetSpriteByID(SPR_GAME_HUD_LIVE), 64, 24);
 
     BallChain_Draw(game.chain);
     BulletList_Draw(game.bulletList);
@@ -97,10 +105,12 @@ static void Game_Draw__() {
     Frog_DrawTop(game.frog);
 
     FloatingTextFactory_Draw();
+
+    World_DrawSystems(game.world);
 }
 
 static void Game_Free_() {
-
+  World_Destroy(game.world);
 }
 
 HScene Scene_Register_Game() {

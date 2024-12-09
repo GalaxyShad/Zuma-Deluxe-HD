@@ -33,7 +33,7 @@ void Statistics_AddExplodedBalls(int explodedBalls, BallColor ballsColor) {
     curBallColor = ballsColor;
 }
 
-void Statistics_BuildAndInstantiateFloatingText(float x, float y) {
+void Statistics_BuildAndInstantiateFloatingText(float x, float y, uint32_t color) {
     int points = ballsCount_ * 10 + gapPoints_ + comboCount_ * 100;
 
     bool isChainBonus = chainCount_ >= 5;
@@ -58,7 +58,7 @@ void Statistics_BuildAndInstantiateFloatingText(float x, float y) {
 
     FloatingTextFactory_Instantiate(
             x, y,
-            0xFF00FF,
+            color,
             "+%d\n%s%s%s", points, comboText, gapText, chainText
             );
 

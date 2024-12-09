@@ -16,8 +16,8 @@ int Store_CountSprites();
 
 
 enum _TextureID {
-	TEX_FROG,
-	TEX_GAME_OBJECTS,
+    TEX_FROG,
+    TEX_GAME_OBJECTS,
     TEX_GAME_HUD,
     TEX_MENU
 };

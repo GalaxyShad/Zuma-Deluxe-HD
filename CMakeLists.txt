@@ -105,6 +105,19 @@ add_executable(
         src/zuma/FloatingText.c
         src/zuma/Statistics.c
         src/zuma/Statistics.h
+        src/zuma/ecs/World.h
+        src/zuma/ecs/System.h
+        src/zuma/ecs/World.c
+        src/zuma/components/PositionComponent.h
+        src/zuma/entities/FrogEntity.c
+        src/zuma/systems/SpriteDrawSystem.h
+        src/zuma/systems/SpriteDrawSystem.c
+        src/zuma/ecs/Entity.h
+        src/zuma/systems/HudSystem.c
+        src/zuma/components/FrogComponent.h
+        src/zuma/components/ComponentID.h
+        src/zuma/components/HudComponent.h
+        src/zuma/systems/FrogSystem.c
 )
 
 target_include_directories(

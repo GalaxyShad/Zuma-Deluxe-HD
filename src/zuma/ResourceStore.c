@@ -76,7 +76,7 @@ static const char* _MUSIC_FILE = "zuma.mo3";
 //////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-private HQC_VECTOR(HQC_Texture)      _textureList    = NULL;
+private HQC_VECTOR(HQC_Texture)      _textureList   = NULL;
 
 private HQC_VECTOR(HQC_Sprite)       _spriteList     = NULL;
 private HQC_VECTOR(HQC_Animation)    _animationList  = NULL;
@@ -85,12 +85,10 @@ private HQC_VECTOR(HQC_Sound)        _soundList      = NULL;
 private HQC_VECTOR(HQC_Font)         _fontList       = NULL;
 private HQC_Music                    _music          = NULL;
 
-
 //////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 private void _LoadTextures() {
-    
     size_t count = sizeof(_TEXTURE_FILES) / sizeof(_TEXTURE_FILES[0]);
 
     _textureList = HQC_Container_CreateVector(sizeof(HQC_Texture));

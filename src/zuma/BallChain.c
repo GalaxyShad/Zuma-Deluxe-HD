@@ -132,23 +132,18 @@ HBall BallChain_ExplodeBalls(HBall hstartBall) {
 
     if (!startBall) return NULL;
 
-    int count = 0;
+    int count = 1;
 
     Ball* right;
-    for (right = startBall; right != NULL; right = right->next) {
-        if (right->color != startBall->color || !Ball_IsCollidingBack__(right, 10)) break;
+    for (right = startBall->next; right != NULL; right = right->next) {
+        if (right->color != startBall->color || !right->isGluedToBack) break;
         count++;
     }
 
     Ball* left;
-    for (left = startBall; left->prev != NULL; left = left->prev) {
-        if (left->color != startBall->color || !Ball_IsCollidingBack__(left, 10)) break;
+    for (left = startBall->prev; left != NULL; left = left->prev) {
+        if (left->color != startBall->color || !left->isGluedToBack) break;
         count++;
-    }
-
-    if (left->color != startBall->color) {
-        left = left->next;
-        count--;
     }
 
     if (count < BALLS_TO_EXPLODE)
@@ -157,7 +152,7 @@ HBall BallChain_ExplodeBalls(HBall hstartBall) {
     v2f_t pos = Ball_GetPositionCoords(hstartBall);
 
     Statistics_AddExplodedBalls(count, startBall->color);
-    Statistics_BuildAndInstantiateFloatingText(pos.x, pos.y);
+    Statistics_BuildAndInstantiateFloatingText(pos.x, pos.y, Ball_GetColorUint32__(hstartBall));
 
     Ball* ball;
     for (ball = left; (ball != right) && (ball != NULL); ball = ball->next ) {
