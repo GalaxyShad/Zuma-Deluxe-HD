@@ -3,6 +3,23 @@ A remake of the legendary 2003 PopCap game with improved textures and support fo
 
 ![preview](https://user-images.githubusercontent.com/52833080/162574925-d6c9f657-c2e4-43e3-860d-412e60f14834.png)
 
+## 2024-2025 Project State 
+Currently, work is being done on version 2.0.0*, which features a significantly revamped project architecture with an emphasis on code readability and maintainability. 
+The "engine" API is now called HQC Framework, 
+a own ECS API has been added,
+and the chain movement logic has been reworked 
+to achieve smoother and more accurate to original behavior. 
+There are plans to replace many of the used libraries 
+and support a greater number of platforms, 
+including replacing the BASS LIB with an open-source analog. 
+However, at this stage, this version is not yet playable. <br/>
+
+If you want to build a playable build, you need the [v0.1.0-release branch](https://github.com/GalaxyShad/Zuma-Deluxe-HD/tree/release-v0.1.0). Stay tuned!
+
+*when I have free time between university assignments :D
+
+# Description of v0.1.0-release version
+
 
 ## [Gameplay video on YouTube](https://www.youtube.com/watch?v=VZYsNUUAozM&ab_channel=GalaxyShad)
 
