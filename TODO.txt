@@ -1,0 +1,13 @@
+
+[] Game console
+
+[] Multiple items for function HQC_Container_VectorAdd
+[] HQC Linked List conatiner
+[] HQC Dictionary container (Hash Map)
+
+[] HQC Vector Remove element function
+
+[] Put hardcoded sprite mappings in Resource Store to some file format (json)
+... [] And make parser for it
+
+[] Make Resource store part of HQC framework 

@@ -333,7 +333,7 @@
 <Level graphics="groovefest"		progression="standard"		/>
 <Level graphics="blackswirley"		progression="dual"			/>
 <Level graphics="snakepit"			progression="dual"			/>
-<Level graphics="serpents"		progression="dual" 			/>
+<Level graphics="serpents"			progression="dual" 			/>
 
 <Level graphics="longrange"		    progression="standard"		/>
 <Level graphics="tiltspiral"		progression="standard"		/>

@@ -1,7 +1,11 @@
 .vscode
+.vs
 .gitignore
+out
 CMakeFiles
 lib
 bin
 compile.bat
 Makefile
+
+old_src
