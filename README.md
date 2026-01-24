@@ -21,7 +21,8 @@ A remake of the legendary 2003 PopCap game with improved textures and support fo
 
 ## 🛠️ Build via CMake
 ```
-CMake -G <your generator>
+cmake -B build -G <your generator>
+cmake --build build
 ```
 
 ## 🛠️ Build via console

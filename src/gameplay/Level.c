@@ -1,5 +1,11 @@
 #include "Level.h"
 
+levelMgr_t levelMgr;
+int xmlDepth = 0;
+
+extern engine_t engine;
+
+
 static void LevelParser_ParseGraphics(
     void *data, const char *element, const char **attribute
 ) {
@@ -225,7 +231,7 @@ int LevelMgr_LoadLevels(const char* fileName) {
     int done;
 
     char path[STR_PATH_BUFFER_SIZE];
-    sprintf(path, "%s\\%s", PATH_LEVEL, fileName);
+    sprintf(path, "%s_SEP_%s", PATH_LEVEL, fileName);
 
     char* buff = malloc(XML_BUFF_SIZE);
     if (!buff) {
@@ -235,7 +241,7 @@ int LevelMgr_LoadLevels(const char* fileName) {
 
     FILE *fp = fopen(path, "r");
     if (!fp) {
-        Engine_PushErrorFile(path, "Не удалось открыть файл!");
+        Engine_PushErrorFile(path, "пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ!");
         return 0;
     }
 
@@ -378,7 +384,7 @@ int Level_Load(Level* level) {
 
     sprintf(
         path, 
-        "%s\\%s\\%s.jpg", 
+        "%s_SEP_%s_SEP_%s.jpg", 
         PATH_LEVEL,
         levelMgr.graphics[level->graphicsID].id,
         levelMgr.graphics[level->graphicsID].textureFile
@@ -391,7 +397,7 @@ int Level_Load(Level* level) {
     if (!(strcmp(levelMgr.graphics[level->graphicsID].textureTopLayerFile, "none") == 0)) {
         sprintf(
             path, 
-            "%s\\%s\\%s.png", 
+            "%s_SEP_%s_SEP_%s.png", 
             PATH_LEVEL,
             levelMgr.graphics[level->graphicsID].id,
             levelMgr.graphics[level->graphicsID].textureTopLayerFile
@@ -403,7 +409,7 @@ int Level_Load(Level* level) {
     
     sprintf(
         path, 
-        "%s\\%s\\%s.dat", 
+        "%s_SEP_%s_SEP_%s.dat", 
         PATH_LEVEL,
         levelMgr.graphics[level->graphicsID].id,
         levelMgr.graphics[level->graphicsID].spiralFile

@@ -10,6 +10,8 @@
 #define MAX_FPS 60
 #define FRAME_DELAY 1000 / MAX_FPS
 
+extern engine_t engine;
+
 static struct {
     Game game;
     MenuMgr menuMgr;
@@ -44,11 +46,13 @@ static int ApplicationZuma_LoadResources(void) {
 
     if (!LevelMgr_LoadLevels("levels.xml"))
         return 8;
+
+    return 0;
 }
 
 
 static int ApplicationZuma_ShowStartupImage(void) {
-    SDL_Texture* texDisc = Engine_TextureLoad("images\\disclaimer.jpg");
+    SDL_Texture* texDisc = Engine_TextureLoad("images/disclaimer.jpg");
     if (!texDisc)
         return 10;
 
@@ -111,14 +115,21 @@ static void ApplicationZuma_Update(void) {
 
 
 int ApplicationZuma_Start(void) {
+    int rc = 0;
+
     if (!Engine_Init())
-        return 1;
+        rc = 1;
+        goto err_exit;
 
     if (!Engine_CreateWindow("Zuma HD. By GalaxyShad and s4lat", WINDOW_WIDTH, WINDOW_HEIGHT))
-        return 2;
+        rc = 2;
+        goto err_exit;
 
     ApplicationZuma_ShowStartupImage();
-    ApplicationZuma_LoadResources();
+    rc = ApplicationZuma_LoadResources();
+    if (rc != 0) {
+        goto abort;
+    }
 
     srand(time(NULL));
 
@@ -143,8 +154,10 @@ int ApplicationZuma_Start(void) {
             SDL_Delay(FRAME_DELAY - app.frameTime);
     }
 
+abort:
     LevelMgr_Free();
     Engine_Destroy();
 
-    return 0;
+err_exit:
+    return rc;
 }

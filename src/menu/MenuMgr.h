@@ -6,6 +6,12 @@
 
 #include "../gameplay/Level.h"
 
+#ifdef __linux__
+// required for MIN/MAX
+#include <sys/param.h>
+#define min MIN
+#endif
+
 #define SKY_SPD 1
 
 enum _BtnState {

@@ -1,5 +1,7 @@
 #include "Animation.h"
 
+extern engine_t engine;
+
 int Animation_Init(Animation* anim, int textureID, SDL_Rect framePos) {
     if (!anim)
         return 0;

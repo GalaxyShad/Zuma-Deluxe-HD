@@ -1,4 +1,7 @@
 #include "Engine.h"
+#include <stdio.h>
+
+engine_t engine;
 
 // ==== Common ==== //
 void Engine_PushError(const char* header, const char* main) {
@@ -174,7 +177,7 @@ int Engine_TexturesLoad(const char** files, int n) {
 
     char path[STR_PATH_BUFFER_SIZE];
     for (int i = 0; i < n; i++) {
-        sprintf(path, "%s\\%s", TEXTURE_FOLDER, files[i]);
+        sprintf(path, "%s_SEP_%s", TEXTURE_FOLDER, files[i]);
 
         engine.textures[i] = Engine_TextureLoad(path);
         if (!engine.textures[i]) 
@@ -213,14 +216,14 @@ Font* Engine_FontLoad(const char* fileName) {
     
     char path[STR_PATH_BUFFER_SIZE];
     
-    sprintf(path, "%s\\%s.png", FONT_FOLDER, fileName);
+    sprintf(path, "%s_SEP_%s.png", FONT_FOLDER, fileName);
     font->texture = Engine_TextureLoad(path);
     if (!font->texture) {
         Engine_PushErrorFile(path, "");
         return NULL;
     }
 
-    sprintf(path, "%s\\%s.txt", FONT_FOLDER, fileName);
+    sprintf(path, "%s_SEP_%s.txt", FONT_FOLDER, fileName);
     FILE* file = fopen(path, "r");
     if (!file) {
         Engine_PushErrorFile(path, "");
@@ -549,7 +552,7 @@ void Engine_DrawTextExtScale(const char* str, int fontID, float scale, SDL_Color
 
 int Engine_MusicLoad(const char* fileName) {
     char path[STR_PATH_BUFFER_SIZE];
-    sprintf(path, "%s\\%s", MUSIC_FOLDER, fileName);
+    sprintf(path, "%s_SEP_%s", MUSIC_FOLDER, fileName);
 
     engine.music = BASS_MusicLoad(
         FALSE, path, 0, 0, BASS_SAMPLE_LOOP, MUSIC_FREQUENCY);
@@ -586,7 +589,7 @@ int Engine_SoundsLoad(const char** files, int n) {
 
     for (int i = 0; i < n; i++) {
         char path[STR_PATH_BUFFER_SIZE];
-        sprintf(path, "%s\\%s", SOUND_FOLDER, files[i]);
+        sprintf(path, "%s_SEP_%s", SOUND_FOLDER, files[i]);
 
         engine.sounds[i] = Engine_SoundLoad(path);
         if (!engine.sounds[i]) 
@@ -623,7 +626,7 @@ int Engine_SoundsSfxLoad(const char** files, int n) {
 
     for (int i = 0; i < n; i++) {
         char path[STR_PATH_BUFFER_SIZE];
-        sprintf(path, "%s\\%s", SOUND_FOLDER, files[i]);
+        sprintf(path, "%s_SEP_%s", SOUND_FOLDER, files[i]);
 
         engine.soundsSfx[i] = Engine_SoundSfxLoad(path);
         if (!engine.soundsSfx[i]) 

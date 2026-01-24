@@ -6,30 +6,37 @@
 #define SOUNDS_COUNT 38
 #define FONTS_COUNT 9
 
+#ifdef _WIN32
+#define _SEP_ \\
+#else
+#define _SEP_ /
+#endif
+
+
 const char *filesTextures[TEXTURES_COUNT] = {
     "frog.png",
     "gameobjects.png",
     "gameinterface.png",
     "menu.png",
 
-    "thumbnails\\thumb (1).jpg",
-    "thumbnails\\thumb (2).jpg",
-    "thumbnails\\thumb (3).jpg",
-    "thumbnails\\thumb (4).jpg",
-    "thumbnails\\thumb (5).jpg",
-    "thumbnails\\thumb (6).jpg",
-    "thumbnails\\thumb (7).jpg",
-    "thumbnails\\thumb (8).jpg",
-    "thumbnails\\thumb (9).jpg",
-    "thumbnails\\thumb (10).jpg",
-    "thumbnails\\thumb (11).jpg",
-    "thumbnails\\thumb (12).jpg",
-    "thumbnails\\thumb (13).jpg",
-    "thumbnails\\thumb (14).jpg",
-    "thumbnails\\thumb (15).jpg",
-    "thumbnails\\thumb (16).jpg",
-    "thumbnails\\thumb (17).jpg",
-    "thumbnails\\thumb (18).jpg",
+    "thumbnails_SEP_thumb (1).jpg",
+    "thumbnails_SEP_thumb (2).jpg",
+    "thumbnails_SEP_thumb (3).jpg",
+    "thumbnails_SEP_thumb (4).jpg",
+    "thumbnails_SEP_thumb (5).jpg",
+    "thumbnails_SEP_thumb (6).jpg",
+    "thumbnails_SEP_thumb (7).jpg",
+    "thumbnails_SEP_thumb (8).jpg",
+    "thumbnails_SEP_thumb (9).jpg",
+    "thumbnails_SEP_thumb (10).jpg",
+    "thumbnails_SEP_thumb (11).jpg",
+    "thumbnails_SEP_thumb (12).jpg",
+    "thumbnails_SEP_thumb (13).jpg",
+    "thumbnails_SEP_thumb (14).jpg",
+    "thumbnails_SEP_thumb (15).jpg",
+    "thumbnails_SEP_thumb (16).jpg",
+    "thumbnails_SEP_thumb (17).jpg",
+    "thumbnails_SEP_thumb (18).jpg",
 };
 
 const char *filesSounds[SOUNDS_COUNT] = {

@@ -1,5 +1,7 @@
 #include "MenuMgr.h"
 
+extern engine_t engine;
+extern levelMgr_t levelMgr;
 
 void Button_Init(Button* btn) {
     btn->state = BTN_IDLE;

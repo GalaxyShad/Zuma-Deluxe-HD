@@ -4,64 +4,91 @@ project(
     LANGUAGES C
     VERSION 0.1.0
 )
+include(FetchContent)
 
+SET(CMAKE_C_COMPILER clang)
+set(CMAKE_C_STANDARD 11)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
-find_library (isBassFound bass NO_CACHE PATHS ${PROJECT_SOURCE_DIR}/lib/bass/c/x64)
+if(UNIX)
+set(BASS_LIB_NAME "bass24.zip")
+endif()
+if (WIN32)
+set(BASS_LIB_NAME "bass-linux.zip")
+endif()
+
+message("Fetching bass")
+find_library (isBassFound bass NO_CACHE PATHS ${PROJECT_SOURCE_DIR}/lib/bass/libs/x86_64)
 if (${isBassFound} STREQUAL isBassFound-NOTFOUND)
     message(STATUS "Downloading bass...")
-    file(DOWNLOAD "https://www.un4seen.com/files/bass24.zip" "lib/bass-win.zip" SHOW_PROGRESS)
-    file(ARCHIVE_EXTRACT INPUT "lib/bass-win.zip" DESTINATION lib/bass)
+    file(DOWNLOAD "https://www.un4seen.com/files/${BASS_LIB_NAME}" "lib/bass.zip" SHOW_PROGRESS)
+    file(ARCHIVE_EXTRACT INPUT "lib/bass.zip" DESTINATION lib/bass)
 endif()
 
-
-find_library (isBassFxFound bass_fx NO_CACHE PATHS ${PROJECT_SOURCE_DIR}/lib/bass-fx/C/x64)
+find_library (isBassFxFound bass_fx NO_CACHE PATHS ${PROJECT_SOURCE_DIR}/lib/bass-fx/libs/x86_64)
 if (${isBassFxFound} STREQUAL isBassFxFound-NOTFOUND)
     message(STATUS "Downloading bass fx...")
-    file(DOWNLOAD "https://www.un4seen.com/files/z/0/bass_fx24.zip" "lib/bass-fx-win.zip" SHOW_PROGRESS)
-    file(ARCHIVE_EXTRACT INPUT "lib/bass-fx-win.zip" DESTINATION lib/bass-fx)
+    file(DOWNLOAD "https://www.un4seen.com/files/z/0/bass_fx24.zip" "lib/bass-fx.zip" SHOW_PROGRESS)
+    file(ARCHIVE_EXTRACT INPUT "lib/bass-fx.zip" DESTINATION lib/bass-fx)
 endif()
 
-include(FetchContent)
+if(UNIX)
+find_package(SDL2 REQUIRED)
+find_package(SDL2_image REQUIRED)
+find_package(EXPAT REQUIRED)
+endif()
+if(WIN32)
 
-message("Fetching expat")
-FetchContent_Declare(
-  expat
-  URL https://github.com/libexpat/libexpat/archive/refs/tags/R_2_4_8.zip
-  FIND_PACKAGE_ARGS
-)
 
-FetchContent_MakeAvailable(expat)
+    message("Fetching expat")
+    FetchContent_Declare(
+    expat
+    URL https://github.com/libexpat/libexpat/archive/refs/tags/R_2_4_8.zip
+    FIND_PACKAGE_ARGS
+    )
 
-set(EXPAT_BUILD_DOCS OFF)
-set(EXPAT_BUILD_TOOLS OFF)
-add_subdirectory(${expat_SOURCE_DIR}/expat ${expat_BINARY_DIR})
+    FetchContent_MakeAvailable(expat)
 
-message("Fetching sdl2")
-FetchContent_Declare(
-  sdl2
-  URL https://github.com/libsdl-org/SDL/archive/refs/tags/release-2.24.0.zip
-  FIND_PACKAGE_ARGS
-)
+    find_library(EXPAT)
 
-FetchContent_MakeAvailable(sdl2)
+    set(EXPAT_BUILD_DOCS OFF)
+    set(EXPAT_BUILD_TOOLS OFF)
+    add_subdirectory(${expat_SOURCE_DIR}/expat ${expat_BINARY_DIR})
 
-message("Fetching sdl2 image")
-FetchContent_Declare(
-  sdl2_image
-  URL https://github.com/libsdl-org/SDL_image/archive/refs/tags/release-2.6.2.zip
-  FIND_PACKAGE_ARGS
-)
+    message("Fetching sdl2")
+    FetchContent_Declare(
+    sdl2
+    URL https://github.com/libsdl-org/SDL/archive/refs/tags/release-2.24.0.zip
+    FIND_PACKAGE_ARGS
+    )
 
-set(SDL2IMAGE_SAMPLES OFF)
-FetchContent_MakeAvailable(sdl2_image)
+    FetchContent_MakeAvailable(sdl2)
 
-FILE(GLOB_RECURSE SOURCES RELATIVE ${PROJECT_SOURCE_DIR} "src/*.c")
+    message("Fetching sdl2 image")
+    FetchContent_Declare(
+    sdl2_image
+    URL https://github.com/libsdl-org/SDL_image/archive/refs/tags/release-2.6.2.zip
+    FIND_PACKAGE_ARGS
+    )
+
+    set(SDL2IMAGE_SAMPLES OFF)
+    FetchContent_MakeAvailable(sdl2_image)
+endif()
 
 add_executable(
     ZumaHD
-    ${SOURCES}
+    "src/main.c"
+    "src/Application.c"
+    "src/menu/MenuMgr.c"
+    "src/global/Animation.c"
+    "src/global/Engine.c"
+    "src/gameplay/Game.c"
+    "src/gameplay/Level.c"
+    "src/gameplay/objects/BallChain.c"
+    "src/gameplay/objects/Bullet.c"
+    "src/gameplay/objects/Frog.c"
+    "src/gameplay/objects/FX.c"
 )
 
 target_include_directories(
@@ -77,18 +104,20 @@ target_include_directories(
 )
 
 link_directories(
-    ${PROJECT_SOURCE_DIR}/lib/bass/c
-    ${PROJECT_SOURCE_DIR}/lib/bass-fx/C
+    ${PROJECT_SOURCE_DIR}/lib/bass/libs/x86_64/
+    ${PROJECT_SOURCE_DIR}/lib/bass-fx/libs/x86_64/
     )
 
 target_link_libraries(
     ZumaHD PRIVATE
     SDL2
-    SDL2_Image
+    SDL2_image
+    m
+    expat
+    bass
+    bass_fx
     ${isBassFound}
     ${isBassFxFound}
-    
-    expat
     )
 
 # Copy DLLs needed for runtime on Windows

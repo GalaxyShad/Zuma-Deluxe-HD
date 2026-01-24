@@ -1,5 +1,7 @@
 #include "BallChain.h"
 
+extern engine_t engine;
+
 void Ball_Init(Ball* ball, float pos, float x, float y, char isPusher, 
 	char color, char bonus) {
 	ball->pos = pos;

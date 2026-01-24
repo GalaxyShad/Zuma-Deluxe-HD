@@ -36,7 +36,7 @@ typedef struct _Font {
 	int* kerningValues;
 } Font;
 
-struct {
+typedef struct {
     /* Graphics */
     SDL_Window* 	win;
 	SDL_Renderer* 	render;
@@ -63,7 +63,7 @@ struct {
 	HSAMPLE* 		sounds;
 	unsigned int 	soundsSfxLen;
 	HSTREAM*		soundsSfx;
-} engine;
+} engine_t;
 
 void Engine_PushError(const char*, const char*);
 void Engine_PushErrorCode(const char*, int);

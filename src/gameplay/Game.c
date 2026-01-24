@@ -1,5 +1,8 @@
 #include "Game.h"
 
+extern engine_t engine;
+extern levelMgr_t levelMgr;
+
 void constrain(int* a, int min, int max) {
     if (*a < min)
         *a = max;

@@ -76,7 +76,7 @@ typedef struct _Stage {
     Level* levels;
 } Stage;
 
-struct {
+typedef struct {
     int settingsLen;
     LevelSettings* settings;
     int graphicsLen;
@@ -88,7 +88,7 @@ struct {
     Stage stages[STAGE_COUNT];
     int survivalLevelsLen;
     Level* survivalLevels;
-} levelMgr;
+} levelMgr_t;
 
 int LevelMgr_LoadLevels(const char*);
 int LevelMgr_SaveProgress();
@@ -99,7 +99,6 @@ LevelGraphics* LevelMgr_GetLevelGraphics(Level* lv);
 LevelSettings* LevelMgr_GetLevelSettings(Level* lv, int settingID);
 int LevelMgr_Free();
 
-int xmlDepth;
 void XML_StartElement(void *data, const char *element, const char **attribute);
 void XML_EndElement(void *data, const char *element);
 

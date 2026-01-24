@@ -1,5 +1,7 @@
 #include "Bullet.h"
 
+extern engine_t engine;
+
 void Bullet_Init(Bullet* bullet, float x, float y, float motionVecX, 
 	float motionVecY, char color) {
 
