@@ -1,5 +1,7 @@
 #include "Level.h"
 
+int xmlDepth;
+
 static void LevelParser_ParseGraphics(
     void *data, const char *element, const char **attribute
 ) {
@@ -235,7 +237,7 @@ int LevelMgr_LoadLevels(const char* fileName) {
 
     FILE *fp = fopen(path, "r");
     if (!fp) {
-        Engine_PushErrorFile(path, "Не удалось открыть файл!");
+        Engine_PushErrorFile(path, "пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ!");
         return 0;
     }
 

@@ -10,6 +10,8 @@
 #define MAX_FPS 60
 #define FRAME_DELAY 1000 / MAX_FPS
 
+Engine engine;
+
 static struct {
     Game game;
     MenuMgr menuMgr;

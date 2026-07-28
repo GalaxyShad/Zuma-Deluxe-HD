@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "Level.h"
 
 void constrain(int* a, int min, int max) {
     if (*a < min)
@@ -7,7 +8,7 @@ void constrain(int* a, int min, int max) {
         *a = min;
 }
 
-
+LevelMgr levelMgr;
 
 void Game_Init(Game* game, int lvlID, int difficulty) {
     game->stageID = 0;
