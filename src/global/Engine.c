@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include <string.h>
 
 // ==== Common ==== //
 void Engine_PushError(const char* header, const char* main) {
