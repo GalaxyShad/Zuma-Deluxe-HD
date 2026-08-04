@@ -1,4 +1,5 @@
 #include "Level.h"
+#include "SDL_stdinc.h"
 
 int xmlDepth;
 
@@ -133,32 +134,45 @@ static void LevelParser_ParseStageProgression(
     void *data, const char *element, const char **attribute
 ) {
 
-    for (int i = 0; i < STAGE_COUNT; i++)
+    for (int i = 0; i < STAGE_COUNT; i++) {
         levelMgr.stages[i].levelsLen = 0;
+        levelMgr.stages[i].levels = NULL;
+    }
 
     for (int i = 0; attribute[i]; i += 2) {
         if (strncmp(attribute[i], "stage", 5) == 0) {
             char* cid = strtok((char*)attribute[i], "stage");
             int stageID = atoi(cid)-1;
 
+            if (stageID > STAGE_COUNT) {
+                continue;
+            }
+
             char* gID = strtok((char*)attribute[i+1], ",");
             while (gID) {
                 for (int i = 0; i < levelMgr.graphicsLen; i++) {
                     if (strcmp(gID, levelMgr.graphics[i].id) == 0) {
+                        Stage* stage = &levelMgr.stages[stageID];
+
+                        if (stage->levels == NULL) {
+                            stage->levels = malloc(sizeof(Level) * (stage->levelsLen+1));
+                        }
+
                         Level* ptr = realloc(
-                            levelMgr.stages[stageID].levels,
-                            sizeof(Level) * (levelMgr.stages[stageID].levelsLen+1));
+                            stage->levels,
+                            sizeof(Level) * (stage->levelsLen+1));
                         if (!ptr) {
                             Engine_PushErrorFile("levels.xml", "Out of Memory!");
                             return;
                         }
 
-                        levelMgr.stages[stageID].levels = ptr;
-                        levelMgr.stages[stageID].levelsLen++;
+                        stage->levels = ptr;
+                        stage->levelsLen++;
 
-                        Level* lv = &levelMgr.stages[stageID].levels[levelMgr.stages[stageID].levelsLen-1];
+                        Level* lv = &stage->levels[stage->levelsLen-1];
                         lv->settingsID = NULL;
                         lv->graphicsID = i;
+
                         break;
                     }
                 }
@@ -167,6 +181,10 @@ static void LevelParser_ParseStageProgression(
         } else if (strncmp(attribute[i], "diffi", 5) == 0) {
             char* cid = strtok((char*)attribute[i], "diffi");
             int stageID = atoi(cid)-1;
+
+            if (stageID > STAGE_COUNT) {
+                continue;
+            }
 
             char* sID = strtok((char*)attribute[i+1], ",");
             int j = 0;
@@ -226,8 +244,10 @@ int LevelMgr_LoadLevels(const char* fileName) {
 
     int done;
 
-    char path[STR_PATH_BUFFER_SIZE];
-    sprintf(path, "%s\\%s", PATH_LEVEL, fileName);
+    char path[256];
+    char* basePath = SDL_GetBasePath();
+    sprintf(path, "%s%s/%s", basePath, PATH_LEVEL, fileName);
+    SDL_free(basePath);
 
     char* buff = malloc(XML_BUFF_SIZE);
     if (!buff) {
@@ -376,24 +396,32 @@ int LevelMgr_Free() {
 ////////////////////////////////////
 
 int Level_Load(Level* level) {
-    char path[STR_PATH_BUFFER_SIZE];
+    int ok = 1;
+
+    char path[256];
+
+    char* basePath = SDL_GetBasePath();
 
     sprintf(
         path, 
-        "%s\\%s\\%s.jpg", 
+        "%s%s/%s/%s.jpg", 
+        basePath,
         PATH_LEVEL,
         levelMgr.graphics[level->graphicsID].id,
         levelMgr.graphics[level->graphicsID].textureFile
     );
     level->texture = Engine_TextureLoad(path); 
-    if (!level->texture)
-        return 0;
+    if (!level->texture) {
+        ok = 0;
+        return ok;
+    }
 
     level->textureTopLayer = NULL;
     if (!(strcmp(levelMgr.graphics[level->graphicsID].textureTopLayerFile, "none") == 0)) {
         sprintf(
             path, 
-            "%s\\%s\\%s.png", 
+            "%s%s/%s/%s.png", 
+            basePath,
             PATH_LEVEL,
             levelMgr.graphics[level->graphicsID].id,
             levelMgr.graphics[level->graphicsID].textureTopLayerFile
@@ -405,14 +433,17 @@ int Level_Load(Level* level) {
     
     sprintf(
         path, 
-        "%s\\%s\\%s.dat", 
+        "%s%s/%s/%s.dat",
+        basePath, 
         PATH_LEVEL,
         levelMgr.graphics[level->graphicsID].id,
         levelMgr.graphics[level->graphicsID].spiralFile
     );
     FILE* file = fopen(path, "rb");
-    if (!file)
-        return 0;
+    if (!file) {
+        ok = 0;
+        goto end;
+    }
 
     fseek(file, 0x10, SEEK_SET);
     long count;
@@ -446,8 +477,10 @@ int Level_Load(Level* level) {
         level->spiral[i].dy = (float)y / 100.0;
     }
 
+end:
     fclose(file);
-    return 1;
+
+    return ok;
 }
 
 void Level_Free(Level* level) {
