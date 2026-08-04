@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "SDL_stdinc.h"
 #include <string.h>
 
 // ==== Common ==== //
@@ -173,14 +174,24 @@ int Engine_TexturesLoad(const char** files, int n) {
         return 0;
     }
 
-    char path[STR_PATH_BUFFER_SIZE];
+    char* basePath = SDL_GetBasePath();
+
+    char path[256];
     for (int i = 0; i < n; i++) {
-        sprintf(path, "%s\\%s", TEXTURE_FOLDER, files[i]);
+        if (SDL_snprintf(path, sizeof(path), "%s%s/%s", basePath, TEXTURE_FOLDER, files[i]) >= sizeof(path)) {
+            Engine_PushError("Critical Error!", "Texture path too long");
+            return 0;
+        }
 
         engine.textures[i] = Engine_TextureLoad(path);
-        if (!engine.textures[i]) 
+        
+        if (!engine.textures[i]) {
             return 0;
+        }
     }
+
+    SDL_free(basePath);
+    
     engine.texturesLen = n;
 
     return 1;
@@ -212,21 +223,25 @@ Font* Engine_FontLoad(const char* fileName) {
     font->kerningPairs = NULL;
     font->kerningValues = NULL;
     
-    char path[STR_PATH_BUFFER_SIZE];
+    char path[256];
+
+    char* basePath = SDL_GetBasePath();
     
-    sprintf(path, "%s\\%s.png", FONT_FOLDER, fileName);
+    sprintf(path, "%s%s/%s.png", basePath, FONT_FOLDER, fileName);
     font->texture = Engine_TextureLoad(path);
     if (!font->texture) {
         Engine_PushErrorFile(path, "");
         return NULL;
     }
 
-    sprintf(path, "%s\\%s.txt", FONT_FOLDER, fileName);
+    sprintf(path, "%s%s/%s.txt", basePath, FONT_FOLDER, fileName);
     FILE* file = fopen(path, "r");
     if (!file) {
         Engine_PushErrorFile(path, "");
         return NULL;
     }
+
+    SDL_free(basePath);
 
     int n;
     int errFlag = 0;
@@ -549,8 +564,12 @@ void Engine_DrawTextExtScale(const char* str, int fontID, float scale, SDL_Color
 // ==== Sound And Music ==== //
 
 int Engine_MusicLoad(const char* fileName) {
-    char path[STR_PATH_BUFFER_SIZE];
-    sprintf(path, "%s\\%s", MUSIC_FOLDER, fileName);
+    char* basePath = SDL_GetBasePath();
+
+    char path[256];
+    sprintf(path, "%s%s/%s", basePath, MUSIC_FOLDER, fileName);
+
+    SDL_free(basePath);
 
     engine.music = BASS_MusicLoad(
         FALSE, path, 0, 0, BASS_SAMPLE_LOOP, MUSIC_FREQUENCY);
@@ -585,15 +604,19 @@ int Engine_SoundsLoad(const char** files, int n) {
         return 0;
     }
 
+    char* basePath = SDL_GetBasePath();
+    
     for (int i = 0; i < n; i++) {
-        char path[STR_PATH_BUFFER_SIZE];
-        sprintf(path, "%s\\%s", SOUND_FOLDER, files[i]);
+        char path[256];
+        sprintf(path, "%s%s/%s", basePath, SOUND_FOLDER, files[i]);
 
         engine.sounds[i] = Engine_SoundLoad(path);
         if (!engine.sounds[i]) 
             return 0;
     }
     engine.soundsLen = n;
+
+    SDL_free(basePath);
 
     return 1;
 }
@@ -622,15 +645,19 @@ int Engine_SoundsSfxLoad(const char** files, int n) {
         return 0;
     }
 
+    char* basePath = SDL_GetBasePath();
+
     for (int i = 0; i < n; i++) {
-        char path[STR_PATH_BUFFER_SIZE];
-        sprintf(path, "%s\\%s", SOUND_FOLDER, files[i]);
+        char path[256];
+        sprintf(path, "%s%s/%s", basePath, SOUND_FOLDER, files[i]);
 
         engine.soundsSfx[i] = Engine_SoundSfxLoad(path);
         if (!engine.soundsSfx[i]) 
             return 0;
     }
     engine.soundsSfxLen = n;
+
+    SDL_free(basePath);
 
     return 1;
 }
