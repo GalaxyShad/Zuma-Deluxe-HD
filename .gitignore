@@ -1,5 +1,8 @@
 .vscode
+.zed
 .gitignore
+*.txt
+*.bin
 CMakeFiles
 lib
 bin

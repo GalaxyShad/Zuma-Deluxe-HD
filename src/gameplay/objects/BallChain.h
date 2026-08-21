@@ -1,7 +1,6 @@
 #ifndef BALL_H
 #define BALL_H
 
-#include <malloc.h>
 #include <math.h>
 
 #include "../../global/Enums.h"

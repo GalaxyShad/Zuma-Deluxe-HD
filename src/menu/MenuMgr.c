@@ -489,7 +489,13 @@ void DialogueBox_Draw(DialogueBox* db) {
 
     if (db->animation) {
         if (db->pos.y > db->startY) {
-            int spd = min(DB_ANIM_SPD, db->pos.y-db->startY);
+            int spd = 0;
+            if (DB_ANIM_SPD < db->pos.y-db->startY) {
+                spd = DB_ANIM_SPD;
+            } else {
+                spd = db->pos.y-db->startY;
+            }
+            
             db->pos.y -= spd;
             for (int i = 0; i < db->buttonsLen; i++) 
                 db->buttons[i].pos.y -= spd;
