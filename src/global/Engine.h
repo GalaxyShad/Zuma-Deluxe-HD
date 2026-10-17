@@ -6,7 +6,6 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <bass.h>
-#include <bass_fx.h>
 #include <stdio.h>
 #include <stdbool.h>
 
