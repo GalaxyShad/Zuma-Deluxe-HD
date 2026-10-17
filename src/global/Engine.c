@@ -303,7 +303,7 @@ Font* Engine_FontLoad(const char* fileName) {
             font->kerningPairsLen = n;
 
             for (int i = 0; i < n; i++) {
-                char temp[2];
+                char temp[10];
                 if (!fscanf(file, "%s", &temp)) {errFlag = 1; break;}        
                 font->kerningPairs[i].ch[0] = temp[0];
                 font->kerningPairs[i].ch[1] = temp[1];
