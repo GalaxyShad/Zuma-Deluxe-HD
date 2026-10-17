@@ -370,8 +370,10 @@ void BallChain_Update(BallChain* ballChain, SpiralDot* spiral, int spiralLen, in
 			ball->drawPrority = spiral[j].t2;
 		}
 
-		xx = lerp(xx, xx + spiral[j].dx * engine.scale_x, modff(ball->pos, NULL));
-		yy = lerp(yy, yy + spiral[j].dy * engine.scale_x, modff(ball->pos, NULL));
+		float _;
+
+		xx = lerp(xx, xx + spiral[j].dx * engine.scale_x, modff(ball->pos, &_));
+		yy = lerp(yy, yy + spiral[j].dy * engine.scale_x, modff(ball->pos, &_));
 
 		ball->x = xx;
 		ball->y = yy;

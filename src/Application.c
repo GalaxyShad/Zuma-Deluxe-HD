@@ -6,9 +6,12 @@
 
 #include "gameplay/Game.h"
 #include "menu/MenuMgr.h"
+#include <stdio.h>
 
 #define MAX_FPS 60
 #define FRAME_DELAY 1000 / MAX_FPS
+
+Engine engine;
 
 static struct {
     Game game;
@@ -31,8 +34,9 @@ static int ApplicationZuma_LoadResources(void) {
     if (!Engine_LoadSettings())
         return 9;
 
-    if (!Engine_TexturesLoad(filesTextures, TEXTURES_COUNT))
+    if (!Engine_TexturesLoad(filesTextures, TEXTURES_COUNT)) {
         return 3;
+    }
     if (!Engine_FontsLoad(filesFonts, FONTS_COUNT))
         return 4;
     if (!Engine_SoundsLoad(filesSounds, SOUNDS_COUNT))
@@ -48,7 +52,14 @@ static int ApplicationZuma_LoadResources(void) {
 
 
 static int ApplicationZuma_ShowStartupImage(void) {
-    SDL_Texture* texDisc = Engine_TextureLoad("images\\disclaimer.jpg");
+    char* basePath = SDL_GetBasePath();
+    
+    char resPath[50];
+    sprintf(resPath, "%simages/disclaimer.jpg", basePath);
+
+    SDL_free(basePath);
+
+    SDL_Texture* texDisc = Engine_TextureLoad(resPath);
     if (!texDisc)
         return 10;
 

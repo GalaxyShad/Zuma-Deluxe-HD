@@ -3,10 +3,9 @@
 
 #define SDL_MAIN_HANDLED
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_Image.h>
+#include <SDL.h>
+#include <SDL_image.h>
 #include <bass.h>
-#include <bass_fx.h>
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -36,7 +35,7 @@ typedef struct _Font {
 	int* kerningValues;
 } Font;
 
-struct {
+typedef struct {
     /* Graphics */
     SDL_Window* 	win;
 	SDL_Renderer* 	render;
@@ -63,7 +62,9 @@ struct {
 	HSAMPLE* 		sounds;
 	unsigned int 	soundsSfxLen;
 	HSTREAM*		soundsSfx;
-} engine;
+} Engine;
+
+extern Engine engine;
 
 void Engine_PushError(const char*, const char*);
 void Engine_PushErrorCode(const char*, int);

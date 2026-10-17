@@ -1,0 +1,9 @@
+[submodule "thirdparty/expat"]
+	path = thirdparty/expat
+	url = https://github.com/libexpat/libexpat.git
+[submodule "thirdparty/sdl2"]
+	path = thirdparty/sdl2
+	url = https://github.com/libsdl-org/SDL.git
+[submodule "thirdparty/sdl2_image"]
+	path = thirdparty/sdl2_image
+	url = https://github.com/libsdl-org/SDL_image.git

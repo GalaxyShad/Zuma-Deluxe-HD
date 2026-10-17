@@ -1,7 +1,13 @@
 .vscode
+.zed
 .gitignore
+*.txt
+*.bin
 CMakeFiles
 lib
 bin
 compile.bat
 Makefile
+
+build/
+.cache/
