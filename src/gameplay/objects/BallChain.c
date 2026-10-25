@@ -363,7 +363,7 @@ void BallChain_Update(BallChain* ballChain, SpiralDot* spiral, int spiralLen, in
 		int j;
 		for (j = 0; j < (int)ball->pos; j++) {
 			xx += spiral[j].dx * engine.scale_x;
-			yy += spiral[j].dy * engine.scale_x;
+			yy += spiral[j].dy * engine.scale_y;
 
 			ball->ang = atan2(spiral[j].dy, spiral[j].dx) * RAD_TO_DEG;
 			ball->inTunnel = spiral[j].t1;
@@ -373,7 +373,7 @@ void BallChain_Update(BallChain* ballChain, SpiralDot* spiral, int spiralLen, in
 		float _;
 
 		xx = lerp(xx, xx + spiral[j].dx * engine.scale_x, modff(ball->pos, &_));
-		yy = lerp(yy, yy + spiral[j].dy * engine.scale_x, modff(ball->pos, &_));
+		yy = lerp(yy, yy + spiral[j].dy * engine.scale_y, modff(ball->pos, &_));
 
 		ball->x = xx;
 		ball->y = yy;

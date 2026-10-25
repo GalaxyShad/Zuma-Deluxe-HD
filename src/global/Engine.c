@@ -823,7 +823,7 @@ int Engine_LoadSettings() {
         return 0;
     }
 
-    bool full = -1;
+    int full = -1;
     if (fscanf(file, "%d", &full) == 1 && full >= 0 && full <= 1) {
         engine.fullScr = full;
         if (engine.fullScr) {

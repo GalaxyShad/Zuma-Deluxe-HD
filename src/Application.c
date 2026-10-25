@@ -54,7 +54,7 @@ static int ApplicationZuma_LoadResources(void) {
 static int ApplicationZuma_ShowStartupImage(void) {
     char* basePath = SDL_GetBasePath();
     
-    char resPath[50];
+    char resPath[100];
     sprintf(resPath, "%simages/disclaimer.jpg", basePath);
 
     SDL_free(basePath);
