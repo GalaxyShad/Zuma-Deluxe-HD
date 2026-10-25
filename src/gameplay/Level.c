@@ -446,14 +446,14 @@ int Level_Load(Level* level) {
     }
 
     fseek(file, 0x10, SEEK_SET);
-    long count;
-    fread(&count, sizeof(long), 1, file);
+    int count;
+    fread(&count, sizeof(int), 1, file);
     fseek(file, 0x14 + count * 10, SEEK_SET);
 
-    long c;
+    int c;
     float cx, cy;
 
-    fread(&c, sizeof(long), 1, file);
+    fread(&c, sizeof(int), 1, file);
     fread(&cx, sizeof(float), 1, file);
     fread(&cy, sizeof(float), 1, file);
 
@@ -463,7 +463,7 @@ int Level_Load(Level* level) {
     level->spiralLen = c-1;
     level->spiral = malloc(sizeof(SpiralDot) * level->spiralLen);
 
-    long i;
+    int i;
     for (i = 0; i < level->spiralLen; i++) {
         char t1, t2, x, y;
         fread(&t1, 1, 1, file);
