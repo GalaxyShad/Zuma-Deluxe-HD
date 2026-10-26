@@ -1,6 +1,11 @@
 #include "Engine.h"
+#include "SDL_log.h"
+#include "SDL_pixels.h"
 #include "SDL_stdinc.h"
 #include <string.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 // ==== Common ==== //
 void Engine_PushError(const char* header, const char* main) {
@@ -24,8 +29,8 @@ void Engine_PushErrorCode(const char* header, int code) {
 void Engine_PushErrorFile(const char* file, const char* main) {
     char pathMsg[STR_ERR_BUFFER_SIZE];
     sprintf(
-        pathMsg, 
-        "Error loading file \"%s\".", 
+        pathMsg,
+        "Error loading file \"%s\".",
         file
     );
     Engine_PushError(pathMsg, main);
@@ -34,8 +39,8 @@ void Engine_PushErrorFile(const char* file, const char* main) {
 void Engine_PushErrorFileCode(const char* file, int code) {
     char pathMsg[STR_ERR_BUFFER_SIZE];
     sprintf(
-        pathMsg, 
-        "Error loading file \"%s\".", 
+        pathMsg,
+        "Error loading file \"%s\".",
         file
     );
     Engine_PushErrorCode(pathMsg, code);
@@ -60,21 +65,14 @@ int Engine_Init() {
     engine.volSnd = 1.0f;
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        Engine_PushError("SDL.dll graphics library initialization error:", 
+        Engine_PushError("SDL.dll graphics library initialization error:",
                             SDL_GetError());
         return 0;
     }
 
-    int flags = IMG_INIT_JPG | IMG_INIT_PNG;
-    if (!(IMG_Init(flags) & flags)) {
-        Engine_PushError("SDL_Image.dll initialization error:", 
-                            IMG_GetError());
-        return 0;
-    }
 
-   
     if (!BASS_Init(-1, MUSIC_FREQUENCY, BASS_DEVICE_STEREO, 0, NULL)) {
-        Engine_PushErrorCode("Bass.dll initialization error", 
+        Engine_PushErrorCode("Bass.dll initialization error",
                                 BASS_ErrorGetCode());
         return 0;
     }
@@ -99,18 +97,17 @@ void Engine_Destroy() {
     engine.render = NULL;
 
     /* Sound and music */
-    for (int i = 0; i < engine.soundsLen; i++) 
+    for (int i = 0; i < engine.soundsLen; i++)
         BASS_SampleFree(engine.sounds[i]);
     free(engine.sounds);
 
-    for (int i = 0; i < engine.soundsSfxLen; i++) 
+    for (int i = 0; i < engine.soundsSfxLen; i++)
         BASS_StreamFree(engine.soundsSfx[i]);
     free(engine.soundsSfx);
 
     BASS_MusicFree(engine.music);
 
     SDL_Quit();
-    IMG_Quit();
     BASS_Free();
 }
 
@@ -120,22 +117,22 @@ void Engine_Destroy() {
 
 int Engine_CreateWindow(const char* cap, int w, int h) {
     engine.win = SDL_CreateWindow(
-        cap, 
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
-        w, h, 
+        cap,
+        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+        w, h,
         SDL_WINDOW_OPENGL
     );
 
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
 
     engine.render = SDL_CreateRenderer(
-        engine.win, -1, 
-        SDL_RENDERER_ACCELERATED | 
-        SDL_RENDERER_PRESENTVSYNC 
+        engine.win, -1,
+        SDL_RENDERER_ACCELERATED |
+        SDL_RENDERER_PRESENTVSYNC
     );
 
     if (!engine.render) {
-        Engine_PushError("Error while creating render:", 
+        Engine_PushError("Error while creating render:",
             SDL_GetError());
         return 0;
     }
@@ -146,22 +143,42 @@ int Engine_CreateWindow(const char* cap, int w, int h) {
 }
 
 SDL_Texture* Engine_TextureLoad(const char* fileName) {
-    SDL_Texture* newTexture = NULL;
-
-    SDL_Surface* loadedSurface = IMG_Load(fileName);
-    if(!loadedSurface) {
-        Engine_PushErrorFile(fileName, IMG_GetError());
+    int imgw, imgh, imgchannels, wantchannels = 4;
+    uint8_t* pixels = stbi_load(fileName, &imgw, &imgh, &imgchannels, wantchannels);
+    if (!pixels) {
+        Engine_PushErrorFile(fileName, stbi_failure_reason());
         return NULL;
-    } else {
-        newTexture = SDL_CreateTextureFromSurface( 
-            engine.render, loadedSurface);
-        if (!newTexture) 
-            Engine_PushErrorFile(fileName, SDL_GetError());
-
-        SDL_FreeSurface( loadedSurface );
     }
 
-    return newTexture;
+    if (imgchannels != wantchannels) {
+        SDL_LogWarn(SDL_LOG_CATEGORY_SYSTEM, "img %s: chanels dont match expected %d got %d",
+            fileName, wantchannels, imgchannels);
+    }
+
+     SDL_Texture* texture = SDL_CreateTexture(
+         engine.render, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STATIC, imgw, imgh);
+
+     if (!texture) {
+         SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "texture create: %s", SDL_GetError());
+         stbi_image_free(pixels);
+         return NULL;
+     }
+
+     int err = SDL_UpdateTexture(texture, NULL, pixels, imgw * wantchannels);
+     if (err) {
+         SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+             "texture load from buffer: %s. src file %s", SDL_GetError(), fileName);
+
+         SDL_DestroyTexture(texture);
+         stbi_image_free(pixels);
+
+         return NULL;
+     }
+
+    SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
+    stbi_image_free(pixels);
+
+    return texture;
 }
 
 int Engine_TexturesLoad(const char** files, int n) {
@@ -184,14 +201,14 @@ int Engine_TexturesLoad(const char** files, int n) {
         }
 
         engine.textures[i] = Engine_TextureLoad(path);
-        
+
         if (!engine.textures[i]) {
             return 0;
         }
     }
 
     SDL_free(basePath);
-    
+
     engine.texturesLen = n;
 
     return 1;
@@ -222,11 +239,11 @@ Font* Engine_FontLoad(const char* fileName) {
     font->kerningPairsLen = 0;
     font->kerningPairs = NULL;
     font->kerningValues = NULL;
-    
+
     char path[256];
 
     char* basePath = SDL_GetBasePath();
-    
+
     sprintf(path, "%s%s/%s.png", basePath, FONT_FOLDER, fileName);
     font->texture = Engine_TextureLoad(path);
     if (!font->texture) {
@@ -279,8 +296,8 @@ Font* Engine_FontLoad(const char* fileName) {
 
             for (int i = 0; i < n; i++) {
                 SDL_Rect temp;
-                if (fscanf(file, "%d %d %d %d", 
-                        &temp.x, &temp.y, 
+                if (fscanf(file, "%d %d %d %d",
+                        &temp.x, &temp.y,
                         &temp.w, &temp.h) != 4) {errFlag = 1; break;}
                 font->rectList[i] = temp;
             }
@@ -291,7 +308,7 @@ Font* Engine_FontLoad(const char* fileName) {
 
             for (int i = 0; i < n; i++) {
                 SDL_Point temp;
-                if (fscanf(file, "%d%d", 
+                if (fscanf(file, "%d%d",
                     &temp.x, &temp.y) != 2) {errFlag = 1; break;}
                 font->offsetList[i] = temp;
             }
@@ -304,7 +321,7 @@ Font* Engine_FontLoad(const char* fileName) {
 
             for (int i = 0; i < n; i++) {
                 char temp[10];
-                if (!fscanf(file, "%s", &temp)) {errFlag = 1; break;}        
+                if (!fscanf(file, "%s", &temp)) {errFlag = 1; break;}
                 font->kerningPairs[i].ch[0] = temp[0];
                 font->kerningPairs[i].ch[1] = temp[1];
             }
@@ -352,7 +369,7 @@ int Engine_FontsLoad(const char** files, int n) {
 
     for (int i = 0; i < n; i++) {
         engine.fonts[i] = Engine_FontLoad(files[i]);
-        if (!engine.fonts[i]) 
+        if (!engine.fonts[i])
             return 0;
     }
     engine.fontsLen = n;
@@ -370,9 +387,9 @@ void Engine_DrawTexture(int texID, float x, float y) {
     SDL_FRect rect = {x-(w/2), y-(h/2), w, h};
 
     SDL_RenderCopyF(
-        engine.render, 
-        engine.textures[texID], 
-        NULL, 
+        engine.render,
+        engine.textures[texID],
+        NULL,
         &rect
     );
 }
@@ -386,7 +403,7 @@ void Engine_DrawTextureWithRot(int texID, float x, float y, float angle) {
     SDL_FRect rect = {x-(w/2), y-(h/2), w, h};
 
     SDL_RenderCopyExF(
-        engine.render, 
+        engine.render,
         engine.textures[texID],
         NULL,
         &rect,
@@ -402,9 +419,9 @@ void Engine_DrawTextureSDL(SDL_Texture* tex, float x, float y) {
     SDL_FRect rect = {x-(w/2), y-(h/2), w, h};
 
     SDL_RenderCopyF(
-        engine.render, 
-        tex, 
-        NULL, 
+        engine.render,
+        tex,
+        NULL,
         &rect
     );
 }
@@ -412,7 +429,7 @@ void Engine_DrawTextureSDL(SDL_Texture* tex, float x, float y) {
 void Engine_DrawTextScale(const char* str, int fontID, float scale, float x, float y) {
     if (fontID < 0 || fontID >= engine.fontsLen)
         return;
-    
+
     int i = 0;
     int width = 0;
     int height = 0;
@@ -431,22 +448,22 @@ void Engine_DrawTextScale(const char* str, int fontID, float scale, float x, flo
         for (int j = 0; j < font->charsLen; j++) {
             if (str[i] == font->chars[j]) {
                 for (int k = 0; k < font->kerningPairsLen; k++) {
-                    if (str[i] == font->kerningPairs[k].ch[0] && 
+                    if (str[i] == font->kerningPairs[k].ch[0] &&
                         str[i+1] == font->kerningPairs[k].ch[1])
                             width += font->kerningValues[k];
                 }
 
                 SDL_FRect rect = {
-                    x + (width + font->offsetList[j].x) * engine.scale_x * scale, 
-                    y + (height+ font->offsetList[j].y) * engine.scale_y * scale, 
-                    font->rectList[j].w * engine.scale_x * scale, 
+                    x + (width + font->offsetList[j].x) * engine.scale_x * scale,
+                    y + (height+ font->offsetList[j].y) * engine.scale_y * scale,
+                    font->rectList[j].w * engine.scale_x * scale,
                     font->rectList[j].h * engine.scale_y * scale
                 };
 
                 SDL_RenderCopyF(
-                    engine.render, 
-                    font->texture, 
-                    &font->rectList[j], 
+                    engine.render,
+                    font->texture,
+                    &font->rectList[j],
                     &rect
                 );
 
@@ -465,7 +482,7 @@ void Engine_DrawText(const char* str, int fontID, float x, float y) {
 
 int Engine_GetTextWidth(const char* str, int fontID) {
     if (fontID < 0 || fontID >= engine.fontsLen)
-        return 0; 
+        return 0;
 
     int i = 0;
     int maxWidth = 0;
@@ -489,14 +506,14 @@ int Engine_GetTextWidth(const char* str, int fontID) {
         for (int j = 0; j < font->charsLen; j++) {
             if (str[i] == font->chars[j]) {
                 for (int k = 0; k < font->kerningPairsLen; k++) {
-                    if (str[i] == font->kerningPairs[k].ch[0] && 
+                    if (str[i] == font->kerningPairs[k].ch[0] &&
                         str[i+1] == font->kerningPairs[k].ch[1])
                             width += font->kerningValues[k];
                 }
 
                 width += font->widthList[j];
                 dWidth = width * engine.scale_x;
-                
+
                 break;
             }
         }
@@ -523,7 +540,7 @@ void Engine_DrawTextExt(const char* str, int fontID, SDL_Color color, bool drawS
         Engine_DrawText(str, fontID, x-dx+1, y-1);
         SDL_SetTextureAlphaMod(font->texture, 255);
     }
-   
+
     SDL_SetTextureColorMod(font->texture,
         color.r, color.g, color.b);
 
@@ -548,7 +565,7 @@ void Engine_DrawTextExtScale(const char* str, int fontID, float scale, SDL_Color
         Engine_DrawTextScale(str, fontID, scale, x-dx+1, y-1);
         SDL_SetTextureAlphaMod(font->texture, 255);
     }
-   
+
     SDL_SetTextureColorMod(font->texture,
         color.r, color.g, color.b);
 
@@ -605,13 +622,13 @@ int Engine_SoundsLoad(const char** files, int n) {
     }
 
     char* basePath = SDL_GetBasePath();
-    
+
     for (int i = 0; i < n; i++) {
         char path[256];
         sprintf(path, "%s%s/%s", basePath, SOUND_FOLDER, files[i]);
 
         engine.sounds[i] = Engine_SoundLoad(path);
-        if (!engine.sounds[i]) 
+        if (!engine.sounds[i])
             return 0;
     }
     engine.soundsLen = n;
@@ -623,7 +640,7 @@ int Engine_SoundsLoad(const char** files, int n) {
 
 HSTREAM Engine_SoundSfxLoad(const char* fileName) {
     HSTREAM sound = BASS_StreamCreateFile(
-        FALSE, fileName, 0, 0, 
+        FALSE, fileName, 0, 0,
         BASS_STREAM_DECODE);
     sound = BASS_FX_TempoCreate(sound, BASS_SAMPLE_FX);
 
@@ -652,7 +669,7 @@ int Engine_SoundsSfxLoad(const char** files, int n) {
         sprintf(path, "%s%s/%s", basePath, SOUND_FOLDER, files[i]);
 
         engine.soundsSfx[i] = Engine_SoundSfxLoad(path);
-        if (!engine.soundsSfx[i]) 
+        if (!engine.soundsSfx[i])
             return 0;
     }
     engine.soundsSfxLen = n;
@@ -671,14 +688,14 @@ HSAMPLE Engine_GetSoundSample(int soundID) {
 
 void Engine_PlayMusic(int musicID) {
     if (!BASS_ChannelIsActive(engine.music)) {
-        BASS_ChannelSetAttribute(engine.music, 
+        BASS_ChannelSetAttribute(engine.music,
             BASS_ATTRIB_VOL, engine.volMus);
         BASS_ChannelPlay(engine.music, FALSE);
     }
 
     BASS_ChannelSetPosition(
-        engine.music, 
-        MAKELONG(musicID, 0), 
+        engine.music,
+        MAKELONG(musicID, 0),
         BASS_POS_MUSIC_ORDER
     );
 }
@@ -706,7 +723,7 @@ void Engine_StopSound(int soundID) {
 }
 
 void Engine_PlaySoundSfxPitch(int soundID, float pitch) {
-    BASS_ChannelSetAttribute(engine.soundsSfx[soundID], 
+    BASS_ChannelSetAttribute(engine.soundsSfx[soundID],
         BASS_ATTRIB_TEMPO_PITCH, pitch);
     BASS_ChannelSetAttribute(engine.soundsSfx[soundID], BASS_ATTRIB_VOL, engine.volSnd);
     BASS_ChannelPlay(engine.soundsSfx[soundID], TRUE);
@@ -839,4 +856,3 @@ int Engine_LoadSettings() {
 
     return 1;
 }
-
