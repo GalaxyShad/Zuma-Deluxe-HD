@@ -27,20 +27,12 @@ add_executable(
 target_include_directories(
     ZumaHD PUBLIC
 
-    "${PROJECT_BINARY_DIR}"
     "${PROJECT_SOURCE_DIR}/src"
-    "${PROJECT_SOURCE_DIR}/lib/bass/c"
-    "${PROJECT_SOURCE_DIR}/lib/bass-fx/C"
 
     "${expat_SOURCE_DIR}/expat/lib"
     "${sdl2_SOURCE_DIR}/include"
 
     "${PROJECT_SOURCE_DIR}/thirdparty/stb"
-)
-
-link_directories(
-    ${PROJECT_SOURCE_DIR}/lib/bass/c
-    ${PROJECT_SOURCE_DIR}/lib/bass-fx/C
 )
 
 target_link_libraries(
