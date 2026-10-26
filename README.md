@@ -3,9 +3,20 @@ A remake of the legendary 2003 PopCap game with improved textures and support fo
 
 ![preview](https://user-images.githubusercontent.com/52833080/162574925-d6c9f657-c2e4-43e3-860d-412e60f14834.png)
 
-> [!WARNING]
-> **Audio is temporarily unavailable.** 
+> [!NOTE]
+> **Project now (2026-10-26) should build on MacOS and Linux.**
+  >
+  > Tested on:
+  > - Windows 10 - x86_64
+  > - MacOS 26.6.2 (25G83) - M1 ARM
+  > - Linux: linuxmint 7.0.0 - x86_64
+  > - Linux: arch 7.2.11 - x86_64 
+  > 
+  > thx for testing on linux: [@Adolf-Eleador-II](https://github.com/Adolf-Eleador-II), [@ilanufriev](https://github.com/ilanufriev), [@Tarat0r](https://github.com/Tarat0r)
 
+> [!WARNING]
+> **Audio is temporarily unavailable :(** 
+>
 > Sound is currently not implemented because I prioritized porting the game to other platforms. However, I am already researching open-source audio libraries to fix this. Stay tuned!
 
 
