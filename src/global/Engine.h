@@ -4,7 +4,6 @@
 #define SDL_MAIN_HANDLED
 
 #include <SDL.h>
-#include <SDL_image.h>
 #include <bass.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -51,7 +50,7 @@ typedef struct {
 	bool fullScr;
 
 	/* Scores */
-	
+
 
     /* Sound and Music */
 	float 			volMus;
@@ -92,11 +91,11 @@ void Engine_DrawTextureSDL(SDL_Texture*, float, float);
 void Engine_DrawTextScale(const char*, int, float, float, float);
 void Engine_DrawText(const char*, int, float, float);
 int Engine_GetTextWidth(const char* str, int fontID);
-void Engine_DrawTextExt(const char* str, int fontID, 
-	SDL_Color color, bool drawShadow, bool center, 
+void Engine_DrawTextExt(const char* str, int fontID,
+	SDL_Color color, bool drawShadow, bool center,
 	float x, float y);
-void Engine_DrawTextExtScale(const char* str, int fontID, 
-	float scale, SDL_Color color, bool drawShadow, bool center, 
+void Engine_DrawTextExtScale(const char* str, int fontID,
+	float scale, SDL_Color color, bool drawShadow, bool center,
 	float x, float y);
 
 
@@ -126,4 +125,4 @@ int randInt(const int, const int);
 float fsign(float x);
 float lerp(float start, float end, float val);
 
-#endif	
+#endif

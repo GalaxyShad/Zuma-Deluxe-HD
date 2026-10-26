@@ -7,33 +7,16 @@ project(
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+# deps exapt
 set(EXPAT_BUILD_TESTS OFF)
 set(EXPAT_BUILD_DOCS OFF)
 set(EXPAT_BUILD_TOOLS OFF)
 
-set(SDL2IMAGE_PNG ON)
-set(SDL2IMAGE_JPG ON)
-
-set(SDL2IMAGE_AVIF OFF)
-set(SDL2IMAGE_BMP OFF)
-set(SDL2IMAGE_GIF OFF)
-set(SDL2IMAGE_JXL OFF)
-set(SDL2IMAGE_LBM OFF)
-set(SDL2IMAGE_PCX OFF)
-set(SDL2IMAGE_PNM OFF)
-set(SDL2IMAGE_QOI OFF)
-set(SDL2IMAGE_SVG OFF)
-set(SDL2IMAGE_TGA OFF)
-set(SDL2IMAGE_TIF OFF)
-set(SDL2IMAGE_WEBP OFF)
-set(SDL2IMAGE_XCF OFF)
-set(SDL2IMAGE_XPM OFF)
-set(SDL2IMAGE_XV OFF)
-
+# deps sdl
 add_subdirectory(thirdparty/expat/expat)
 add_subdirectory(thirdparty/sdl2)
-add_subdirectory(thirdparty/sdl2_image)
 
+# project conf
 FILE(GLOB_RECURSE SOURCES RELATIVE ${PROJECT_SOURCE_DIR} "src/*.c")
 
 add_executable(
@@ -51,7 +34,8 @@ target_include_directories(
 
     "${expat_SOURCE_DIR}/expat/lib"
     "${sdl2_SOURCE_DIR}/include"
-    "${sdl2_image_SOURCE_DIR}"
+
+    "${PROJECT_SOURCE_DIR}/thirdparty/stb"
 )
 
 link_directories(
@@ -62,10 +46,10 @@ link_directories(
 target_link_libraries(
     ZumaHD PRIVATE
     SDL2::SDL2
-    SDL2_image::SDL2_image
     expat
 )
 
+# copy assets
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_CURRENT_SOURCE_DIR}/content
