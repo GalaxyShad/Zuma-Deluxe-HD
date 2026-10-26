@@ -3,6 +3,11 @@ A remake of the legendary 2003 PopCap game with improved textures and support fo
 
 ![preview](https://user-images.githubusercontent.com/52833080/162574925-d6c9f657-c2e4-43e3-860d-412e60f14834.png)
 
+> [!WARNING]
+> **Audio is temporarily unavailable.** 
+
+> Sound is currently not implemented because I prioritized porting the game to other platforms. However, I am already researching open-source audio libraries to fix this. Stay tuned!
+
 
 ## [Gameplay video on YouTube](https://www.youtube.com/watch?v=VZYsNUUAozM&ab_channel=GalaxyShad)
 
@@ -14,9 +19,8 @@ A remake of the legendary 2003 PopCap game with improved textures and support fo
  [⬇️ [Stable] ZumaHD v0.1.0 Windows.zip ](https://github.com/GalaxyShad/Zuma-Deluxe-HD/releases/download/v0.1.0/zuma-hd-v0.1.0-windows.zip)
 
 ## ⛓️ Dependencies
-* [SDL2 	   2.26.5](https://www.libsdl.org)
-* [Expat 		2.5.0](https://github.com/libexpat/libexpat)
-* [BASS and BASS FX](http://www.un4seen.com)
+* [SDL2](https://github.com/libsdl-org/SDL/tree/SDL2)
+* [Expat](https://github.com/libexpat/libexpat)
 
 ## 🛠️ Build via CMake
 ```
@@ -33,4 +37,3 @@ Thanks to [hclxing](https://hclxing.wordpress.com/2017/06/27/reverse-engineering
 
 ## 📃 License 
 Source code is under MIT License, but all assets (in content folder) belong to [PopCap and EA games](https://www.ea.com/ea-studios/popcap)
-
