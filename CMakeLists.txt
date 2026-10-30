@@ -45,4 +45,7 @@ target_link_libraries(
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_CURRENT_SOURCE_DIR}/content
-    ${CMAKE_CURRENT_BINARY_DIR}/bin)
+    $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+
+# SDL2 links with /NODEFAULTLIB, so MSVC /RTC checks must be off (CMP0184 moved them out of CMAKE_C_FLAGS_DEBUG)
+set_target_properties(SDL2 PROPERTIES MSVC_RUNTIME_CHECKS "")
