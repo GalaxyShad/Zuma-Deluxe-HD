@@ -40,9 +40,9 @@ typedef struct _Button {
 
 void Button_Init(Button* btn);
 void Button_SetText(Button* btn, const char* str);
-void Button_Update(Button* btn);
+void Button_Update(Engine *engine, Button* btn);
 int Button_IsClicked(Button* btn);
-void Button_Draw(Button* btn);
+void Button_Draw(Engine *engine, Button* btn);
 
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
@@ -58,10 +58,10 @@ typedef struct _CheckBox {
 } CheckBox;
 
 void CheckBox_Init(CheckBox* cb);
-void CheckBox_Update(CheckBox* cb);
+void CheckBox_Update(Engine *engine, CheckBox* cb);
 int CheckBox_IsClicked(CheckBox* cb);
 int CheckBox_IsChecked(CheckBox* cb);
-void CheckBox_Draw(CheckBox* cb);
+void CheckBox_Draw(Engine *engine, CheckBox* cb);
 
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
@@ -81,9 +81,9 @@ typedef struct _Slider {
 } Slider;
 
 void Slider_Init(Slider* s, float* val);
-void Slider_Update(Slider* s);
+void Slider_Update(Engine *engine, Slider* s);
 int Slider_IsDragging(Slider* s);
-void Slider_Draw(Slider* s);
+void Slider_Draw(Engine *engine, Slider* s);
 
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
@@ -134,15 +134,15 @@ void DialogueBox_AddText(DialogueBox* db, DialogueBoxText* text);
 void DialogueBox_SetTextStr(DialogueBox* db, int textID, const char* str);
 void DialogueBox_Animate(DialogueBox* db);
 int DialogueBox_GetBtn(DialogueBox* db);
-void DialogueBox_Update(DialogueBox* db);
-void DialogueBox_Draw(DialogueBox* db);
+void DialogueBox_Update(Engine *engine, DialogueBox* db);
+void DialogueBox_Draw(Engine *engine, DialogueBox* db);
 void DialogueBox_Destroy(DialogueBox* db);
 
-DialogueBox* DialogueBox_CreateOptions();
-void DialogueBox_UpdateOptions(DialogueBox* db);
+DialogueBox* DialogueBox_CreateOptions(Engine *engine);
+void DialogueBox_UpdateOptions(Engine *engine, DialogueBox* db);
 
-DialogueBox* DialogueBox_CreateMenu();
-void DialogueBox_UpdateMenu(DialogueBox* db);
+DialogueBox* DialogueBox_CreateMenu(Engine *engine);
+void DialogueBox_UpdateMenu(Engine *engine, DialogueBox* db);
 
 enum _DbResultsTexts {
     DB_RES_TEXT_POINTS = 7,
@@ -184,8 +184,8 @@ void Menu_AddButton(Menu* menu, Button* btn);
 void Menu_SetBgRect(Menu* menu, SDL_Rect rect);
 void Menu_SetSkyRect(Menu* menu, SDL_Rect rect);
 int  Menu_GetButton(Menu* menu);
-void Menu_Update(Menu* menu);
-void Menu_Draw(Menu* menu);
+void Menu_Update(Engine *engine, Menu* menu);
+void Menu_Draw(Engine *engine, Menu* menu);
 void Menu_Destroy(Menu* menu);
 
 ////////////////////////////////////////////////////
@@ -206,9 +206,9 @@ typedef struct _MenuMgr {
 } MenuMgr;
 
 void MenuMgr_Init(MenuMgr* m, int* curLvl, int* curDiff);
-void MenuMgr_Set(MenuMgr* m, int room);
-void MenuMgr_Update(MenuMgr* m);
-void MenuMgr_Draw(MenuMgr* m);
+void MenuMgr_Set(Engine *engine, MenuMgr* m, int room);
+void MenuMgr_Update(Engine *engine, MenuMgr* m);
+void MenuMgr_Draw(LevelMgr *levelMgr, Engine *engine, MenuMgr* m);
 
 
 #endif

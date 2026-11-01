@@ -64,13 +64,6 @@ typedef struct _Level {
     SDL_FPoint spiral2Start;
 } Level;
 
-int Level_Load(Level*);
-void Level_Draw(Level*);
-void Level_DrawTopLayer(Level* lvl);
-void Level_DrawDebug(Level*);
-char* Level_GetInfo(Level*);
-void Level_Free(Level*);
-
 typedef struct _Stage {
     int levelsLen;
     Level* levels;
@@ -90,16 +83,21 @@ typedef struct {
     Level* survivalLevels;
 } LevelMgr;
 
-extern LevelMgr levelMgr;
+int Level_Load(LevelMgr *levelMgr, Engine *engine, Level*);
+void Level_Draw(Engine *engine, Level*);
+void Level_DrawTopLayer(Engine *engine, Level* lvl);
+void Level_DrawDebug(LevelMgr *levelMgr, Engine *engine, Level*);
+char* Level_GetInfo(LevelMgr *levelMgr, Level*);
+void Level_Free(Level*);
 
-int LevelMgr_LoadLevels(const char*);
-int LevelMgr_SaveProgress();
-int LevelMgr_LoadProgress();
-Stage* LevelMgr_GetStage(int stageID);
-Level* LevelMgr_GetLevelFromStage(int stageID, int lvID);
-LevelGraphics* LevelMgr_GetLevelGraphics(Level* lv);
-LevelSettings* LevelMgr_GetLevelSettings(Level* lv, int settingID);
-int LevelMgr_Free();
+int LevelMgr_LoadLevels(LevelMgr *levelMgr, const char*);
+int LevelMgr_SaveProgress(LevelMgr *levelMgr);
+int LevelMgr_LoadProgress(LevelMgr *levelMgr);
+Stage* LevelMgr_GetStage(LevelMgr *levelMgr, int stageID);
+Level* LevelMgr_GetLevelFromStage(LevelMgr *levelMgr, int stageID, int lvID);
+LevelGraphics* LevelMgr_GetLevelGraphics(LevelMgr *levelMgr, Level* lv);
+LevelSettings* LevelMgr_GetLevelSettings(LevelMgr *levelMgr, Level* lv, int settingID);
+int LevelMgr_Free(LevelMgr *levelMgr);
 
 extern int xmlDepth;
 void XML_StartElement(void *data, const char *element, const char **attribute);

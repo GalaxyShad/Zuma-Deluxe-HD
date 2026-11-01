@@ -32,7 +32,7 @@ void Ball_InitAnim(Ball* ball) {
 		Animation_Set(&ball->anim, 0, 50, 0);
 }
 
-void Ball_Draw(Ball* ball) {
+void Ball_Draw(Engine *engine, Ball* ball) {
 	if (!ball->isExploding)
 		Animation_SetFrame(&ball->anim, ((int)ball->pos) % ball->anim.endFrame);
 
@@ -45,7 +45,7 @@ void Ball_Draw(Ball* ball) {
 	}
 
 	Animation_SetAngle(&ball->anim, ball->ang - 90);
-	Animation_Draw(&ball->anim, ball->x, ball->y);
+	Animation_Draw(engine, &ball->anim, ball->x, ball->y);
 }
 
 void Ball_Copy(Ball* src, Ball* dst) {
@@ -176,7 +176,7 @@ void BallChain_Append(BallChain* ballChain, Level* lvl, LevelSettings* settings)
 	ballChain->len++;
 }
 
-void BallChain_Update(BallChain* ballChain, SpiralDot* spiral, int spiralLen, int* score, Messages* msgs) {
+void BallChain_Update(Engine *engine, BallChain* ballChain, SpiralDot* spiral, int spiralLen, int* score, Messages* msgs) {
 	for (int i = ballChain->len-1; i >= 0; i--) {
 		Ball* ball = &ballChain->balls[i];
 
@@ -198,7 +198,7 @@ void BallChain_Update(BallChain* ballChain, SpiralDot* spiral, int spiralLen, in
 						ballChain->balls[j].spd = ballChain->balls[i].spd / BALL_WEIGHT_RATIO;
 
 						if (!BallChain_CollidesBack(ballChain, j, BALLS_CHAIN_PAD_ROUGH)) {
-							Engine_PlaySound(SND_BALLCLICK1);
+							Engine_PlaySound(engine, SND_BALLCLICK1);
 							break;
 						}
 					}
@@ -209,7 +209,7 @@ void BallChain_Update(BallChain* ballChain, SpiralDot* spiral, int spiralLen, in
 						BallChain_FindSubChain(ballChain, i, &start, &end);
 
 						if (end - start + 1 >= 3) {
-							BallChain_ExplodeBalls(ballChain, start, end);
+							BallChain_ExplodeBalls(engine, ballChain, start, end);
 							int combo = 0;
 							for (int i = start; i <= end; i++){
 								if (ballChain->balls[i].combo) {
@@ -296,7 +296,7 @@ void BallChain_Update(BallChain* ballChain, SpiralDot* spiral, int spiralLen, in
 					BallChain_FindSubChain(ballChain, i + 1, &start, &end);
 
 					if (end - start + 1 >= 3) {
-						BallChain_ExplodeBalls(ballChain, start, end);
+						BallChain_ExplodeBalls(engine, ballChain, start, end);
 						ballChain->chainBonus++;
 						if (ballChain->maxChainBonus < ballChain->chainBonus)
 							ballChain->maxChainBonus = ballChain->chainBonus;
@@ -332,7 +332,7 @@ void BallChain_Update(BallChain* ballChain, SpiralDot* spiral, int spiralLen, in
 			BallChain_FindSubChain(ballChain, i, &start, &end);
 
 			if (end - start + 1 >= 3) {
-				BallChain_ExplodeBalls(ballChain, start, end);
+				BallChain_ExplodeBalls(engine, ballChain, start, end);
 				ballChain->chainBonus++;
 				if (ballChain->maxChainBonus < ballChain->chainBonus)
 					ballChain->maxChainBonus = ballChain->chainBonus;
@@ -362,8 +362,8 @@ void BallChain_Update(BallChain* ballChain, SpiralDot* spiral, int spiralLen, in
 
 		int j;
 		for (j = 0; j < (int)ball->pos; j++) {
-			xx += spiral[j].dx * engine.scale_x;
-			yy += spiral[j].dy * engine.scale_y;
+			xx += spiral[j].dx * engine->scale_x;
+			yy += spiral[j].dy * engine->scale_y;
 
 			ball->ang = atan2(spiral[j].dy, spiral[j].dx) * RAD_TO_DEG;
 			ball->inTunnel = spiral[j].t1;
@@ -372,8 +372,8 @@ void BallChain_Update(BallChain* ballChain, SpiralDot* spiral, int spiralLen, in
 
 		float _;
 
-		xx = lerp(xx, xx + spiral[j].dx * engine.scale_x, modff(ball->pos, &_));
-		yy = lerp(yy, yy + spiral[j].dy * engine.scale_y, modff(ball->pos, &_));
+		xx = lerp(xx, xx + spiral[j].dx * engine->scale_x, modff(ball->pos, &_));
+		yy = lerp(yy, yy + spiral[j].dy * engine->scale_y, modff(ball->pos, &_));
 
 		ball->x = xx;
 		ball->y = yy;
@@ -406,7 +406,7 @@ void BallChain_UpdateCombos(BallChain* ballChain) {
 	}
 }
 
-void BallChain_ExplodeBalls(BallChain* ballChain, int start, int end) {
+void BallChain_ExplodeBalls(Engine *engine, BallChain* ballChain, int start, int end) {
 	SDL_Rect animBallRect = {395, 0, 105, 120};	
 	int combo = 0;
 	for (int i = start; i <= end; i++) {
@@ -456,22 +456,22 @@ void BallChain_ExplodeBalls(BallChain* ballChain, int start, int end) {
 	float comboPitch = 0;
 	switch (combo) {
 		case 0:
-			Engine_PlaySound(SND_BALLSDESTROYED1);
+			Engine_PlaySound(engine, SND_BALLSDESTROYED1);
 			break;
 		case 1:
-			Engine_PlaySound(SND_BALLSDESTROYED2);
+			Engine_PlaySound(engine, SND_BALLSDESTROYED2);
 			comboPitch = 2;
 			break;
 		case 2:
-			Engine_PlaySound(SND_BALLSDESTROYED3);
+			Engine_PlaySound(engine, SND_BALLSDESTROYED3);
 			comboPitch = 4;
 			break;
 		case 3:
-			Engine_PlaySound(SND_BALLSDESTROYED4);
+			Engine_PlaySound(engine, SND_BALLSDESTROYED4);
 			comboPitch = 6;
 			break;
 		default:
-			Engine_PlaySound(SND_BALLSDESTROYED5);
+			Engine_PlaySound(engine, SND_BALLSDESTROYED5);
 			comboPitch = 8;
 			break;
 	}
@@ -510,7 +510,7 @@ void BallChain_Destroy(BallChain* ballChain, int start, int end) {
 	}
 }
 
-void BallChain_Insert(BallChain* ballChain, int idx, char color, bool isInsertBack) {
+void BallChain_Insert(Engine *engine, BallChain* ballChain, int idx, char color, bool isInsertBack) {
 	Ball curr;
 	Ball prev;
 
@@ -536,12 +536,12 @@ void BallChain_Insert(BallChain* ballChain, int idx, char color, bool isInsertBa
 	ballChain->balls[idx].isExploding = 0;
 	ballChain->balls[idx].isInserted = 1;
 
-	Engine_PlaySound(SND_BALLCLICK2);
+	Engine_PlaySound(engine, SND_BALLCLICK2);
 	Ball_InitAnim(&ballChain->balls[idx]);
 	ballChain->len++;
 }
 
-void BallChain_Draw(BallChain* ballChain, bool priorBallsOnly) {
+void BallChain_Draw(Engine *engine, BallChain* ballChain, bool priorBallsOnly) {
 	// Shadow
 	for (int i = 0; i < ballChain->len; i++) {
 		if (ballChain->balls[i].drawPrority == priorBallsOnly &&
@@ -549,13 +549,13 @@ void BallChain_Draw(BallChain* ballChain, bool priorBallsOnly) {
 				ballChain->ballShadow.color.a = ballChain->balls[i].anim.color.a;
 				if (ballChain->ballShadow.color.a > 128)
 					ballChain->ballShadow.color.a = 128;
-				Animation_Draw(&ballChain->ballShadow, ballChain->balls[i].x-4, ballChain->balls[i].y+6);
+				Animation_Draw(engine, &ballChain->ballShadow, ballChain->balls[i].x-4, ballChain->balls[i].y+6);
 			}
 	}
 	// Balls
 	for (int i = 0; i < ballChain->len; i++) {
 		if (ballChain->balls[i].drawPrority == priorBallsOnly)
-			Ball_Draw(&ballChain->balls[i]);
+			Ball_Draw(engine, &ballChain->balls[i]);
 	}
 	// Blinking
 	if (ballChain->isGlowing) {
@@ -566,7 +566,7 @@ void BallChain_Draw(BallChain* ballChain, bool priorBallsOnly) {
 		for (int i = 0; i < ballChain->len; i++) {
 			if (ballChain->balls[i].drawPrority == priorBallsOnly &&
 				!ballChain->balls[i].isExploding) {
-					Animation_Draw(&whiteCircle, ballChain->balls[i].x, ballChain->balls[i].y);
+					Animation_Draw(engine, &whiteCircle, ballChain->balls[i].x, ballChain->balls[i].y);
 			}
 		}
 	}

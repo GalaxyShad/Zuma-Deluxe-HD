@@ -20,13 +20,13 @@ void Bullet_Update(Bullet* bullet) {
 	bullet->y += bullet->motionVecY * BULLET_SPEED;
 }
 
-void Bullet_Draw(Bullet* bullet) {
-	Animation_Draw(&bullet->anim, bullet->x, bullet->y);
+void Bullet_Draw(Engine *engine, Bullet* bullet) {
+	Animation_Draw(engine, &bullet->anim, bullet->x, bullet->y);
 }
 
-void BulletsArr_UpdateOnScreenStatus(BulletsArr* bulletsArr, int* chainBonus) {
+void BulletsArr_UpdateOnScreenStatus(Engine *engine, BulletsArr* bulletsArr, int* chainBonus) {
 	int w, h;
-	SDL_GetWindowSize(engine.win, &w, &h);
+	SDL_GetWindowSize(engine->win, &w, &h);
 
 	for (int i = 0; i < bulletsArr->len; i++)
 		if (bulletsArr->bullets[i].x > w + 50 || 
@@ -73,7 +73,7 @@ void BulletsArr_AddBullet(BulletsArr* bulletsArr, Frog* frog) {
 	bulletsArr->len++;
 }
 
-char Bullet_isInsertInBack(Bullet* bullet, Ball* ball, SpiralDot* spiral) {
+char Bullet_isInsertInBack(Engine *engine, Bullet* bullet, Ball* ball, SpiralDot* spiral) {
 	float x1 = ball->x;
 	float y1 = ball->y;
 	float pos1 = ball->pos;
@@ -83,16 +83,16 @@ char Bullet_isInsertInBack(Bullet* bullet, Ball* ball, SpiralDot* spiral) {
 	float pos2 = ball->pos;
 
 	while (pos1 - ball->pos < BALLS_CHAIN_PAD) {
-		x1 += spiral[(int)pos1].dx * engine.scale_x * 0.5;
-		y1 += spiral[(int)pos1].dy * engine.scale_y * 0.5;
+		x1 += spiral[(int)pos1].dx * engine->scale_x * 0.5;
+		y1 += spiral[(int)pos1].dy * engine->scale_y * 0.5;
 
 		pos1 += 0.5 * 2;
 	}
 
 	while (ball->pos - pos2 < BALLS_CHAIN_PAD) {
 		if (pos2 < 0) return 0;
-		x2 -= spiral[(int)pos2].dx * engine.scale_x * 0.5;
-		y2 -= spiral[(int)pos2].dy * engine.scale_y * 0.5;
+		x2 -= spiral[(int)pos2].dx * engine->scale_x * 0.5;
+		y2 -= spiral[(int)pos2].dy * engine->scale_y * 0.5;
 
 		pos2 -= 0.5 * 2;
 	}
@@ -123,7 +123,7 @@ int Bullet_IsCollidingWithChain(Bullet* bullet, BallChain* ballChain) {
 	return -1;
 }
 
-void BulletsArr_CollideWithChainUpdate(BulletsArr* bulletsArr, BallChain* ballChain, SpiralDot* spiral) {
+void BulletsArr_CollideWithChainUpdate(Engine *engine, BulletsArr* bulletsArr, BallChain* ballChain, SpiralDot* spiral) {
 	for (int i = 0; i < bulletsArr->len; i++) {
 		if (!bulletsArr->bullets[i].onScreen) continue;
 
@@ -133,12 +133,13 @@ void BulletsArr_CollideWithChainUpdate(BulletsArr* bulletsArr, BallChain* ballCh
 			bulletsArr->bullets[i].onScreen = 0;
 			
 			char isInsertBack = Bullet_isInsertInBack(
+				engine,
 				&bulletsArr->bullets[i], 
 				&ballChain->balls[collBall], spiral);
 
 			collBall = collBall + isInsertBack;
 
-		    BallChain_Insert(ballChain, collBall, 
+		    BallChain_Insert(engine, ballChain, collBall, 
 				bulletsArr->bullets[i].color, isInsertBack);
 		}
 	}
@@ -151,9 +152,9 @@ void BulletsArr_Update(BulletsArr* bulletsArr) {
 	}
 }
 
-void BulletsArr_Draw(BulletsArr* bulletsArr) {
+void BulletsArr_Draw(Engine *engine, BulletsArr* bulletsArr) {
 	for (int i = 0; i < bulletsArr->len; i++) {
 		if (bulletsArr->bullets[i].onScreen)
-			Bullet_Draw(&bulletsArr->bullets[i]);
+			Bullet_Draw(engine, &bulletsArr->bullets[i]);
 	}
 }

@@ -35,7 +35,7 @@ void Frog_Rotate(Frog* frog, int mx, int my) {
 	frog->forwardY = vecY;
 }
 
-void Frog_Draw(Frog* frog, bool introEnd) {
+void Frog_Draw(Engine *engine, Frog* frog, bool introEnd) {
 	float frogX = frog->x;
 	float frogY = frog->y;
 
@@ -61,19 +61,19 @@ void Frog_Draw(Frog* frog, bool introEnd) {
     SDL_Rect animFoundationRect = {162, 162, 162, 162};
 	Animation_Init(&anim, TEX_FROG, animFoundationRect);
 	Animation_SetAngle(&anim, frog->rotation);
-	Animation_Draw(&anim, frogX, frogY);
+	Animation_Draw(engine, &anim, frogX, frogY);
 
     //Drawing BotBodyLayer
 	SDL_Rect animBodyRect = {0, 0, 162, 162};
 	Animation_Init(&anim, TEX_FROG, animBodyRect);
 	Animation_SetAngle(&anim, frog->rotation);
-	Animation_Draw(&anim, frogX, frogY);
+	Animation_Draw(engine, &anim, frogX, frogY);
 
 	//Drawing Tongue
 	SDL_Rect animTongueRect = {162, 0, 162, 162};
 	Animation_Init(&anim, TEX_FROG, animTongueRect);
 	Animation_SetAngle(&anim, frog->rotation);
-	Animation_Draw(&anim, frogX + frog->forwardX*(FROG_TOUNGUE_PAD-frog->tongueShift),
+	Animation_Draw(engine, &anim, frogX + frog->forwardX*(FROG_TOUNGUE_PAD-frog->tongueShift),
 		 frogY + frog->forwardY*(FROG_TOUNGUE_PAD - frog->tongueShift));
 
 	if (introEnd) {
@@ -82,7 +82,7 @@ void Frog_Draw(Frog* frog, bool introEnd) {
 	Animation_Init(&anim, TEX_GAME_OBJECTS, animBallRect);
 	Animation_Set(&anim, 24, 47, 0);
 	Animation_SetAngle(&anim, frog->rotation);
-	Animation_Draw(&anim, frogX + frog->forwardX*(FROG_CUR_BALL_PAD-frog->tongueShift), 
+	Animation_Draw(engine, &anim, frogX + frog->forwardX*(FROG_CUR_BALL_PAD-frog->tongueShift), 
 		frogY + frog->forwardY*(FROG_CUR_BALL_PAD-frog->tongueShift));
 
 	//Drawing  nextBall
@@ -92,7 +92,7 @@ void Frog_Draw(Frog* frog, bool introEnd) {
 	Animation_SetAngle(&anim, frog->rotation);
 	anim.scale = 1.6;
 	if (!frog->isShooted)
-		Animation_Draw(&anim, frogX - frog->forwardX*FROG_NEXT_BALL_PAD, frogY - frog->forwardY*FROG_NEXT_BALL_PAD);
+		Animation_Draw(engine, &anim, frogX - frog->forwardX*FROG_NEXT_BALL_PAD, frogY - frog->forwardY*FROG_NEXT_BALL_PAD);
 	}
 
 	//Drawing TopBodyLayer
@@ -102,7 +102,7 @@ void Frog_Draw(Frog* frog, bool introEnd) {
 	}
 
 	Animation_SetAngle(&frog->eyesAnim, frog->rotation);
-	Animation_Draw(&frog->eyesAnim, frogX, frogY);
+	Animation_Draw(engine, &frog->eyesAnim, frogX, frogY);
 
 	if (frog->eyesAnim.frame == 0) {
 		Animation_Set(&frog->eyesAnim, 0, 3, 0);

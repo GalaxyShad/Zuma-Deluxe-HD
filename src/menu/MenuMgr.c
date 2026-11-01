@@ -34,9 +34,9 @@ void Button_SetText(Button* btn, const char* str) {
 }
 
 
-void Button_Update(Button* btn) {
+void Button_Update(Engine *engine, Button* btn) {
     int mx, my;
-    Engine_GetMousePos(&mx, &my);
+    Engine_GetMousePos(engine, &mx, &my);
 
     int bWidth = btn->tRect.w + (btn->tRect.w / 3) * (btn->xscale-1);
 
@@ -47,7 +47,7 @@ void Button_Update(Button* btn) {
             if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT)) {
                 if (btn->state != BTN_CLICKED) {
                     btn->state = BTN_CLICKED;
-                    Engine_PlaySound(btn->soundClickID);
+                    Engine_PlaySound(engine, btn->soundClickID);
                 }
             } else {
                 btn->clicked = (btn->state == BTN_CLICKED);
@@ -56,7 +56,7 @@ void Button_Update(Button* btn) {
                     if (btn->soundHoverSfxID != -1) {
                         Engine_PlaySoundSfxPitch(btn->soundHoverSfxID, btn->sndSfxPitch);
                     } else if (btn->soundHoverID != -1) {
-                        Engine_PlaySound(btn->soundHoverID);
+                        Engine_PlaySound(engine, btn->soundHoverID);
                     }
                 }
 
@@ -74,8 +74,8 @@ int Button_IsClicked(Button* btn) {
 }
 
 
-void Button_Draw(Button* btn) {
-    SDL_Texture* tex = Engine_GetTextureSDL(btn->textureID);
+void Button_Draw(Engine *engine, Button* btn) {
+    SDL_Texture* tex = Engine_GetTextureSDL(engine, btn->textureID);
 
     SDL_Rect dstRect = {
         btn->pos.x, 
@@ -96,7 +96,7 @@ void Button_Draw(Button* btn) {
             srcRect.x = btn->tRect.x;
 
         SDL_RenderCopy(
-            engine.render, 
+            engine->render, 
             tex,
             &srcRect,
             &dstRect
@@ -119,7 +119,7 @@ void Button_Draw(Button* btn) {
                 srcRect.x = srcRect.w*dx + btn->tRect.x;
 
             SDL_RenderCopy(
-                engine.render, 
+                engine->render, 
                 tex,
                 &srcRect,
                 &dstRect
@@ -147,6 +147,7 @@ void Button_Draw(Button* btn) {
         }
 
         Engine_DrawTextExt(
+            engine, 
             btn->text,
             FONT_CANCUN_10,
             color,
@@ -170,9 +171,9 @@ void CheckBox_Init(CheckBox* cb) {
 }
 
 
-void CheckBox_Update(CheckBox* cb) {
+void CheckBox_Update(Engine *engine, CheckBox* cb) {
     int mx, my;
-    Engine_GetMousePos(&mx, &my);
+    Engine_GetMousePos(engine, &mx, &my);
 
     if (mx > cb->pos.x && 
         my > cb->pos.y &&
@@ -180,7 +181,7 @@ void CheckBox_Update(CheckBox* cb) {
         my < cb->pos.y+CHECK_BOX_HEIGHT) {
             if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT)) {
                     if (!cb->clicked) {
-                        Engine_PlaySound(SND_BUTTON2);
+                        Engine_PlaySound(engine, SND_BUTTON2);
                         cb->checked = !cb->checked;
                         cb->clicked = true;
                     }
@@ -201,8 +202,8 @@ int CheckBox_IsChecked(CheckBox* cb) {
 }
 
 
-void CheckBox_Draw(CheckBox* cb) {
-    SDL_Texture* texture = Engine_GetTextureSDL(TEX_MENU);
+void CheckBox_Draw(Engine *engine, CheckBox* cb) {
+    SDL_Texture* texture = Engine_GetTextureSDL(engine, TEX_MENU);
 
     SDL_Rect srcRect = {
         CHECK_BOX_WIDTH * !cb->checked, 
@@ -219,7 +220,7 @@ void CheckBox_Draw(CheckBox* cb) {
     };
 
     SDL_RenderCopy(
-        engine.render,
+        engine->render,
         texture,
         &srcRect,
         &dstRect
@@ -242,9 +243,9 @@ void Slider_Init(Slider* s, float* val) {
 }
 
 
-void Slider_Update(Slider* s) {
+void Slider_Update(Engine *engine, Slider* s) {
     int mx, my;
-    Engine_GetMousePos(&mx, &my);
+    Engine_GetMousePos(engine, &mx, &my);
 
     if (mx > s->pos.x + s->thumbPos && 
         my > s->pos.y &&
@@ -280,14 +281,14 @@ int Slider_IsDragging(Slider* s) {
 }
 
 
-void Slider_Draw(Slider* s) {
-    SDL_Texture* texture = Engine_GetTextureSDL(TEX_MENU);
+void Slider_Draw(Engine *engine, Slider* s) {
+    SDL_Texture* texture = Engine_GetTextureSDL(engine, TEX_MENU);
 
     SDL_Rect srcRect = {0, 365,  307, 49};
     SDL_Rect dstRect = {s->pos.x, s->pos.y, 307, 49};
 
     SDL_RenderCopy(
-        engine.render,
+        engine->render,
         texture,
         &srcRect,
         &dstRect
@@ -303,7 +304,7 @@ void Slider_Draw(Slider* s) {
     };
 
     SDL_RenderCopy(
-        engine.render,
+        engine->render,
         texture,
         &srcSlRect,
         &dstSlRect
@@ -465,27 +466,27 @@ int DialogueBox_GetBtn(DialogueBox* db) {
 }
 
 
-void DialogueBox_Update(DialogueBox* db) {
+void DialogueBox_Update(Engine *engine, DialogueBox* db) {
 
     if (db->animation)
         return;
 
     for (int i = 0; i < db->buttonsLen; i++) {
-        Button_Update(&db->buttons[i]);
+        Button_Update(engine, &db->buttons[i]);
 
         if (Button_IsClicked(&db->buttons[i]))
             db->pressedBtn = i+1;
     }
 
     for (int i = 0; i < db->chBoxesLen; i++)
-        CheckBox_Update(&db->chBoxes[i]);
+        CheckBox_Update(engine, &db->chBoxes[i]);
 
     for (int i = 0; i < db->slidersLen; i++)
-        Slider_Update(&db->sliders[i]);
+        Slider_Update(engine, &db->sliders[i]);
 }
 
 
-void DialogueBox_Draw(DialogueBox* db) {
+void DialogueBox_Draw(Engine *engine, DialogueBox* db) {
 
     if (db->animation) {
         if (db->pos.y > db->startY) {
@@ -510,7 +511,7 @@ void DialogueBox_Draw(DialogueBox* db) {
         }
     }
 
-    SDL_Texture* texture = Engine_GetTextureSDL(TEX_MENU);
+    SDL_Texture* texture = Engine_GetTextureSDL(engine, TEX_MENU);
 
     SDL_Point dPos;
     dPos.x = db->pos.x - (121 * db->sizeW) / 2;
@@ -538,7 +539,7 @@ void DialogueBox_Draw(DialogueBox* db) {
             dstBgRect.y = dPos.y + 121 * i;
 
             SDL_RenderCopy(
-                engine.render,
+                engine->render,
                 texture,
                 &srcBgRect,
                 &dstBgRect
@@ -557,7 +558,7 @@ void DialogueBox_Draw(DialogueBox* db) {
         };
 
         SDL_RenderCopy(
-            engine.render,
+            engine->render,
             texture,
             &srcRect,
             &dstRect
@@ -570,6 +571,7 @@ void DialogueBox_Draw(DialogueBox* db) {
     if (db->drawGodHead)
         cDy = 72;
     Engine_DrawTextExt(
+        engine, 
         db->caption, 
         FONT_NATIVE_ALIEN_EXT_18,
         cColor,
@@ -580,16 +582,17 @@ void DialogueBox_Draw(DialogueBox* db) {
     );
 
     for (int i = 0; i < db->buttonsLen; i++)
-        Button_Draw(&db->buttons[i]);
+        Button_Draw(engine, &db->buttons[i]);
 
     for (int i = 0; i < db->chBoxesLen; i++) 
-        CheckBox_Draw(&db->chBoxes[i]);
+        CheckBox_Draw(engine, &db->chBoxes[i]);
 
     for (int i = 0; i < db->slidersLen; i++)
-        Slider_Draw(&db->sliders[i]);
+        Slider_Draw(engine, &db->sliders[i]);
 
     for (int i = 0; i < db->textsLen; i++) {
         Engine_DrawTextExt(
+            engine, 
             db->texts[i].str,
             db->texts[i].FontID,
             db->texts[i].color,
@@ -617,7 +620,7 @@ void DialogueBox_Destroy(DialogueBox* db) {
 }
 
 
-DialogueBox* DialogueBox_CreateOptions() {
+DialogueBox* DialogueBox_CreateOptions(Engine *engine) {
     DialogueBox* db = DialogueBox_Create();
     db->sizeW = 5;
     db->sizeH = 4;
@@ -625,7 +628,7 @@ DialogueBox* DialogueBox_CreateOptions() {
     strcpy(db->caption, "OPTIONS");
 
     Slider slMus;
-    Slider_Init(&slMus, &engine.volMus);
+    Slider_Init(&slMus, &engine->volMus);
     slMus.pos.x = -56;
     slMus.pos.y = -128;
     DialogueBox_AddSlider(db, &slMus);
@@ -638,7 +641,7 @@ DialogueBox* DialogueBox_CreateOptions() {
     DialogueBox_AddText(db, &tMus);
 
     Slider slSnd;
-    Slider_Init(&slSnd, &engine.volSnd);
+    Slider_Init(&slSnd, &engine->volSnd);
     slSnd.pos.x = slMus.pos.x;
     slSnd.pos.y = slMus.pos.y + 64;
     DialogueBox_AddSlider(db, &slSnd);
@@ -652,7 +655,7 @@ DialogueBox* DialogueBox_CreateOptions() {
 
     CheckBox cbFullscr;
     CheckBox_Init(&cbFullscr);
-    cbFullscr.checked = engine.fullScr;
+    cbFullscr.checked = engine->fullScr;
     cbFullscr.pos.x = -236;
     cbFullscr.pos.y = slSnd.pos.y + 48;
     DialogueBox_AddCheckBox(db, &cbFullscr);
@@ -676,29 +679,29 @@ DialogueBox* DialogueBox_CreateOptions() {
 }
 
 
-void DialogueBox_UpdateOptions(DialogueBox* db) {
-    DialogueBox_Update(db);
+void DialogueBox_UpdateOptions(Engine *engine, DialogueBox* db) {
+    DialogueBox_Update(engine, db);
 
     if (CheckBox_IsClicked(&db->chBoxes[0])) {
         if (CheckBox_IsChecked(&db->chBoxes[0])) {
             SDL_SetWindowFullscreen(
-                engine.win, SDL_WINDOW_FULLSCREEN);
-            engine.fullScr = true;
+                engine->win, SDL_WINDOW_FULLSCREEN);
+            engine->fullScr = true;
         } else {
-            SDL_SetWindowFullscreen(engine.win, 0);
-            engine.fullScr = false;
+            SDL_SetWindowFullscreen(engine->win, 0);
+            engine->fullScr = false;
         }
     }
 
     if (Slider_IsDragging(&db->sliders[0])) {
-        BASS_ChannelSetAttribute(engine.music, 
-            BASS_ATTRIB_VOL, engine.volMus);
+        BASS_ChannelSetAttribute(engine->music, 
+            BASS_ATTRIB_VOL, engine->volMus);
     }
 }
 
 
-DialogueBox* DialogueBox_CreateMenu() {
-    DialogueBox* db = DialogueBox_CreateOptions();
+DialogueBox* DialogueBox_CreateMenu(Engine *engine) {
+    DialogueBox* db = DialogueBox_CreateOptions(engine);
     strcpy(db->caption, "mENU");
 
     strcpy(db->buttons[0].text, "BACK TO GAME");
@@ -715,8 +718,8 @@ DialogueBox* DialogueBox_CreateMenu() {
 }
 
 
-void DialogueBox_UpdateMenu(DialogueBox* db) {
-    DialogueBox_UpdateOptions(db);
+void DialogueBox_UpdateMenu(Engine *engine, DialogueBox* db) {
+    DialogueBox_UpdateOptions(engine, db);
 }
 
 
@@ -887,9 +890,9 @@ int Menu_GetButton(Menu* menu) {
 }
 
 
-void Menu_Update(Menu* menu) {
+void Menu_Update(Engine *engine, Menu* menu) {
     for (int i = 0; i < menu->buttonsLen; i++) {
-        Button_Update(&menu->buttons[i]);
+        Button_Update(engine, &menu->buttons[i]);
 
         if (Button_IsClicked(&menu->buttons[i]))
             menu->pressedBtn = i+1;
@@ -897,8 +900,8 @@ void Menu_Update(Menu* menu) {
 }
 
 
-void Menu_Draw(Menu* menu) {
-    SDL_Texture* tex = Engine_GetTextureSDL(TEX_MENU);
+void Menu_Draw(Engine *engine, Menu* menu) {
+    SDL_Texture* tex = Engine_GetTextureSDL(engine, TEX_MENU);
 
     if (menu->haveSky) {
         static int skyPos = 0;
@@ -913,22 +916,22 @@ void Menu_Draw(Menu* menu) {
             menu->trBgSky.h
         };
 
-        SDL_RenderCopy(engine.render, tex, &menu->trBgSky, &dtrSky);
+        SDL_RenderCopy(engine->render, tex, &menu->trBgSky, &dtrSky);
 
         dtrSky.x = skyPos-1279;
-        SDL_RenderCopy(engine.render, tex, &menu->trBgSky, &dtrSky);
+        SDL_RenderCopy(engine->render, tex, &menu->trBgSky, &dtrSky);
     }
 
     SDL_Rect dtrBg = {0, 0, 1280, 720};
     SDL_RenderCopy(
-        engine.render, 
+        engine->render, 
         tex,
         &menu->trBg,
         &dtrBg
     );
 
     for (int i = 0; i < menu->buttonsLen; i++) {
-        Button_Draw(&menu->buttons[i]);
+        Button_Draw(engine, &menu->buttons[i]);
     }
 
 }
@@ -953,7 +956,7 @@ void MenuMgr_Init(MenuMgr* m, int* curLvl, int* curDiff) {
 }
 
 
-void MenuMgr_Set(MenuMgr* m, int room) {
+void MenuMgr_Set(Engine *engine, MenuMgr* m, int room) {
     if (m->room != NULL) {
         Menu_Destroy(m->room);
     }
@@ -966,7 +969,7 @@ void MenuMgr_Set(MenuMgr* m, int room) {
 
     m->room = Menu_Create();
     if (m->roomID == MR_MAIN) {
-        Engine_PlayMusic(MUS_MAIN_MENU);
+        Engine_PlayMusic(engine, MUS_MAIN_MENU);
 
         SDL_Rect mBgRect = {1282, 720, 1280, 720};
         Menu_SetBgRect(m->room, mBgRect);
@@ -1028,7 +1031,7 @@ void MenuMgr_Set(MenuMgr* m, int room) {
         Menu_AddButton(m->room, &btnQuit);
 
     } else if (m->roomID == MR_GAUNTLET) {
-        Engine_PlayMusic(MUS_GAUNTLET);
+        Engine_PlayMusic(engine, MUS_GAUNTLET);
 
         SDL_Rect mBgRect = {1282, 1440, 1280, 720};
         Menu_SetBgRect(m->room, mBgRect);
@@ -1099,19 +1102,19 @@ void MenuMgr_Set(MenuMgr* m, int room) {
 }
 
 
-void MenuMgr_Update(MenuMgr* m) {
+void MenuMgr_Update(Engine *engine, MenuMgr* m) {
     if (!m)
         return;
     
     if (!m->inDialog)
-        Menu_Update(m->room);
+        Menu_Update(engine, m->room);
 
     if (m->roomID == MR_MAIN) {
         switch(Menu_GetButton(m->room)) {
-            case 1: MenuMgr_Set(m, MR_GAUNTLET); break;
+            case 1: MenuMgr_Set(engine, m, MR_GAUNTLET); break;
             case 2: break;
             case 3: 
-                m->dbOptions = DialogueBox_CreateOptions();
+                m->dbOptions = DialogueBox_CreateOptions(engine);
                 m->inDialog = true;
                 break;
             case 4: break;          /* TODO NEVER GONNA GIVE YOU UP */
@@ -1119,9 +1122,9 @@ void MenuMgr_Update(MenuMgr* m) {
         }
     } else if (m->roomID == MR_GAUNTLET) {
         switch(Menu_GetButton(m->room)) {
-            case 1: MenuMgr_Set(m, MR_MAIN); return; break;
+            case 1: MenuMgr_Set(engine, m, MR_MAIN); return; break;
             case 2: (*m->curLvl)--; break;
-            case 3: MenuMgr_Set(m, MR_GAME); Engine_StopMusic(); return; break;
+            case 3: MenuMgr_Set(engine, m, MR_GAME); Engine_StopMusic(); return; break;
             case 4: (*m->curLvl)++; break;
 
             case 5: (*m->curDiff) = 0; break;
@@ -1144,10 +1147,10 @@ void MenuMgr_Update(MenuMgr* m) {
     }
 
     if (m->dbOptions) {
-        DialogueBox_UpdateOptions(m->dbOptions);
+        DialogueBox_UpdateOptions(engine, m->dbOptions);
 
         if (DialogueBox_GetBtn(m->dbOptions) == 1) {
-            Engine_SaveSettings();
+            Engine_SaveSettings(engine);
             DialogueBox_Destroy(m->dbOptions);
             m->dbOptions = NULL;
             m->inDialog = false;
@@ -1156,24 +1159,24 @@ void MenuMgr_Update(MenuMgr* m) {
 }
 
 
-void MenuMgr_Draw(MenuMgr* m) {
+void MenuMgr_Draw(LevelMgr *levelMgr, Engine *engine, MenuMgr* m) {
     if (m->roomID == MR_GAME) 
         return;
 
     if (m->roomID == MR_GAUNTLET)
-        Engine_DrawTexture(4+(*m->curLvl), WINDOW_WIDTH / 2+16, 500);
+        Engine_DrawTexture(engine, 4+(*m->curLvl), WINDOW_WIDTH / 2+16, 500);
     
-    Menu_Draw(m->room);
+    Menu_Draw(engine, m->room);
     if (m->dbOptions)
-        DialogueBox_Draw(m->dbOptions);
+        DialogueBox_Draw(engine, m->dbOptions);
 
     if (m->roomID == MR_MAIN) {
-        SDL_Texture* tempTex = Engine_GetTextureSDL(TEX_MENU);
+        SDL_Texture* tempTex = Engine_GetTextureSDL(engine, TEX_MENU);
 
         SDL_Rect srcSunRect = {2563, 315, 130, 138};
         SDL_Rect dstSunRect = {158, 16, 130, 138};
 
-        SDL_RenderCopy(engine.render, 
+        SDL_RenderCopy(engine->render, 
             tempTex, &srcSunRect, &dstSunRect);
 
         SDL_Rect srcGlowRect = {2563, 0, 315, 315};
@@ -1182,41 +1185,41 @@ void MenuMgr_Draw(MenuMgr* m) {
         SDL_SetTextureAlphaMod(tempTex, 152);
         SDL_SetTextureColorMod(tempTex, 255, 192, 0);
 
-        SDL_RenderCopy(engine.render, 
+        SDL_RenderCopy(engine->render, 
             tempTex, &srcGlowRect, &dstGlowRect);
 
         SDL_SetTextureAlphaMod(tempTex, 255);
         SDL_SetTextureColorMod(tempTex, 255, 255, 255);
 
-        Engine_DrawText("WELCOME TO ZUMA HD!", FONT_NATIVE_ALIEN_EXT_16, 426, 0);
+        Engine_DrawText(engine, "WELCOME TO ZUMA HD!", FONT_NATIVE_ALIEN_EXT_16, 426, 0);
 
-        Engine_DrawText("REMASTER BY\nGALAXYSHAD AND S4LAT. 2021", FONT_CANCUN_10, 16, 660);
-        Engine_DrawText("ORIGINAL GAME BY POPCAP. 2003", FONT_CANCUN_10, 16, 694);
+        Engine_DrawText(engine, "REMASTER BY\nGALAXYSHAD AND S4LAT. 2021", FONT_CANCUN_10, 16, 660);
+        Engine_DrawText(engine, "ORIGINAL GAME BY POPCAP. 2003", FONT_CANCUN_10, 16, 694);
 
     } else if (m->roomID == MR_GAUNTLET) {
         char buff[32];
         SDL_Color color = {255, 255, 255, 255};
 
         sprintf(buff, "BEST SCORE:");
-        Engine_DrawTextExt(buff, FONT_CANCUN_10, color, true,
+        Engine_DrawTextExt(engine, buff, FONT_CANCUN_10, color, true,
             false, 924, 632);
 
-        sprintf(buff, "%d", levelMgr.bestScore[*m->curLvl][*m->curDiff]);
+        sprintf(buff, "%d", levelMgr->bestScore[*m->curLvl][*m->curDiff]);
         color.b = 0;
-        Engine_DrawTextExt(buff, FONT_CANCUN_10, color, true,
+        Engine_DrawTextExt(engine, buff, FONT_CANCUN_10, color, true,
             false, 1140, 632);
 
         sprintf(buff, "BEST TIME:");
         color.b = 255;
-        Engine_DrawTextExt(buff, FONT_CANCUN_10, color, true,
+        Engine_DrawTextExt(engine, buff, FONT_CANCUN_10, color, true,
             false, 924, 686);
 
         int min, sec;
-        min = levelMgr.bestTime[*m->curLvl][*m->curDiff] / 60;
-        sec = levelMgr.bestTime[*m->curLvl][*m->curDiff] % 60;
+        min = levelMgr->bestTime[*m->curLvl][*m->curDiff] / 60;
+        sec = levelMgr->bestTime[*m->curLvl][*m->curDiff] % 60;
         sprintf(buff, "%d:%02d", min, sec);
         color.b = 0;
-        Engine_DrawTextExt(buff, FONT_CANCUN_10, color, true,
+        Engine_DrawTextExt(engine, buff, FONT_CANCUN_10, color, true,
             false, 1140, 686);
     }
 }

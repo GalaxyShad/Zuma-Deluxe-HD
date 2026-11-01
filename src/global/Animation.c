@@ -53,7 +53,7 @@ void Animation_SetAngle(Animation* anim, float angle) {
 }
 
 
-void Animation_Draw(Animation* anim, float x, float y) {
+void Animation_Draw(Engine *engine, Animation* anim, float x, float y) {
     if (!anim)
         return;
 
@@ -64,7 +64,7 @@ void Animation_Draw(Animation* anim, float x, float y) {
     if (anim->frame < anim->startFrame && anim->spd != 0)
         anim->frame = anim->endFrame-1;
 
-    SDL_Texture* tex = Engine_GetTextureSDL(anim->textureID);
+    SDL_Texture* tex = Engine_GetTextureSDL(engine, anim->textureID);
     SDL_Rect frame = anim->framePos;
     frame.y += (anim->framePos.h * (int)anim->frame) * anim->frameDir;
 
@@ -87,7 +87,7 @@ void Animation_Draw(Animation* anim, float x, float y) {
     );
     
     SDL_RenderCopyExF(
-        engine.render,
+        engine->render,
         tex,
         &frame,
         &dRect,

@@ -12,7 +12,7 @@ void Message_Init(Message* msg, char* text, float x, float y, char font, char co
 	msg->spawnTime = clock();
 }
 
-void Message_Draw(Message* msg) {
+void Message_Draw(Engine *engine, Message* msg) {
 	SDL_Color c = {255, 255, 255, 255};
 	switch (msg->color) {
 		case 0: c.r = 0x00; c.g = 0xA9; c.b = 0xFF; break; // Blue
@@ -23,7 +23,7 @@ void Message_Draw(Message* msg) {
 		case 5: c.r = 0xFF; c.g = 0xFF; c.b = 0xFF; break; // Grey
 	}
 
-	Engine_DrawTextExt(msg->text, msg->font, c, 
+	Engine_DrawTextExt(engine, msg->text, msg->font, c, 
 		true, false, msg->x, msg->y);
 }
 
@@ -51,11 +51,11 @@ void Messages_Update(Messages* messages) {
 	}
 }
 
-void Messages_Draw(Messages* messages) {
+void Messages_Draw(Engine *engine, Messages* messages) {
 	for (int i = 0; i < messages->len; i++) {
 		if (!messages->msgs[i].onScreen) 
 			continue;
-		Message_Draw(&messages->msgs[i]);
+		Message_Draw(engine, &messages->msgs[i]);
 	}
 }
 
@@ -87,11 +87,11 @@ void Particles_Update(Particles* particles, float lastFrame, float spd) {
 	}
 }
 
-void Particles_Draw(Particles* particles) {
+void Particles_Draw(Engine *engine, Particles* particles) {
 	for (int i = 0; i < particles->len; i++) {
 		if (!particles->prtcls[i].onScreen) continue;
 
     	Animation_SetFrame(&particles->anim, (int)particles->prtcls[i].frame);
-    	Animation_Draw(&particles->anim, particles->prtcls[i].x, particles->prtcls[i].y);
+    	Animation_Draw(engine, &particles->anim, particles->prtcls[i].x, particles->prtcls[i].y);
 	}
 }

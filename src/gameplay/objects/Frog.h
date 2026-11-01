@@ -32,6 +32,6 @@ typedef struct _Frog {
 
 void Frog_Init(Frog*, float, float);
 void Frog_Rotate(Frog*, int, int);
-void Frog_Draw(Frog*, bool);
+void Frog_Draw(Engine *engine, Frog*, bool);
 
 #endif

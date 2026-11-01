@@ -74,19 +74,19 @@ typedef struct _Game {
 
 
 
-void Game_Init(Game*, int, int);
+void Game_Init(LevelMgr*, Engine*, Game*, int, int);
 
-void Game_Update(Game*, int*, int);
-void Game_UpdateTreasure(Game*);
-void Game_UpdateOutro(Game*);
-void Game_UpdateIntro(Game*);
+void Game_Update(LevelMgr*, Engine*, Game*, int*, int);
+void Game_UpdateTreasure(Engine*, Game*);
+void Game_UpdateOutro(Engine*, Game*);
+void Game_UpdateIntro(Engine*, Game*);
 
-void Game_Draw(Game*);
-void Game_DrawTreasure(Game*);
-void Game_DrawOutro(Game*);
-void Game_DrawIntro(Game*);
-void Game_DrawHUD(Game*);
-void Game_DrawFinish(Game*);
+void Game_Draw(LevelMgr*, Engine*, Game*);
+void Game_DrawTreasure(Engine*, Game*);
+void Game_DrawOutro(Engine*, Game*);
+void Game_DrawIntro(Engine*, Game*);
+void Game_DrawHUD(Engine*, Game*);
+void Game_DrawFinish(Engine*, Game*);
 
 void constrain(int*, int, int);
 

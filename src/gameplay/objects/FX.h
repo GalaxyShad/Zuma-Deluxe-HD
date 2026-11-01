@@ -30,7 +30,7 @@ void Message_Init(Message*, char*, float, float, char, char);
 
 void Messages_NewMsg(Messages*, char*, float, float, char, char);
 void Messages_Update(Messages*);
-void Messages_Draw(Messages*);
+void Messages_Draw(Engine *engine, Messages*);
 
 typedef struct _Particle {
 	bool onScreen;
@@ -59,7 +59,7 @@ void Particle_Init(Particle*, float, float);
 void Particles_NewParticle(Particles*, float, float);
 
 void Particles_Update(Particles*, float, float);
-void Particles_Draw(Particles*);
+void Particles_Draw(Engine *engine, Particles*);
 
 
 

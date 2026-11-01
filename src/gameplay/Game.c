@@ -10,7 +10,7 @@ void constrain(int* a, int min, int max) {
 
 LevelMgr levelMgr;
 
-void Game_Init(Game* game, int lvlID, int difficulty) {
+void Game_Init(LevelMgr *levelMgr, Engine *engine, Game* game, int lvlID, int difficulty) {
     game->stageID = 0;
     game->score = 0;
     game->lives = 0;
@@ -23,48 +23,48 @@ void Game_Init(Game* game, int lvlID, int difficulty) {
     game->subHeaderFontScale = 0;
     game->difficulty = difficulty;
 
-    Stage* stg = LevelMgr_GetStage(game->stageID);
+    Stage* stg = LevelMgr_GetStage(levelMgr, game->stageID);
 
     game->lvlID = lvlID; 
     constrain(&game->lvlID, 0, stg->levelsLen-1);
 
-    game->lvl = LevelMgr_GetLevelFromStage(game->stageID, game->lvlID);
-    Level_Load(game->lvl);
+    game->lvl = LevelMgr_GetLevelFromStage(levelMgr, game->stageID, game->lvlID);
+    Level_Load(levelMgr, engine, game->lvl);
 
-    game->graphics = LevelMgr_GetLevelGraphics(game->lvl);
+    game->graphics = LevelMgr_GetLevelGraphics(levelMgr, game->lvl);
     switch(difficulty) {
         case 0:
-            game->settings = &levelMgr.settings[4];
+            game->settings = &levelMgr->settings[4];
             game->settings->ballColors = 4;
             game->settings->partTime = 70;
             game->settings->ballStartCount = 40;
             break;
         case 1:
-            game->settings = &levelMgr.settings[8];
+            game->settings = &levelMgr->settings[8];
             game->settings->ballColors = 5;
             game->settings->partTime = 100;
             game->settings->ballStartCount = 50;
             break;
         case 2:
-            game->settings = &levelMgr.settings[13];
+            game->settings = &levelMgr->settings[13];
             game->settings->ballColors = 6;
             game->settings->repeatChance = 25;
             game->settings->partTime = 120;
             game->settings->ballStartCount = 60;
             break;
         case 3:
-            game->settings = &levelMgr.settings[24];
+            game->settings = &levelMgr->settings[24];
             game->settings->ballColors = 6;
             game->settings->partTime = 150;
             game->settings->ballStartCount = 60;
             break;
     }
 
-    if (levelMgr.bestTime[game->lvlID][game->difficulty] != 0)
-        game->settings->partTime = levelMgr.bestTime[game->lvlID][game->difficulty];
+    if (levelMgr->bestTime[game->lvlID][game->difficulty] != 0)
+        game->settings->partTime = levelMgr->bestTime[game->lvlID][game->difficulty];
     
-    Frog_Init(&game->frog, (game->graphics->frogPos.x + 106) * engine.scale_x, 
-        game->graphics->frogPos.y * engine.scale_y);
+    Frog_Init(&game->frog, (game->graphics->frogPos.x + 106) * engine->scale_x, 
+        game->graphics->frogPos.y * engine->scale_y);
 
     BallChain_Init(&game->chain, game->lvl, game->settings);
 
@@ -111,11 +111,11 @@ void Game_Init(Game* game, int lvlID, int difficulty) {
     Animation_Init(&game->finishAnim, TEX_GAME_OBJECTS, animFinishRect);
     Animation_Set(&game->finishAnim, 0, 12, 0);
 
-    game->finishPos.x = (game->lvl->spiralStart.x + 104)*engine.scale_x;
-    game->finishPos.y = game->lvl->spiralStart.y*engine.scale_y;
+    game->finishPos.x = (game->lvl->spiralStart.x + 104)*engine->scale_x;
+    game->finishPos.y = game->lvl->spiralStart.y*engine->scale_y;
     for (int i = 0; i < game->lvl->spiralLen; i++) {
-        game->finishPos.x += game->lvl->spiral[i].dx * engine.scale_x;
-        game->finishPos.y += game->lvl->spiral[i].dy * engine.scale_y;
+        game->finishPos.x += game->lvl->spiral[i].dx * engine->scale_x;
+        game->finishPos.y += game->lvl->spiral[i].dy * engine->scale_y;
     }
 
     game->scoreRect.x = 773;
@@ -123,8 +123,8 @@ void Game_Init(Game* game, int lvlID, int difficulty) {
     game->scoreRect.w = 0;
     game->scoreRect.h = 28;
 
-    Engine_PlaySound(SND_CHANT1);
-    Engine_PlayMusic(MUS_GAME);
+    Engine_PlaySound(engine, SND_CHANT1);
+    Engine_PlayMusic(engine, MUS_GAME);
 
     Button_Init(&game->btnMenu);
     game->btnMenu.textureID = TEX_GAME_HUD;
@@ -142,7 +142,7 @@ void Game_Init(Game* game, int lvlID, int difficulty) {
     game->dbGameOver = NULL;
 }
 
-static bool _Game_FrogControl(Game* game, int mouseClicked) {
+static bool _Game_FrogControl(Engine *engine, Game* game, int mouseClicked) {
     bool isShooted = 0;
 
     switch (mouseClicked) {
@@ -154,7 +154,7 @@ static bool _Game_FrogControl(Game* game, int mouseClicked) {
             char t = game->frog.color;
             game->frog.color = game->frog.nextColor;
             game->frog.nextColor = t;
-            Engine_PlaySound(SND_BUTTON2);
+            Engine_PlaySound(engine, SND_BUTTON2);
             break;
         }
     }
@@ -162,29 +162,29 @@ static bool _Game_FrogControl(Game* game, int mouseClicked) {
     return isShooted;
 }
 
-static bool _Game_isEnd(Game* game, int* inMenu) {
+static bool _Game_isEnd(LevelMgr *levelMgr, Engine *engine, Game* game, int* inMenu) {
     if (!game->isLosed && !game->isWon)
         return false;
 
     if (game->isWon && !game->isOutroEnded) {
-        Game_UpdateOutro(game);
+        Game_UpdateOutro(engine, game);
         return false;
     }
 
     if (game->dbStats) {
-        DialogueBox_Update(game->dbStats);
+        DialogueBox_Update(engine, game->dbStats);
         if (DialogueBox_GetBtn(game->dbStats) == 1) {
             DialogueBox_Destroy(game->dbStats);
             game->dbStats = NULL;
 
-            if (game->score > levelMgr.bestScore[game->lvlID][game->difficulty])
-                levelMgr.bestScore[game->lvlID][game->difficulty] = game->score;
+            if (game->score > levelMgr->bestScore[game->lvlID][game->difficulty])
+                levelMgr->bestScore[game->lvlID][game->difficulty] = game->score;
 
-            if (game->time < levelMgr.bestTime[game->lvlID][game->difficulty] ||
-                levelMgr.bestTime[game->lvlID][game->difficulty] == 0)
-                    levelMgr.bestTime[game->lvlID][game->difficulty] = game->time;
+            if (game->time < levelMgr->bestTime[game->lvlID][game->difficulty] ||
+                levelMgr->bestTime[game->lvlID][game->difficulty] == 0)
+                    levelMgr->bestTime[game->lvlID][game->difficulty] = game->time;
 
-            LevelMgr_SaveProgress();
+            LevelMgr_SaveProgress(levelMgr);
 
             *inMenu = 1;
             Level_Free(game->lvl);
@@ -192,7 +192,7 @@ static bool _Game_isEnd(Game* game, int* inMenu) {
     }
 
     if (game->dbGameOver) {
-        DialogueBox_Update(game->dbGameOver);
+        DialogueBox_Update(engine, game->dbGameOver);
         if (DialogueBox_GetBtn(game->dbGameOver) == 1) {
             DialogueBox_Destroy(game->dbGameOver);
             game->dbGameOver = NULL;
@@ -204,11 +204,11 @@ static bool _Game_isEnd(Game* game, int* inMenu) {
     return true;
 }
 
-static bool _Game_HandleMenu(Game* game, int* inMenu) {
+static bool _Game_HandleMenu(Engine *engine, Game* game, int* inMenu) {
     if (!game->dbMenu)
         return false;
     
-    DialogueBox_UpdateMenu(game->dbMenu);
+    DialogueBox_UpdateMenu(engine, game->dbMenu);
 
     switch (DialogueBox_GetBtn(game->dbMenu)) {
         case 1:
@@ -226,7 +226,7 @@ static bool _Game_HandleMenu(Game* game, int* inMenu) {
     return true;
 }
 
-static void _Game_GenerateChain(Game* game) {
+static void _Game_GenerateChain(Engine *engine, Game* game) {
     game->chain.speed = game->settings->ballSpd;
 
     if (!game->chain.isGenerating)
@@ -248,14 +248,14 @@ static void _Game_GenerateChain(Game* game) {
         }
 
         if (game->isFirstTime) {
-            Engine_StopSound(SND_ROLLING);
+            Engine_StopSound(engine, SND_ROLLING);
         }
         game->isFirstTime = false;
     }
 
 }
 
-static void _Game_HandleGameWon(Game* game) {
+static void _Game_HandleGameWon(Engine *engine, Game* game) {
     if (game->chain.isEndReached || 
         game->chain.len != 0 || 
         game->score <= game->settings->gaugeScore ||
@@ -264,7 +264,7 @@ static void _Game_HandleGameWon(Game* game) {
         return;
     }
 
-    Engine_PlayMusic(MUS_WIN);
+    Engine_PlayMusic(engine, MUS_WIN);
 
     game->dbStats = DialogueBox_CreateResults();
 
@@ -313,15 +313,15 @@ static void _Game_HandleGameWon(Game* game) {
 
 }
 
-static bool _Game_IsGameLose(Game* game) {
+static bool _Game_IsGameLose(LevelMgr *levelMgr, Engine *engine, Game* game) {
     if (!(game->chain.len == 0 && game->chain.isEndReached))
         return false;
 
 
     if (game->lives >= 1) {
         int lives = game->lives - 1;
-        Engine_PlaySound(SND_CHANT14);
-        Game_Init(game, game->stageID, game->lvlID);
+        Engine_PlaySound(engine, SND_CHANT14);
+        Game_Init(levelMgr, engine, game, game->stageID, game->lvlID);
         game->lives = lives;
         return true;
     } 
@@ -329,8 +329,8 @@ static bool _Game_IsGameLose(Game* game) {
     if (game->isLosed) 
         return true;
 
-    Engine_PlaySound(SND_CHANT8);
-    Engine_PlayMusic(MUS_GAME_OVER);
+    Engine_PlaySound(engine, SND_CHANT8);
+    Engine_PlayMusic(engine, MUS_GAME_OVER);
 
     game->dbGameOver = DialogueBox_CreateGameOver();
 
@@ -363,26 +363,26 @@ static bool _Game_IsGameLose(Game* game) {
 
 }
 
-void Game_Update(Game* game, int* inMenu, int mouseClicked) {
+void Game_Update(LevelMgr *levelMgr, Engine *engine, Game* game, int* inMenu, int mouseClicked) {
     // Get mouse pos and rotate frog;
-    Engine_GetMousePos(&game->mx, &game->my);
+    Engine_GetMousePos(engine, &game->mx, &game->my);
     Frog_Rotate(&game->frog, game->mx, game->my);
 
     if (!game->isIntroEnded) {
-        Game_UpdateIntro(game);
+        Game_UpdateIntro(engine, game);
         return;
     }
 
-    bool isShooted = _Game_FrogControl(game, mouseClicked);
+    bool isShooted = _Game_FrogControl(engine, game, mouseClicked);
 
-    if (_Game_isEnd(game, inMenu)) return;
-    if (_Game_HandleMenu(game, inMenu)) return;
+    if (_Game_isEnd(levelMgr, engine, game, inMenu)) return;
+    if (_Game_HandleMenu(engine, game, inMenu)) return;
 
-    BallChain_Update(&game->chain, game->lvl->spiral, 
+    BallChain_Update(engine, &game->chain, game->lvl->spiral, 
         game->lvl->spiralLen, &game->score, &game->msgs);
     
     if (game->chain.len > 0) {
-        BulletsArr_UpdateOnScreenStatus(&game->bullets, &game->chain.chainBonus);
+        BulletsArr_UpdateOnScreenStatus(engine, &game->bullets, &game->chain.chainBonus);
         BulletsArr_Update(&game->bullets);
     }
 
@@ -390,22 +390,22 @@ void Game_Update(Game* game, int* inMenu, int mouseClicked) {
         game->chain.isGenerating = 0;
         game->chain.isGlowing = 1;
         game->chain.glowTime = clock();
-        Engine_PlaySound(SND_CHANT4);
+        Engine_PlaySound(engine, SND_CHANT4);
     }
 
-    _Game_GenerateChain(game);
-    _Game_HandleGameWon(game);
-    if (_Game_IsGameLose(game)) return;
+    _Game_GenerateChain(engine, game);
+    _Game_HandleGameWon(engine, game);
+    if (_Game_IsGameLose(levelMgr, engine, game)) return;
 
     // UI Update
-    Button_Update(&game->btnMenu);
+    Button_Update(engine, &game->btnMenu);
     if (Button_IsClicked(&game->btnMenu)) {
-        game->dbMenu = DialogueBox_CreateMenu();
+        game->dbMenu = DialogueBox_CreateMenu(engine);
     }
 
     if (isShooted && !(int)game->frog.shift && game->btnMenu.state != BTN_CLICKED) {
         BulletsArr_AddBullet(&game->bullets, &game->frog);
-        Engine_PlaySound(SND_FIREBALL1);
+        Engine_PlaySound(engine, SND_FIREBALL1);
 
         game->frog.isShooted = 1;
         game->frog.color = game->frog.nextColor;
@@ -434,91 +434,91 @@ void Game_Update(Game* game, int* inMenu, int mouseClicked) {
     else
         game->chain.speed = game->settings->ballSpd;
     
-    BulletsArr_CollideWithChainUpdate(&game->bullets, &game->chain, game->lvl->spiral);
+    BulletsArr_CollideWithChainUpdate(engine, &game->bullets, &game->chain, game->lvl->spiral);
     Messages_Update(&game->msgs);
-    Game_UpdateTreasure(game);
+    Game_UpdateTreasure(engine, game);
 }
 
-void Game_Draw(Game* game) {
-    Level_Draw(game->lvl);
-    Game_DrawFinish(game);
-    Frog_Draw(&game->frog, game->isIntroEnded);
+void Game_Draw(LevelMgr *levelMgr, Engine *engine, Game* game) {
+    Level_Draw(engine, game->lvl);
+    Game_DrawFinish(engine, game);
+    Frog_Draw(engine, &game->frog, game->isIntroEnded);
 
     if (!game->isIntroEnded) {
-        Game_DrawHUD(game);
-        Game_DrawIntro(game);
+        Game_DrawHUD(engine, game);
+        Game_DrawIntro(engine, game);
         return;
     }
 
     if (game->isWon && !game->isOutroEnded) {
-        Game_DrawHUD(game);
-        Game_DrawOutro(game);
+        Game_DrawHUD(engine, game);
+        Game_DrawOutro(engine, game);
         return;
     }
 
     if (game->dbMenu || game->dbGameOver || game->dbStats) {
-        Game_DrawHUD(game);
+        Game_DrawHUD(engine, game);
         return;
     } 
     
     if (!game->graphics->textureTopLayerFile) {
-        BallChain_Draw(&game->chain, false);
+        BallChain_Draw(engine, &game->chain, false);
     } else {
-        BallChain_Draw(&game->chain, false);
-        Level_DrawTopLayer(game->lvl);
-        BallChain_Draw(&game->chain, true);
+        BallChain_Draw(engine, &game->chain, false);
+        Level_DrawTopLayer(engine, game->lvl);
+        BallChain_Draw(engine, &game->chain, true);
     }
 
 
 
-    BulletsArr_Draw(&game->bullets);
-    Messages_Draw(&game->msgs);
-    Game_DrawHUD(game);
+    BulletsArr_Draw(engine, &game->bullets);
+    Messages_Draw(engine, &game->msgs);
+    Game_DrawHUD(engine, game);
 
     if (game->treasure.isActive) {
         if (game->treasure.isBlinking) {
             int delta = (int)(((float)(clock() - game->treasure.time))/(CLOCKS_PER_SEC / TREASURE_BLINK_SPEED));
             if (delta % 2 == 0)
-                Game_DrawTreasure(game);
+                Game_DrawTreasure(engine, game);
         } else
-            Game_DrawTreasure(game);
+            Game_DrawTreasure(engine, game);
     }
 
     if (game->treasure.isFading) {
         game->treasure.anim.scale += TREASURE_FADING_SPEED;
-        Game_DrawTreasure(game);
+        Game_DrawTreasure(engine, game);
     }
 
     if (game->DEBUG) {
         char buff[48];
 
         sprintf(buff, "isGlowing: %d", game->chain.isGlowing);
-        Engine_DrawText(buff, FONT_ARIAL_12, 600, 16);
+        Engine_DrawText(engine, buff, FONT_ARIAL_12, 600, 16);
 
         int w, h;
-        SDL_GetWindowSize(engine.win, &w, &h);
+        SDL_GetWindowSize(engine->win, &w, &h);
         sprintf(buff, "Window_Size: (%d, %d)", w, h);
-        Engine_DrawText(buff, FONT_ARIAL_12, 16, 16);
+        Engine_DrawText(engine, buff, FONT_ARIAL_12, 16, 16);
 
         sprintf(buff, "Mouse_POS: (%d, %d)", game->mx, game->my);
-        Engine_DrawText(buff, FONT_ARIAL_12, 16, 32);
+        Engine_DrawText(engine, buff, FONT_ARIAL_12, 16, 32);
         sprintf(buff, "MAX_COMBO: %d", game->chain.maxCombo);
-        Engine_DrawText(buff, FONT_ARIAL_12, 16, 128);
+        Engine_DrawText(engine, buff, FONT_ARIAL_12, 16, 128);
 
         sprintf(buff, "BULLETS: ");
-        Engine_DrawText(buff, FONT_ARIAL_12, 240, 16);
+        Engine_DrawText(engine, buff, FONT_ARIAL_12, 240, 16);
         for (int i = 0; i < game->bullets.len; i++) {
             sprintf(buff, "    %d. (%lf, %lf, %d)", i + 1, 
                 game->bullets.bullets[i].x, game->bullets.bullets[i].y, 
                 game->bullets.bullets[i].onScreen);
-            Engine_DrawText(buff, FONT_ARIAL_12, 240, 16*(i+2));
+            Engine_DrawText(engine, buff, FONT_ARIAL_12, 240, 16*(i+2));
         }
 
-        Level_DrawDebug(game->lvl);
+        Level_DrawDebug(levelMgr, engine, game->lvl);
     }
 }
 
-void Game_UpdateTreasure(Game* game) {
+void Game_UpdateTreasure(Engine *engine, Game* game) {
     clock_t t = clock();
     float delta = ((float)(t - game->treasure.time)) / CLOCKS_PER_SEC;
 
@@ -527,7 +527,7 @@ void Game_UpdateTreasure(Game* game) {
             game->treasure.isActive = false;
             game->treasure.isBlinking = false;
             game->treasure.time = t;
-            Engine_PlaySound(SND_GEMVANISHES);
+            Engine_PlaySound(engine, SND_GEMVANISHES);
         }
     } else if (game->treasure.isActive && !game->treasure.isBlinking) {
         if (delta > TREASURE_LIFE_TIME) {
@@ -536,7 +536,7 @@ void Game_UpdateTreasure(Game* game) {
         }
     } else {
         if (delta > TREASURE_LIFE_TIME) {
-            Engine_PlaySound(SND_JEWELAPPEAR);
+            Engine_PlaySound(engine, SND_JEWELAPPEAR);
             game->treasure.isActive = true;
             game->treasure.pos = randInt(0, game->graphics->coinsLen - 1);
             game->treasure.time = t;
@@ -555,8 +555,8 @@ void Game_UpdateTreasure(Game* game) {
         //Check bullets collide with treasure
         for (int i = 0; i < game->bullets.len; i++) {
             if (!game->bullets.bullets[i].onScreen) continue;
-            float coinX = (game->graphics->coinsPos[game->treasure.pos].x + 104) * engine.scale_x;
-            float coinY = game->graphics->coinsPos[game->treasure.pos].y * engine.scale_y;
+            float coinX = (game->graphics->coinsPos[game->treasure.pos].x + 104) * engine->scale_x;
+            float coinY = game->graphics->coinsPos[game->treasure.pos].y * engine->scale_y;
 
             float dist = (game->bullets.bullets[i].x - coinX) * (game->bullets.bullets[i].x - coinX);
             dist += (game->bullets.bullets[i].y - coinY) * (game->bullets.bullets[i].y - coinY);
@@ -574,15 +574,15 @@ void Game_UpdateTreasure(Game* game) {
                 char txt[MAX_MSG_LEN];
                 sprintf(txt, "BONUS +500");
                 Messages_NewMsg(&game->msgs, txt, coinX, coinY, FONT_CANCUN_FLOAT_14, 2);
-                Engine_PlaySound(SND_COINGRAB);
+                Engine_PlaySound(engine, SND_COINGRAB);
             }
         }
     }
 }
 
-void Game_DrawTreasure(Game* game) {
-    float x = (game->graphics->coinsPos[game->treasure.pos].x + 104) * engine.scale_x;
-    float y = game->graphics->coinsPos[game->treasure.pos].y * engine.scale_y;
+void Game_DrawTreasure(Engine *engine, Game* game) {
+    float x = (game->graphics->coinsPos[game->treasure.pos].x + 104) * engine->scale_x;
+    float y = game->graphics->coinsPos[game->treasure.pos].y * engine->scale_y;
 
     if (game->treasure.isFading) {
         float rescale = (1 - game->treasure.anim.scale / TREASURE_MAX_SCALE);
@@ -595,53 +595,53 @@ void Game_DrawTreasure(Game* game) {
     SDL_Color tc = game->treasure.anim.color;
     SDL_Color c = {0, 0, 0, game->treasure.anim.color.a / 2};
     game->treasure.anim.color = c;
-    Animation_Draw(&game->treasure.anim, x-12, y+16);
+    Animation_Draw(engine, &game->treasure.anim, x-12, y+16);
 
     game->treasure.anim.color = tc;
-    Animation_Draw(&game->treasure.anim, x, y);
+    Animation_Draw(engine, &game->treasure.anim, x, y);
 }
 
-void Game_DrawFinish(Game* game) {
+void Game_DrawFinish(Engine *engine, Game* game) {
     Animation anim;
     SDL_Rect animFinishRect = {629, 0, 132, 132};
     Animation_Init(&anim, TEX_GAME_OBJECTS, animFinishRect);
     Animation_Set(&anim, 0, 1, 0);
-    Animation_Draw(&anim, game->finishPos.x, game->finishPos.y);
+    Animation_Draw(engine, &anim, game->finishPos.x, game->finishPos.y);
 
     float dist_to_finish = game->lvl->spiralLen - game->chain.balls[0].pos;
     int frame = 12 * ((game->lvl->spiralLen * PIT_OPEN_POS - dist_to_finish) / (game->lvl->spiralLen * PIT_OPEN_POS));
     if (dist_to_finish < game->lvl->spiralLen * PIT_OPEN_POS)
         Animation_SetFrame(&game->finishAnim, frame);
 
-    Animation_Draw(&game->finishAnim, game->finishPos.x, game->finishPos.y);
+    Animation_Draw(engine, &game->finishAnim, game->finishPos.x, game->finishPos.y);
 }
 
-void Game_DrawHUD(Game* game) {
+void Game_DrawHUD(Engine *engine, Game* game) {
     Animation anim;
     SDL_Rect animBorderRect = {0, 51, 1280, 730};
     Animation_Init(&anim, TEX_GAME_HUD, animBorderRect);
-    Animation_Draw(&anim, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - 1);
+    Animation_Draw(engine, &anim, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - 1);
 
     SDL_Color yellow = {255, 255, 0, 255};
 
     char buff[64];
     sprintf(buff, "%9d", game->score);
-    Engine_DrawTextExt(buff, FONT_CANCUN_12, yellow, 0, 0, 545, 6);
+    Engine_DrawTextExt(engine, buff, FONT_CANCUN_12, yellow, 0, 0, 545, 6);
 
     sprintf(buff, "lvl%d-%d", game->stageID + 1, game->lvlID + 1);
-    Engine_DrawTextExt(buff, FONT_CANCUN_12, yellow, 0, 1, 460, 6);
+    Engine_DrawTextExt(engine, buff, FONT_CANCUN_12, yellow, 0, 1, 460, 6);
 
     SDL_Rect animFrogRect = {40, 18, 40, 36};
     Animation_Init(&anim, TEX_GAME_HUD, animFrogRect);
     if (game->lives <= 3) {
         for (int i = 0; i < game->lives; i++) {
             anim.scale = 0.9;
-            Animation_Draw(&anim, 57 + (40 * i), 22);
+            Animation_Draw(engine, &anim, 57 + (40 * i), 22);
         }
     } else {
-        Animation_Draw(&anim, 57, 22);
+        Animation_Draw(engine, &anim, 57, 22);
         sprintf(buff, "x%d", game->lives);
-        Engine_DrawText(buff, FONT_CANCUN_FLOAT_14, 77, 12);
+        Engine_DrawText(engine, buff, FONT_CANCUN_FLOAT_14, 77, 12);
     }
 
     if (game->score < game->settings->gaugeScore) {
@@ -654,15 +654,15 @@ void Game_DrawHUD(Game* game) {
     }
 
     Animation_Init(&anim, TEX_GAME_HUD, game->scoreRect);
-    Animation_Draw(&anim, 820 - (96 - game->scoreRect.w) / 2, 16);
+    Animation_Draw(engine, &anim, 820 - (96 - game->scoreRect.w) / 2, 16);
 
-    Button_Draw(&game->btnMenu);
-    if (game->dbStats && game->isOutroEnded) DialogueBox_Draw(game->dbStats);
-    if (game->dbMenu) DialogueBox_Draw(game->dbMenu);
-    if (game->dbGameOver) DialogueBox_Draw(game->dbGameOver);
+    Button_Draw(engine, &game->btnMenu);
+    if (game->dbStats && game->isOutroEnded) DialogueBox_Draw(engine, game->dbStats);
+    if (game->dbMenu) DialogueBox_Draw(engine, game->dbMenu);
+    if (game->dbGameOver) DialogueBox_Draw(engine, game->dbGameOver);
 }
 
-void Game_UpdateOutro(Game* game) {
+void Game_UpdateOutro(Engine *engine, Game* game) {
     if (game->particles.len == 0) {
         SDL_Rect animExplRect = {528, 0, 100, 130};
         Animation_Init(&game->particles.anim, TEX_GAME_OBJECTS, animExplRect);
@@ -675,7 +675,7 @@ void Game_UpdateOutro(Game* game) {
         game->particles.prevPos = game->chain.balls[0].pos;
 
         game->score += 100;
-        Engine_PlaySound(SND_ENDOFLEVELPOP1);
+        Engine_PlaySound(engine, SND_ENDOFLEVELPOP1);
         Messages_NewMsg(&game->msgs, "+100", game->particles.x, game->particles.y, FONT_CANCUN_FLOAT_14, 2);
         Particles_NewParticle(&game->particles, game->particles.x, game->particles.y);
         return;
@@ -690,7 +690,7 @@ void Game_UpdateOutro(Game* game) {
         }
 
         if (!game->isOutroEnded)
-            Engine_PlaySound(SND_CHANT2);
+            Engine_PlaySound(engine, SND_CHANT2);
         game->isOutroEnded = true;
         game->particles.len = 0;
 
@@ -703,32 +703,32 @@ void Game_UpdateOutro(Game* game) {
 
     if (game->particles.pos - game->particles.prevPos > EXPLOSIONS_PAD) {
         game->score += 100;
-        Engine_PlaySound(SND_ENDOFLEVELPOP1);
+        Engine_PlaySound(engine, SND_ENDOFLEVELPOP1);
         Messages_NewMsg(&game->msgs, "+100", game->particles.x, game->particles.y, FONT_CANCUN_FLOAT_14, 2);
         Particles_NewParticle(&game->particles, game->particles.x, game->particles.y);
         game->particles.prevPos = game->particles.pos;
     }
 
-    game->particles.x   += game->lvl->spiral[(int)game->particles.pos].dx * engine.scale_x * EXPLOSION_MOVE_SPEED;
-    game->particles.y   += game->lvl->spiral[(int)game->particles.pos].dy * engine.scale_y * EXPLOSION_MOVE_SPEED;
+    game->particles.x   += game->lvl->spiral[(int)game->particles.pos].dx * engine->scale_x * EXPLOSION_MOVE_SPEED;
+    game->particles.y   += game->lvl->spiral[(int)game->particles.pos].dy * engine->scale_y * EXPLOSION_MOVE_SPEED;
     game->particles.pos += EXPLOSION_MOVE_SPEED;
 }
 
-void Game_DrawOutro(Game* game) {
-    Particles_Draw(&game->particles);
-    Messages_Draw(&game->msgs);
+void Game_DrawOutro(Engine *engine, Game* game) {
+    Particles_Draw(engine, &game->particles);
+    Messages_Draw(engine, &game->msgs);
     return;
 }
 
-void Game_UpdateIntro(Game* game) {
+void Game_UpdateIntro(Engine *engine, Game* game) {
     if (game->particles.len == 0) {
         SDL_Rect animSparkleRect = {732, 2253, 30, 30};
         Animation_Init(&game->particles.anim, TEX_GAME_OBJECTS, animSparkleRect);
         game->particles.anim.color.b = 0;
         game->particles.anim.scale = 1.5;
 
-        game->particles.x = (game->lvl->spiralStart.x + 104) * engine.scale_x;
-        game->particles.y = game->lvl->spiralStart.y * engine.scale_y;
+        game->particles.x = (game->lvl->spiralStart.x + 104) * engine->scale_x;
+        game->particles.y = game->lvl->spiralStart.y * engine->scale_y;
         game->particles.pos = 0;
         game->particles.prevPos = 0;
         Particles_NewParticle(&game->particles, game->particles.x, game->particles.y);
@@ -756,7 +756,7 @@ void Game_UpdateIntro(Game* game) {
             if (game->particles.prtcls[i].onScreen) return;
         }
 
-        Engine_PlaySound(SND_ROLLING);
+        Engine_PlaySound(engine, SND_ROLLING);
         game->isIntroEnded = true;
         game->particles.len = 0;
         game->time = ((float)clock())/CLOCKS_PER_SEC;
@@ -768,8 +768,8 @@ void Game_UpdateIntro(Game* game) {
         game->particles.prevPos = game->particles.pos;
     }
     
-    game->particles.x += game->lvl->spiral[(int)game->particles.pos].dx * engine.scale_x * SPARKLES_MOVE_SPEED;
-    game->particles.y += game->lvl->spiral[(int)game->particles.pos].dy * engine.scale_y * SPARKLES_MOVE_SPEED;
+    game->particles.x += game->lvl->spiral[(int)game->particles.pos].dx * engine->scale_x * SPARKLES_MOVE_SPEED;
+    game->particles.y += game->lvl->spiral[(int)game->particles.pos].dy * engine->scale_y * SPARKLES_MOVE_SPEED;
     game->particles.pos +=  SPARKLES_MOVE_SPEED;
 
     float currTime = ((float)clock())/CLOCKS_PER_SEC;
@@ -784,18 +784,18 @@ void Game_UpdateIntro(Game* game) {
 
 }
 
-void Game_DrawIntro(Game* game) {
-    Particles_Draw(&game->particles);
+void Game_DrawIntro(Engine *engine, Game* game) {
+    Particles_Draw(engine, &game->particles);
 
     char buff[16];
     SDL_Color color = {255, 255, 255, 255};
 
     sprintf(buff, "%s", game->graphics->dispName);
-    Engine_DrawTextExtScale(buff, FONT_NATIVE_ALIEN_EXT_16, game->subHeaderFontScale, color, false, true, 
+    Engine_DrawTextExtScale(engine, buff, FONT_NATIVE_ALIEN_EXT_16, game->subHeaderFontScale, color, false, true, 
         WINDOW_WIDTH - 250, WINDOW_HEIGHT - 95);
 
     sprintf(buff, "LEVEL %d-%d", game->lvlID + 1, game->difficulty + 1);
-    Engine_DrawTextExtScale(buff, FONT_NATIVE_ALIEN_48, game->headerFontScale, color, false, true, 
+    Engine_DrawTextExtScale(engine, buff, FONT_NATIVE_ALIEN_48, game->headerFontScale, color, false, true, 
         WINDOW_WIDTH - 250, WINDOW_HEIGHT - 200);
     return;
 }

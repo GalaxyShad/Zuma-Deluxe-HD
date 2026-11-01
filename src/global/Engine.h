@@ -63,63 +63,61 @@ typedef struct {
 	HSTREAM*		soundsSfx;
 } Engine;
 
-extern Engine engine;
-
 void Engine_PushError(const char*, const char*);
 void Engine_PushErrorCode(const char*, int);
 void Engine_PushErrorFile(const char*, const char*);
 void Engine_PushErrorFileCode(const char*, int);
 
-int Engine_Init();
-void Engine_Destroy();
+int Engine_Init(Engine*);
+void Engine_Destroy(Engine*);
 
 /* === Graphics === */
-int Engine_CreateWindow(const char*, int, int);
-SDL_Texture* Engine_TextureLoad(const char*);
-int Engine_TexturesLoad(const char**, int);
-SDL_Texture* Engine_GetTextureSDL(int);
+int Engine_CreateWindow(Engine*, const char*, int, int);
+SDL_Texture* Engine_TextureLoad(Engine*, const char*);
+int Engine_TexturesLoad(Engine*, const char**, int);
+SDL_Texture* Engine_GetTextureSDL(Engine*, int);
 
 /* Font */
-Font* Engine_FontLoad(const char*);
-int Engine_FontsLoad(const char**, int);
+Font* Engine_FontLoad(Engine*, const char*);
+int Engine_FontsLoad(Engine*, const char**, int);
 void Engine_FontFree(Font*);
 
 /* Drawing */
-void Engine_DrawTexture(int, float, float);
-void Engine_DrawTextureWithRot(int, float, float, float);
-void Engine_DrawTextureSDL(SDL_Texture*, float, float);
-void Engine_DrawTextScale(const char*, int, float, float, float);
-void Engine_DrawText(const char*, int, float, float);
-int Engine_GetTextWidth(const char* str, int fontID);
-void Engine_DrawTextExt(const char* str, int fontID,
+void Engine_DrawTexture(Engine*, int, float, float);
+void Engine_DrawTextureWithRot(Engine*, int, float, float, float);
+void Engine_DrawTextureSDL(Engine*, SDL_Texture*, float, float);
+void Engine_DrawTextScale(Engine*, const char*, int, float, float, float);
+void Engine_DrawText(Engine*, const char*, int, float, float);
+int Engine_GetTextWidth(Engine*, const char* str, int fontID);
+void Engine_DrawTextExt(Engine*, const char* str, int fontID,
 	SDL_Color color, bool drawShadow, bool center,
 	float x, float y);
-void Engine_DrawTextExtScale(const char* str, int fontID,
+void Engine_DrawTextExtScale(Engine*, const char* str, int fontID,
 	float scale, SDL_Color color, bool drawShadow, bool center,
 	float x, float y);
 
 
 /* === Sound and Music === */
-int Engine_MusicLoad(const char*);
+int Engine_MusicLoad(Engine*, const char*);
 
-HSAMPLE Engine_SoundLoad(const char*);
-HSTREAM Engine_SoundSfxLoad(const char*);
-int Engine_SoundsLoad(const char**, int);
-int Engine_SoundsSfxLoad(const char**, int);
-HSAMPLE Engine_GetSoundSample(int);
+HSAMPLE Engine_SoundLoad(Engine*, const char*);
+HSTREAM Engine_SoundSfxLoad(Engine*, const char*);
+int Engine_SoundsLoad(Engine*, const char**, int);
+int Engine_SoundsSfxLoad(Engine*, const char**, int);
+HSAMPLE Engine_GetSoundSample(Engine*, int);
 
-void Engine_PlayMusic(int);
+void Engine_PlayMusic(Engine *engine, int);
 void Engine_StopMusic();
-void Engine_PlaySound(int);
-void Engine_StopSound(int);
+void Engine_PlaySound(Engine*, int);
+void Engine_StopSound(Engine *engine, int);
 void Engine_PlaySoundSfxPitch(int, float);
 void Engine_StopSoundSfx(int);
 
 
-void Engine_GetMousePos(int* mx, int* my);
+void Engine_GetMousePos(Engine *engine, int* mx, int* my);
 
-int Engine_SaveSettings();
-int Engine_LoadSettings();
+int Engine_SaveSettings(Engine *engine);
+int Engine_LoadSettings(Engine *engine);
 
 int randInt(const int, const int);
 float fsign(float x);
