@@ -54,7 +54,7 @@ void Button_Update(Engine *engine, Button* btn) {
 
                 if (!btn->state == BTN_HOVER) {
                     if (btn->soundHoverSfxID != -1) {
-                        Engine_PlaySoundSfxPitch(btn->soundHoverSfxID, btn->sndSfxPitch);
+                        Engine_PlaySoundSfxPitch(engine, btn->soundHoverSfxID, btn->sndSfxPitch);
                     } else if (btn->soundHoverID != -1) {
                         Engine_PlaySound(engine, btn->soundHoverID);
                     }
@@ -694,8 +694,11 @@ void DialogueBox_UpdateOptions(Engine *engine, DialogueBox* db) {
     }
 
     if (Slider_IsDragging(&db->sliders[0])) {
-        BASS_ChannelSetAttribute(engine->music, 
-            BASS_ATTRIB_VOL, engine->volMus);
+        Engine_UpdateMusicVolume(engine);
+    }
+
+    if (Slider_IsDragging(&db->sliders[1])) {
+        Engine_UpdateSoundVolume(engine);
     }
 }
 
@@ -1124,7 +1127,7 @@ void MenuMgr_Update(Engine *engine, MenuMgr* m) {
         switch(Menu_GetButton(m->room)) {
             case 1: MenuMgr_Set(engine, m, MR_MAIN); return; break;
             case 2: (*m->curLvl)--; break;
-            case 3: MenuMgr_Set(engine, m, MR_GAME); Engine_StopMusic(); return; break;
+            case 3: MenuMgr_Set(engine, m, MR_GAME); Engine_StopMusic(engine); return; break;
             case 4: (*m->curLvl)++; break;
 
             case 5: (*m->curDiff) = 0; break;

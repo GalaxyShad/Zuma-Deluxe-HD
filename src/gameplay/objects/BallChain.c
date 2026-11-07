@@ -475,7 +475,7 @@ void BallChain_ExplodeBalls(Engine *engine, BallChain* ballChain, int start, int
 			comboPitch = 8;
 			break;
 	}
-	Engine_PlaySoundSfxPitch(SND_FX_CHIME1, comboPitch);
+	Engine_PlaySoundSfxPitch(engine, SND_FX_CHIME1, comboPitch);
 }
 
 void BallChain_FindSubChain(BallChain* ballChain, int idx, int* start, int* end) {

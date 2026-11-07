@@ -775,7 +775,7 @@ void Game_UpdateIntro(Engine *engine, Game* game) {
     float currTime = ((float)clock())/CLOCKS_PER_SEC;
 
     if (currTime - game->lightTrailTime > 0.3) {
-        Engine_PlaySoundSfxPitch(SND_FX_LIGHTTRAIL2, game->lightTrailPitch);
+        Engine_PlaySoundSfxPitch(engine, SND_FX_LIGHTTRAIL2, game->lightTrailPitch);
 
         game->lightTrailTime = currTime;
 

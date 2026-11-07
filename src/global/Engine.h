@@ -4,7 +4,7 @@
 #define SDL_MAIN_HANDLED
 
 #include <SDL.h>
-#include <bass.h>
+#include "sound/SoundEngine.h"
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -56,11 +56,7 @@ typedef struct {
 	float 			volMus;
 	float 			volSnd;
 
-    HMUSIC 			music;
-	unsigned int 	soundsLen;
-	HSAMPLE* 		sounds;
-	unsigned int 	soundsSfxLen;
-	HSTREAM*		soundsSfx;
+	SoundEngine*	sound;		/* NULL when there is no audio device */
 } Engine;
 
 void Engine_PushError(const char*, const char*);
@@ -99,19 +95,17 @@ void Engine_DrawTextExtScale(Engine*, const char* str, int fontID,
 
 /* === Sound and Music === */
 int Engine_MusicLoad(Engine*, const char*);
+int Engine_SoundsLoad(Engine*, const char**, int, int copiesPerSound);
+int Engine_SoundsSfxLoad(Engine*, const char**, int, int copiesPerSound);
 
-HSAMPLE Engine_SoundLoad(Engine*, const char*);
-HSTREAM Engine_SoundSfxLoad(Engine*, const char*);
-int Engine_SoundsLoad(Engine*, const char**, int);
-int Engine_SoundsSfxLoad(Engine*, const char**, int);
-HSAMPLE Engine_GetSoundSample(Engine*, int);
-
-void Engine_PlayMusic(Engine *engine, int);
-void Engine_StopMusic();
+void Engine_PlayMusic(Engine*, int);
+void Engine_StopMusic(Engine*);
+void Engine_UpdateMusicVolume(Engine*);
+void Engine_UpdateSoundVolume(Engine*);
 void Engine_PlaySound(Engine*, int);
-void Engine_StopSound(Engine *engine, int);
-void Engine_PlaySoundSfxPitch(int, float);
-void Engine_StopSoundSfx(int);
+void Engine_StopSound(Engine*, int);
+void Engine_PlaySoundSfxPitch(Engine*, int, float);
+void Engine_StopSoundSfx(Engine*, int);
 
 
 void Engine_GetMousePos(Engine *engine, int* mx, int* my);
