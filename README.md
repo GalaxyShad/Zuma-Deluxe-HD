@@ -15,9 +15,9 @@ A remake of the legendary 2003 PopCap game with improved textures and support fo
 > Thanks for testing on Linux: [@Adolf-Eleador-II](https://github.com/Adolf-Eleador-II), [@ilanufriev](https://github.com/ilanufriev), [@Tarat0r](https://github.com/Tarat0r)
 
 > [!WARNING]
-> **Audio is temporarily unavailable :(**
+> **Music is temporarily unavailable :(**
 >
-> Sound is currently not implemented because I prioritized porting the game to other platforms. Choosing an open-source audio library is discussed in [#18](https://github.com/GalaxyShad/Zuma-Deluxe-HD/issues/18) - ideas are welcome!
+> Sound effects are back (miniaudio + libvorbis, played through SDL), but music (`zuma.mo3`) is not implemented yet. Audio is discussed in [#18](https://github.com/GalaxyShad/Zuma-Deluxe-HD/issues/18) - ideas are welcome!
 
 ## Gameplay video on YouTube
 [![Gameplay video](https://img.youtube.com/vi/VZYsNUUAozM/0.jpg)](https://www.youtube.com/watch?v=VZYsNUUAozM)
@@ -39,7 +39,7 @@ A remake of the legendary 2003 PopCap game with improved textures and support fo
 * [CMake](https://cmake.org/download/) 4.0 or newer
 * Git
 
-Deps: [SDL2](https://github.com/libsdl-org/SDL/tree/SDL2) and [Expat](https://github.com/libexpat/libexpat) are git submodules and are built together with the game, [stb_image](https://github.com/nothings/stb) is in `thirdparty/stb`. You don't need to install them.
+Deps: [SDL2](https://github.com/libsdl-org/SDL/tree/SDL2), [Expat](https://github.com/libexpat/libexpat), [libogg](https://github.com/xiph/ogg) and [libvorbis](https://github.com/xiph/vorbis) are git submodules and are built together with the game, [stb_image](https://github.com/nothings/stb) is in `thirdparty/stb`, [miniaudio](https://github.com/mackron/miniaudio) is in `thirdparty/miniaudio`. You don't need to install them.
 
 ### Get the code
 ```
@@ -70,7 +70,7 @@ This is a hobby project, and any help is very welcome! I'm always happy to see p
 
 Some ways to help:
 * Fix a bug or improve the code
-* Help bring the audio back - see [#18](https://github.com/GalaxyShad/Zuma-Deluxe-HD/issues/18)
+* Help bring the music back - see [#18](https://github.com/GalaxyShad/Zuma-Deluxe-HD/issues/18)
 * Test the game on your OS and tell how it went
 * Report bugs or share ideas in [issues](https://github.com/GalaxyShad/Zuma-Deluxe-HD/issues)
 
@@ -78,6 +78,8 @@ Not sure where to start? Just open an issue or a draft pull request, and we'll f
 
 ## Sources
 Thanks to [hclxing](https://hclxing.wordpress.com/2017/06/27/reverse-engineering-zuma-deluxes-level-file/) for the article on how paths are stored in .dat files.
+
+Thanks to [carstene1ns](https://github.com/carstene1ns) for the [Linux Audio port](https://github.com/carstene1ns/Zuma-Deluxe-HD-linux) and the idea of the audio engine with miniaudio.
 
 ## License 
 Source code is under MIT License, but all assets (in content folder) belong to [PopCap and EA games](https://www.ea.com/ea-studios/popcap)
