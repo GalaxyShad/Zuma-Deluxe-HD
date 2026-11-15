@@ -79,7 +79,7 @@ Not sure where to start? Just open an issue or a draft pull request, and we'll f
 ## Sources
 Thanks to [hclxing](https://hclxing.wordpress.com/2017/06/27/reverse-engineering-zuma-deluxes-level-file/) for the article on how paths are stored in .dat files.
 
-Thanks to [carstene1ns](https://github.com/carstene1ns) for the [Linux Audio port](https://github.com/carstene1ns/Zuma-Deluxe-HD-linux) and the idea of the audio engine with miniaudio.
+Thanks to [gen2brain](https://github.com/gen2brain) for suggesting miniaudio and finding unmo3, and to [carstene1ns](https://github.com/carstene1ns) for the [Linux audio port](https://github.com/carstene1ns/Zuma-Deluxe-HD-linux) with miniaudio, which our sound engine is based on.
 
 ## License 
 Source code is under MIT License, but all assets (in content folder) belong to [PopCap and EA games](https://www.ea.com/ea-studios/popcap)
