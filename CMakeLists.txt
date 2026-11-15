@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 4.0...4.4)
 project(
     ZumaHD
-    LANGUAGES C
+    LANGUAGES C CXX
     VERSION 0.1.0
 )
 
@@ -30,6 +30,9 @@ set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 add_subdirectory(thirdparty/vorbis)
 unset(CMAKE_POLICY_VERSION_MINIMUM)
 
+# deps libopenmpt (music)
+add_subdirectory(thirdparty/libopenmpt)
+
 # project conf
 FILE(GLOB_RECURSE SOURCES RELATIVE ${PROJECT_SOURCE_DIR} "src/*.c")
 
@@ -56,6 +59,7 @@ target_link_libraries(
     SDL2::SDL2
     expat
     vorbisfile
+    libopenmpt
 )
 
 # miniaudio: no device (SDL plays the sound), no encoders/generators

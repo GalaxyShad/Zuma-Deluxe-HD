@@ -1,5 +1,6 @@
 #include "SoundEngine.h"
 
+#include "Music.h"
 #include "SdlAudioOutput.h"
 #include "Sound.h"
 #include "miniaudio.h"
@@ -27,6 +28,7 @@ struct SoundEngine {
 
     SoundList           sounds;
     SoundList           sfx;
+    Music               music;
 };
 
 /////////////////////////////////////////////////////////////////////////
@@ -151,6 +153,7 @@ void SoundEngine_Destroy(SoundEngine* engine) {
 
     SoundList_Free(&engine->sounds);
     SoundList_Free(&engine->sfx);
+    Music_Uninit(&engine->music);
 
     ma_sound_group_uninit(&engine->soundGroup);
     ma_engine_uninit(&engine->mixer);
@@ -176,6 +179,14 @@ bool SoundEngine_LoadSfx(SoundEngine* engine, const char* folder,
         return true;
 
     return SoundList_Load(&engine->sfx, engine, folder, files, count, copiesPerSound);
+}
+
+bool SoundEngine_LoadMusic(SoundEngine* engine, const char* path) {
+    if (!engine)
+        return true;
+
+    Music_Uninit(&engine->music);
+    return Music_Init(&engine->music, &engine->mixer, NULL, path, engine->output.sampleRate);
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -220,4 +231,23 @@ void SoundEngine_StopSfx(SoundEngine* engine, int sfxID) {
     Sound* sound = SoundList_Get(&engine->sfx, sfxID);
     if (sound)
         Sound_Stop(sound);
+}
+
+void SoundEngine_PlayMusic(SoundEngine* engine, int order) {
+    if (!engine)
+        return;
+
+    SDL_LockAudioDevice(engine->output.device);
+    Music_Play(&engine->music, order);
+    SDL_UnlockAudioDevice(engine->output.device);
+}
+
+void SoundEngine_StopMusic(SoundEngine* engine) {
+    if (engine)
+        Music_Stop(&engine->music);
+}
+
+void SoundEngine_SetMusicVolume(SoundEngine* engine, float volume) {
+    if (engine)
+        Music_SetVolume(&engine->music, volume);
 }

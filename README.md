@@ -14,10 +14,11 @@ A remake of the legendary 2003 PopCap game with improved textures and support fo
 >
 > Thanks for testing on Linux: [@Adolf-Eleador-II](https://github.com/Adolf-Eleador-II), [@ilanufriev](https://github.com/ilanufriev), [@Tarat0r](https://github.com/Tarat0r)
 
-> [!WARNING]
-> **Music is temporarily unavailable :(**
+> [!TIP]
+> **Music and sounds now use open source libs!**
 >
-> Sound effects are back (miniaudio + libvorbis, played through SDL), but music (`zuma.mo3`) is not implemented yet. Audio is discussed in [#18](https://github.com/GalaxyShad/Zuma-Deluxe-HD/issues/18) - ideas are welcome!
+> On every platform, music (`zuma.mo3`) is played as is by [libopenmpt](https://lib.openmpt.org/libopenmpt/).
+> Sound effects use miniaudio + libvorbis, everything is played through SDL. See [#18](https://github.com/GalaxyShad/Zuma-Deluxe-HD/issues/18).
 
 ## Gameplay video on YouTube
 [![Gameplay video](https://img.youtube.com/vi/VZYsNUUAozM/0.jpg)](https://www.youtube.com/watch?v=VZYsNUUAozM)
@@ -29,7 +30,7 @@ A remake of the legendary 2003 PopCap game with improved textures and support fo
 ## Latest Windows Release (2021)
  [⬇ [Stable] ZumaHD v0.1.0 Windows x86.zip ⬇](https://github.com/GalaxyShad/Zuma-Deluxe-HD/releases/download/v0.1.0/zuma-hd-v0.1.0-windows.zip) 
 
-> [!NOTE]
+> [!WARNING]
 > This build is from 2021 and is only for Windows x86. The current code has changed a lot since then, so to play the latest version build it from source.
 
 ## How to Build
@@ -39,7 +40,7 @@ A remake of the legendary 2003 PopCap game with improved textures and support fo
 * [CMake](https://cmake.org/download/) 4.0 or newer
 * Git
 
-Deps: [SDL2](https://github.com/libsdl-org/SDL/tree/SDL2), [Expat](https://github.com/libexpat/libexpat), [libogg](https://github.com/xiph/ogg) and [libvorbis](https://github.com/xiph/vorbis) are git submodules and are built together with the game, [stb_image](https://github.com/nothings/stb) is in `thirdparty/stb`, [miniaudio](https://github.com/mackron/miniaudio) is in `thirdparty/miniaudio`. You don't need to install them.
+Deps: [SDL2](https://github.com/libsdl-org/SDL/tree/SDL2), [Expat](https://github.com/libexpat/libexpat), [libogg](https://github.com/xiph/ogg) and [libvorbis](https://github.com/xiph/vorbis) are git submodules and are built together with the game, [stb_image](https://github.com/nothings/stb) is in `thirdparty/stb`, [miniaudio](https://github.com/mackron/miniaudio) is in `thirdparty/miniaudio`, [libopenmpt](https://lib.openmpt.org/libopenmpt/) (release sources) is in `thirdparty/libopenmpt`. You don't need to install them.
 
 ### Get the code
 ```
@@ -70,7 +71,6 @@ This is a hobby project, and any help is very welcome! I'm always happy to see p
 
 Some ways to help:
 * Fix a bug or improve the code
-* Help bring the music back - see [#18](https://github.com/GalaxyShad/Zuma-Deluxe-HD/issues/18)
 * Test the game on your OS and tell how it went
 * Report bugs or share ideas in [issues](https://github.com/GalaxyShad/Zuma-Deluxe-HD/issues)
 
@@ -80,6 +80,8 @@ Not sure where to start? Just open an issue or a draft pull request, and we'll f
 Thanks to [hclxing](https://hclxing.wordpress.com/2017/06/27/reverse-engineering-zuma-deluxes-level-file/) for the article on how paths are stored in .dat files.
 
 Thanks to [gen2brain](https://github.com/gen2brain) for suggesting miniaudio and finding unmo3, and to [carstene1ns](https://github.com/carstene1ns) for the [Linux audio port](https://github.com/carstene1ns/Zuma-Deluxe-HD-linux) with miniaudio, which our sound engine is based on.
+
+Thanks to the [OpenMPT](https://openmpt.org/) developers for libopenmpt, which plays the game music.
 
 ## License 
 Source code is under MIT License, but all assets (in content folder) belong to [PopCap and EA games](https://www.ea.com/ea-studios/popcap)
