@@ -39,9 +39,12 @@ static int ApplicationZuma_LoadResources(LevelMgr *levelMgr, Engine *engine) {
   }
   if (!Engine_FontsLoad(engine, filesFonts, FONTS_COUNT))
     return 4;
-  if (!Engine_SoundsLoad(engine, filesSounds, SOUNDS_COUNT))
+  const int soundCopies = 4;
+  const int sfxCopies = 1;
+
+  if (!Engine_SoundsLoad(engine, filesSounds, SOUNDS_COUNT, soundCopies))
     return 5;
-  if (!Engine_SoundsSfxLoad(engine, filesSoundsSfx, SOUNDS_SFX_COUNT))
+  if (!Engine_SoundsSfxLoad(engine, filesSoundsSfx, SOUNDS_SFX_COUNT, sfxCopies))
     return 6;
   if (!Engine_MusicLoad(engine, fileMusic))
     return 7;

@@ -57,9 +57,7 @@ int Engine_Init(Engine *engine) {
     engine->scale_x = 1.5;
     engine->scale_y = 1.5;
 
-    engine->music = 0;
-    engine->sounds = NULL;
-    engine->soundsLen = 0;
+    engine->sound = NULL;
 
     engine->volMus = 1.0f;
     engine->volSnd = 1.0f;
@@ -70,12 +68,7 @@ int Engine_Init(Engine *engine) {
         return 0;
     }
 
-
-    if (!BASS_Init(-1, MUSIC_FREQUENCY, BASS_DEVICE_STEREO, 0, NULL)) {
-        Engine_PushErrorCode("Bass.dll initialization error",
-                                BASS_ErrorGetCode());
-        return 0;
-    }
+    engine->sound = SoundEngine_Create(MUSIC_FREQUENCY);
 
     return 1;
 }
@@ -97,18 +90,10 @@ void Engine_Destroy(Engine *engine) {
     engine->render = NULL;
 
     /* Sound and music */
-    for (int i = 0; i < engine->soundsLen; i++)
-        BASS_SampleFree(engine->sounds[i]);
-    free(engine->sounds);
-
-    for (int i = 0; i < engine->soundsSfxLen; i++)
-        BASS_StreamFree(engine->soundsSfx[i]);
-    free(engine->soundsSfx);
-
-    BASS_MusicFree(engine->music);
+    SoundEngine_Destroy(engine->sound);
+    engine->sound = NULL;
 
     SDL_Quit();
-    BASS_Free();
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -580,157 +565,62 @@ void Engine_DrawTextExtScale(Engine *engine, const char* str, int fontID, float 
 /////////////////////////////////////////////////////////////////////////
 // ==== Sound And Music ==== //
 
-int Engine_MusicLoad(Engine *engine, const char* fileName) {
+static void Engine_GetContentFolder(char* out, size_t outSize, const char* folder) {
     char* basePath = SDL_GetBasePath();
-
-    char path[256];
-    sprintf(path, "%s%s/%s", basePath, MUSIC_FOLDER, fileName);
-
+    SDL_snprintf(out, outSize, "%s%s", basePath ? basePath : "", folder);
     SDL_free(basePath);
-
-    engine->music = BASS_MusicLoad(
-        FALSE, path, 0, 0, BASS_SAMPLE_LOOP, MUSIC_FREQUENCY);
-
-    if (engine->music == 0) {
-        Engine_PushErrorFileCode(fileName, BASS_ErrorGetCode());
-        return 0;
-    }
-
-    return 1;
 }
 
-HSAMPLE Engine_SoundLoad(Engine *engine, const char* fileName) {
-    HSAMPLE sound = BASS_SampleLoad(
-        FALSE, fileName, 0, 0, 65535, 0);
-
-    if (!sound) {
-        Engine_PushErrorFileCode(fileName, BASS_ErrorGetCode());
-        return 0;
-    }
-
-    return sound;
+int Engine_SoundsLoad(Engine *engine, const char** files, int n, int copiesPerSound) {
+    char folder[256];
+    Engine_GetContentFolder(folder, sizeof(folder), SOUND_FOLDER);
+    return SoundEngine_LoadSounds(engine->sound, folder, files, n, copiesPerSound);
 }
 
-int Engine_SoundsLoad(Engine *engine, const char** files, int n) {
-    if (n <= 0)
-        return 0;
-
-    engine->sounds = (HSAMPLE*)malloc(sizeof(HSAMPLE*) * n);
-    if (!engine->sounds) {
-        Engine_PushError("Critical Error!", "Out of memory.");
-        return 0;
-    }
-
-    char* basePath = SDL_GetBasePath();
-
-    for (int i = 0; i < n; i++) {
-        char path[256];
-        sprintf(path, "%s%s/%s", basePath, SOUND_FOLDER, files[i]);
-
-        engine->sounds[i] = Engine_SoundLoad(engine, path);
-        if (!engine->sounds[i])
-            return 0;
-    }
-    engine->soundsLen = n;
-
-    SDL_free(basePath);
-
-    return 1;
-}
-
-HSTREAM Engine_SoundSfxLoad(Engine *engine, const char* fileName) {
-    HSTREAM sound = BASS_StreamCreateFile(
-        FALSE, fileName, 0, 0,
-        BASS_STREAM_DECODE);
-    sound = BASS_FX_TempoCreate(sound, BASS_SAMPLE_FX);
-
-    if (!sound) {
-        Engine_PushErrorFileCode(fileName, BASS_ErrorGetCode());
-        return 0;
-    }
-
-    return sound;
-}
-
-int Engine_SoundsSfxLoad(Engine *engine, const char** files, int n) {
-    if (n <= 0)
-        return 0;
-
-    engine->soundsSfx = (HSTREAM*)malloc(sizeof(HSTREAM*) * n);
-    if (!engine->soundsSfx) {
-        Engine_PushError("Critical Error!", "Out of memory.");
-        return 0;
-    }
-
-    char* basePath = SDL_GetBasePath();
-
-    for (int i = 0; i < n; i++) {
-        char path[256];
-        sprintf(path, "%s%s/%s", basePath, SOUND_FOLDER, files[i]);
-
-        engine->soundsSfx[i] = Engine_SoundSfxLoad(engine, path);
-        if (!engine->soundsSfx[i])
-            return 0;
-    }
-    engine->soundsSfxLen = n;
-
-    SDL_free(basePath);
-
-    return 1;
-}
-
-HSAMPLE Engine_GetSoundSample(Engine *engine, int soundID) {
-    if (soundID < 0 || soundID >= engine->soundsLen)
-        return 0;
-
-    return engine->sounds[soundID];
-}
-
-void Engine_PlayMusic(Engine *engine, int musicID) {
-    if (!BASS_ChannelIsActive(engine->music)) {
-        BASS_ChannelSetAttribute(engine->music,
-            BASS_ATTRIB_VOL, engine->volMus);
-        BASS_ChannelPlay(engine->music, FALSE);
-    }
-
-    BASS_ChannelSetPosition(
-        engine->music,
-        MAKELONG(musicID, 0),
-        BASS_POS_MUSIC_ORDER
-    );
-}
-
-void Engine_StopMusic() {
-    BASS_ChannelStop(engine->music);
+int Engine_SoundsSfxLoad(Engine *engine, const char** files, int n, int copiesPerSound) {
+    char folder[256];
+    Engine_GetContentFolder(folder, sizeof(folder), SOUND_FOLDER);
+    return SoundEngine_LoadSfx(engine->sound, folder, files, n, copiesPerSound);
 }
 
 void Engine_PlaySound(Engine *engine, int soundID) {
-    if (soundID < 0 || soundID >= engine->soundsLen)
-        return;
-
-    HCHANNEL ch = BASS_SampleGetChannel(
-        engine->sounds[soundID], FALSE);
-
-    BASS_ChannelSetAttribute(ch, BASS_ATTRIB_VOL, engine->volSnd);
-    BASS_ChannelPlay(ch, FALSE);
+    SoundEngine_PlaySound(engine->sound, soundID);
 }
 
 void Engine_StopSound(Engine *engine, int soundID) {
-    if (soundID < 0 || soundID >= engine->soundsLen)
-        return;
-
-    BASS_SampleStop(engine->sounds[soundID]);
+    SoundEngine_StopSound(engine->sound, soundID);
 }
 
-void Engine_PlaySoundSfxPitch(int soundID, float pitch) {
-    BASS_ChannelSetAttribute(engine->soundsSfx[soundID],
-        BASS_ATTRIB_TEMPO_PITCH, pitch);
-    BASS_ChannelSetAttribute(engine->soundsSfx[soundID], BASS_ATTRIB_VOL, engine->volSnd);
-    BASS_ChannelPlay(engine->soundsSfx[soundID], TRUE);
+void Engine_PlaySoundSfxPitch(Engine *engine, int soundID, float pitch) {
+    SoundEngine_PlaySfx(engine->sound, soundID, pitch);
 }
 
-void Engine_StopSoundSfx(int soundID) {
-    BASS_ChannelStop(engine->soundsSfx[soundID]);
+void Engine_StopSoundSfx(Engine *engine, int soundID) {
+    SoundEngine_StopSfx(engine->sound, soundID);
+}
+
+void Engine_UpdateSoundVolume(Engine *engine) {
+    SoundEngine_SetSoundVolume(engine->sound, engine->volSnd);
+}
+
+/* TODO: music (zuma.mo3) is not supported yet. */
+int Engine_MusicLoad(Engine *engine, const char* fileName) {
+    (void)engine;
+    (void)fileName;
+    return 1;
+}
+
+void Engine_PlayMusic(Engine *engine, int musicID) {
+    (void)engine;
+    (void)musicID;
+}
+
+void Engine_StopMusic(Engine *engine) {
+    (void)engine;
+}
+
+void Engine_UpdateMusicVolume(Engine *engine) {
+    (void)engine;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -825,6 +715,7 @@ int Engine_LoadSettings(Engine *engine) {
     int snd = -1;
     if (fscanf(file, "%d", &snd) == 1 && snd >= 0 && snd <= 100) {
         engine->volSnd = (float)snd / 100.0f;
+        Engine_UpdateSoundVolume(engine);
     } else {
         Engine_PushError("Failed to load \"settings.txt\"",
             "Invalid parameter value SOUNDS.");

@@ -4,3 +4,9 @@
 [submodule "thirdparty/sdl2"]
 	path = thirdparty/sdl2
 	url = https://github.com/libsdl-org/SDL.git
+[submodule "thirdparty/ogg"]
+	path = thirdparty/ogg
+	url = https://github.com/xiph/ogg.git
+[submodule "thirdparty/vorbis"]
+	path = thirdparty/vorbis
+	url = https://github.com/xiph/vorbis.git
