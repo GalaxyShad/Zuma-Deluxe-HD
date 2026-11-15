@@ -46,9 +46,6 @@ target_include_directories(
 
     "${PROJECT_SOURCE_DIR}/src"
 
-    "${expat_SOURCE_DIR}/expat/lib"
-    "${sdl2_SOURCE_DIR}/include"
-
     "${PROJECT_SOURCE_DIR}/thirdparty/stb"
     "${PROJECT_SOURCE_DIR}/thirdparty/miniaudio"
     "${MINIAUDIO_LIBVORBIS_DIR}"
