@@ -10,6 +10,7 @@ void SoundEngine_Destroy(SoundEngine* engine);
 
 bool SoundEngine_LoadSounds(SoundEngine* engine, const char* folder,
                             const char** files, int count, int copiesPerSound);
+bool SoundEngine_LoadMusic(SoundEngine* engine, const char* path);
 bool SoundEngine_LoadSfx(SoundEngine* engine, const char* folder,
                          const char** files, int count, int copiesPerSound);
 
@@ -20,5 +21,9 @@ void SoundEngine_StopSound(SoundEngine* engine, int soundID);
 
 void SoundEngine_PlaySfx(SoundEngine* engine, int sfxID, float pitch);
 void SoundEngine_StopSfx(SoundEngine* engine, int sfxID);
+
+void SoundEngine_PlayMusic(SoundEngine* engine, int order);
+void SoundEngine_StopMusic(SoundEngine* engine);
+void SoundEngine_SetMusicVolume(SoundEngine* engine, float volume);
 
 #endif

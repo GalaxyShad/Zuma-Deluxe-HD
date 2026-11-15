@@ -603,24 +603,30 @@ void Engine_UpdateSoundVolume(Engine *engine) {
     SoundEngine_SetSoundVolume(engine->sound, engine->volSnd);
 }
 
-/* TODO: music (zuma.mo3) is not supported yet. */
 int Engine_MusicLoad(Engine *engine, const char* fileName) {
-    (void)engine;
-    (void)fileName;
+    char folder[256];
+    Engine_GetContentFolder(folder, sizeof(folder), MUSIC_FOLDER);
+
+    char path[512];
+    SDL_snprintf(path, sizeof(path), "%s/%s", folder, fileName);
+
+    if (!SoundEngine_LoadMusic(engine->sound, path))
+        return 0;
+
+    Engine_UpdateMusicVolume(engine);
     return 1;
 }
 
 void Engine_PlayMusic(Engine *engine, int musicID) {
-    (void)engine;
-    (void)musicID;
+    SoundEngine_PlayMusic(engine->sound, musicID);
 }
 
 void Engine_StopMusic(Engine *engine) {
-    (void)engine;
+    SoundEngine_StopMusic(engine->sound);
 }
 
 void Engine_UpdateMusicVolume(Engine *engine) {
-    (void)engine;
+    SoundEngine_SetMusicVolume(engine->sound, engine->volMus);
 }
 
 /////////////////////////////////////////////////////////////////////////
